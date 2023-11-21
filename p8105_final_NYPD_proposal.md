@@ -30,6 +30,8 @@ a webpage with dashboards
 ### The anticipated data sources 
 
 NYPD Complaint Data Historic (NYC OpenData)  
+Data collected between 2017 Jan 01 12:00:00 AM - 2022 Dec 31 11:45:00
+PM  
 
 ### The planned analyses / visualizations / coding challenges 
 
