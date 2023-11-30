@@ -1,0 +1,23 @@
+---
+title: "Suspect and Victim Analysis"
+author: "Miao Fu"
+date: "2023-11-25"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message=FALSE)
+library(tidyverse)
+```
+
+## Demographic Distribution
+
+```{r}
+demo=df_nypd|>
+  select(boro_nm,susp_age_group,susp_race,susp_sex,latitude,longitude,lat_lon,vic_age_group,vic_race,vic_sex)
+
+
+```
+
