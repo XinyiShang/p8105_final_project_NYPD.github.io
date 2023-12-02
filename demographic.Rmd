@@ -10,13 +10,68 @@ knitr::opts_chunk$set(
   echo = TRUE,
   message=FALSE)
 library(tidyverse)
+library(tidyr)
 ```
 
 ## Demographic Distribution
 
 ```{r}
 demo=df_nypd|>
-  select(boro_nm,susp_age_group,susp_race,susp_sex,latitude,longitude,lat_lon,vic_age_group,vic_race,vic_sex)
+  select(boro_nm,susp_age_group,susp_race,susp_sex,vic_age_group,vic_race,vic_sex)|>
+  mutate_all(~na_if(.,"UNKNOWN"))|>
+  na.omit()
+
+#race distribution across boroughs
+susp_race=demo|>
+  select(boro_nm,susp_race)|>
+  group_by(boro_nm,susp_race)|>
+  summarise(count=n())|>
+  group_by(boro_nm)|>
+  mutate(total=sum(count),
+         percent=(count/total)*100)|>
+  select(-count,-total)
+
+colnames(susp_race)=c("boro_nm","race","percent_susp")
+
+vic_race=demo|>
+  select(boro_nm,vic_race)|>
+  group_by(boro_nm,vic_race)|>
+  summarise(count=n())|>
+  group_by(boro_nm)|>
+  mutate(total=sum(count),
+         percent=(count/total)*100)|>
+  select(-count,-total)
+
+colnames(vic_race)=c("boro_nm","race","percent_vic")
+
+combined=vic_race|>
+  full_join(susp_race,by=c("boro_nm","race"))|>
+  pivot_longer(
+    cols=starts_with("perc"),
+    names_to="category",
+    values_to="percent"
+  )|>
+  mutate(
+    category=ifelse(category=="percent_susp","SUSPECT","VICTIM")
+  )
+
+combined|>
+  ggplot(aes(x=boro_nm,y=percent,fill=race))+
+  geom_bar(stat="identity")+
+  facet_grid(~category)+
+  labs(
+    title="Race Distribution in Suspects and Victims",
+    x="NYC boroughs",
+    y="Percentage(%)"
+  )+
+  theme_minimal()+
+  scale_fill_brewer(palette = "Dark2")+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position="bottom")
+  
+```
+
+```{r}
+# age distribution across boroughs 
 
 
 ```
