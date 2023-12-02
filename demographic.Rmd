@@ -8,20 +8,27 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  message=FALSE)
+  message=FALSE,
+  warning=FALSE)
 library(tidyverse)
 library(tidyr)
 ```
 
-## Demographic Distribution
+```{r,include=FALSE}
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+  janitor::clean_names() 
 
-```{r}
 demo=df_nypd|>
   select(boro_nm,susp_age_group,susp_race,susp_sex,vic_age_group,vic_race,vic_sex)|>
   mutate_all(~na_if(.,"UNKNOWN"))|>
   na.omit()
+```
 
-#race distribution across boroughs
+## Demographic Distribution
+
+### race distribution across boroughs
+
+```{r, echo=FALSE}
 susp_race=demo|>
   select(boro_nm,susp_race)|>
   group_by(boro_nm,susp_race)|>
@@ -70,8 +77,9 @@ combined_race|>
   
 ```
 
-```{r}
-# age distribution across boroughs 
+
+### age distribution across boroughs 
+```{r, echo=FALSE}
 susp_age=demo|>
   select(boro_nm,susp_age_group)|>
   group_by(boro_nm,susp_age_group)|>
@@ -121,8 +129,9 @@ combined_age|>
   theme(axis.text.x=element_text(angle=45,hjust=1),legend.position="bottom")
 ```
 
-```{r}
-# sex distribution across boroughs 
+
+### sex distribution across boroughs 
+```{r, echo=FALSE}
 susp_sex=demo|>
   select(boro_nm,susp_sex)|>
   group_by(boro_nm,susp_sex)|>
@@ -171,4 +180,6 @@ combined_sex|>
   scale_fill_brewer(palette = "Dark2")+
   theme(axis.text.x=element_text(angle=45,hjust=1),legend.position="bottom")
 ```
+
+
 
