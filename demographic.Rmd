@@ -133,22 +133,22 @@ susp_sex=demo|>
          percent=(count/total)*100)|>
   select(-count,-total)
 
-colnames(susp_age)=c("boro_nm","age","percent_susp")
+colnames(susp_sex)=c("boro_nm","sex","percent_susp")
 
-vic_age=demo|>
-  select(boro_nm,vic_age_group)|>
-  group_by(boro_nm,vic_age_group)|>
+vic_sex=demo|>
+  select(boro_nm,vic_sex)|>
+  group_by(boro_nm,vic_sex)|>
   summarise(count=n())|>
-  filter(count>10)|>
+  filter(vic_sex%in%c("F","M"))|>
   group_by(boro_nm)|>
   mutate(total=sum(count),
          percent=(count/total)*100)|>
   select(-count,-total)
 
-colnames(vic_age)=c("boro_nm","age","percent_vic")
+colnames(vic_sex)=c("boro_nm","sex","percent_vic")
 
-combined_age=vic_age|>
-  full_join(susp_age)|>
+combined_sex=vic_sex|>
+  full_join(susp_sex)|>
   pivot_longer(
     cols=starts_with("percent"),
     names_to="category",
@@ -158,12 +158,12 @@ combined_age=vic_age|>
     category=ifelse(category=="percent_susp","SUSPECT","VICTIM")
   )
 
-combined_age|>
-  ggplot(aes(x=boro_nm,y=percent,fill=age))+
+combined_sex|>
+  ggplot(aes(x=boro_nm,y=percent,fill=sex))+
   geom_bar(stat="identity")+
   facet_grid(~category)+
   labs(
-    title="Age Distribution in Suspects and Victims",
+    title="Sex Distribution in Suspects and Victims",
     x="NYC boroughs",
     y="Percentage(%)"
   )+
