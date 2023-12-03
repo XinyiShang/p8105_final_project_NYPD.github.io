@@ -1,15 +1,17 @@
 library(shiny)
 library(dplyr)
 library(ggplot2)
-library(readr)
 library(viridis)
+library(forcats)
+library(readr)
+library(plotly)
 
 crime_counts <- read_csv('data/crime_counts.csv')
 
 ui <- fluidPage(
   titlePanel(" "),  
   sidebarLayout(
-  sidebarPanel(
+    sidebarPanel(
       selectInput("year", "Select Year", choices = c("Overall", "2017", "2018", "2019", "2020", "2021", "2022")),
       br(),
       selectInput("boro", "Select Borough", choices = unique(crime_counts$boro_nm)),
@@ -17,9 +19,7 @@ ui <- fluidPage(
       p("Select a year and a borough to view the top 10 crime types.")
     ),
     mainPanel(
-      wellPanel(
-        plotOutput("crimePlot", height = "400px")
-      ),
+      plotlyOutput('plot')
     )
   )
 )
@@ -38,25 +38,29 @@ server <- function(input, output) {
                             "2021" = crime_counts %>% filter(year == 2021),
                             "2022" = crime_counts %>% filter(year == 2022))
     
-
     data_filtered <- data_filtered %>%
-        filter(boro_nm == input$boro)
+      filter(boro_nm == input$boro)
     
     data_filtered
   })
   
-  output$crimePlot <- renderPlot({
+  output$plot <- renderPlotly({  # Updated the ID to match the UI output
     crime_counts <- selected_data()
     
-    
-    ggplot(crime_counts, aes(x = forcats::fct_reorder(ofns_desc, Incident_Count), y = Incident_Count, fill = ofns_desc)) +
-      geom_bar(stat = "identity") +
-      scale_fill_viridis(discrete = TRUE, option = "magma")+
-      theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-            legend.position = "none") +
-      labs(title = paste("Top 10 Crime Types: Identification and Count -", input$year),
-           x = "Crime Type",
-           y = "Incident Count")
+    plot_ly(
+      data = crime_counts,
+      x = ~forcats::fct_reorder(ofns_desc, Incident_Count),
+      y = ~Incident_Count,
+      type = "bar",
+      marker = list(color = ~viridis::viridis(10)),
+      showlegend = FALSE
+    ) %>%
+      layout(
+        title = paste("Top 10 Crime Types: Identification and Count -", input$year),
+        xaxis = list(title = "Crime Type", tickangle = 45, tickmode = "array"),
+        yaxis = list(title = "Incident Count"),
+        legend = list(orientation = "h")
+      )
   })
 }
 

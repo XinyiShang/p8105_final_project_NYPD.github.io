@@ -5,7 +5,7 @@ account: xinyi-anna-shang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10701751
-bundleId: 8000624
+bundleId: 8002151
 url: https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/
 version: 1
 asMultiple: FALSE
