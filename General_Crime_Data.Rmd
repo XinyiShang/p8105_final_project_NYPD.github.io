@@ -1,0 +1,103 @@
+---
+title: "General Crime Data"
+output: 
+  html_document:
+    code_folding: hide
+    always_allow_html: true
+    toc: true
+    toc_float: true
+---
+
+---
+```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(htmltools)
+library(shiny)
+
+# set knitr defaults
+knitr::opts_chunk$set(
+    echo      = TRUE
+  , message   = FALSE
+  , warning   = FALSE
+  , fig.align = "center"
+)
+
+# set theme defaults
+theme_set(
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+    , plot.title    = element_text(hjust = 0.5)
+    , plot.subtitle = element_text(hjust = 0.5)    
+    , plot.caption  = element_text(hjust = 0.0)
+  )
+)
+
+# set color scale defaults
+options(
+    ggplot2.continuous.colour = "viridis"
+  , ggplot2.continuous.fill   = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete   = scale_fill_viridis_d
+```
+
+```{r}
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
+#  janitor::clean_names()
+
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
+  janitor::clean_names()
+
+```
+
+## Number of Cases in Each Year
+
+```{r}
+df_nypd_test <- df_nypd  %>%
+  janitor::clean_names() %>%
+  mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt))
+
+df_nypd_test <- df_nypd_test %>%
+  mutate(year = lubridate::year(cmplnt_fr_dt))
+
+year_counts <- df_nypd_test %>%
+  group_by(year) %>%
+  summarise(count = n())
+
+ggplot(year_counts, aes(x = year, y = count)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Number of Cases in Each Year",
+       x = "Year",
+       y = "Number of Cases") +
+  theme_minimal()
+```
+
+## Number of Cases by Year, Borough, and Law Category
+
+```{r }
+count_data <- df_nypd_test %>%
+  group_by(boro_nm, year, law_cat_cd) %>%
+  summarise(count = n()) |>
+  filter(boro_nm != "(null)")
+
+ggplot(count_data, aes(x = year, y = count, color = law_cat_cd)) +
+  geom_point(position = position_dodge(width = 0.8)) +
+  geom_line(aes(group = law_cat_cd), position = position_dodge(width = 0.8)) +
+  facet_wrap(~boro_nm, ncol = 5) +
+  labs(title = "Number of Cases by Year, Borough, and Law Category",
+       x = "Year",
+       y = "Number of Cases",
+       color = "Law Category") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+## Top 10 Types of Crime by Borough and Year
+
+<iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/"> </iframe>
+

@@ -1,0 +1,12 @@
+name: Top10CrimetTypes
+title: Top10CrimetTypes
+username: xinyi-anna-shang
+account: xinyi-anna-shang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10701751
+bundleId: 8000624
+url: https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
