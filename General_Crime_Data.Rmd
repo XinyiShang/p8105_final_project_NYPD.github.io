@@ -15,6 +15,7 @@ library(dplyr)
 library(lubridate)
 library(htmltools)
 library(shiny)
+library(plotly)
 
 # set knitr defaults
 knitr::opts_chunk$set(
@@ -67,13 +68,13 @@ year_counts <- df_nypd_test %>%
   group_by(year) %>%
   summarise(count = n())
 
-ggplot(year_counts, aes(x = year, y = count)) +
-  geom_point() +
-  geom_smooth() +
-  labs(title = "Number of Cases in Each Year",
-       x = "Year",
-       y = "Number of Cases") +
-  theme_minimal()
+plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of Cases in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
 ```
 
 ## Number of Cases by Year, Borough, and Law Category
