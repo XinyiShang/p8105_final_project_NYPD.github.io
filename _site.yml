@@ -12,7 +12,7 @@ navbar:
       - text: "General Crime Analysis"
         href: General_Crime_Data.html
       - text: "Demographic"
-        href: Demographic.html
+        href: demographic.html
       - text: "Crime Rate Analysis"
         href: crime-rate-analysis.html
       - text: "Victim Suspect Correlation"
