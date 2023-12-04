@@ -110,4 +110,7 @@ df_nypd_loc = df_nypd |>
     )
   ) |> 
  drop_na(region_name) # excluded the data without the information of location 
+
+# list of sub_borough
+unique(pull(df_nypd_loc, region_name))
 ```
