@@ -31,8 +31,83 @@ Column names are changed to lower cases using `janitor::clean_names()`. Please r
 ## Socioeconomic indicators 
 
 ```{r}
-df_socio = readxl::read_excel("./data/neighorhood_Indicators.xlsx", sheet = "Data")
+df_socio = readxl::read_excel(here::here("data", "neighorhood_Indicators.xlsx"), sheet = "Data")
 ```
 
 This dataset (`r ncol(df_socio)` variables and `r nrow(df_socio)` rows) provides information on the NYC socioecomonic background. ([data source](https://furmancenter.org/coredata/userguide/about))\
 The excel file is stored in "data" directory. Variable explanations can be found in the "Data Dictionary" sheet.
+
+## Neighborhoods (Sub-borough) Information
+
+The neighborhoods information is not included in our master dataset so we will add them using `addr_pct_cd` (NYPD precinct codes) and approximate mapping from Golub et al. (2006)  
+NYPD the 121st Precinct serves the northwestern shore of Staten Island (Willowbrook, Westerleigh, Port Richmond, Mariner's Harbor, Elm Park, Port Ivory, Chelsea, and Bloomfield) so we classified this as `North Shore`.
+
+```{r}
+df_nypd_loc = df_nypd |> 
+  mutate(
+    region_name = case_when( # region_name: neighborhood, sub-borough
+      # manhattan
+      addr_pct_cd %in% c(1, 6) ~ "Greenwich Village/Financial District", 
+      addr_pct_cd %in% c(5, 7, 9)  ~ "Lower East Side/Chinatown",
+      addr_pct_cd %in% c(10, 18, 14)  ~ "Chelsea/Clinton/Midtown",
+      addr_pct_cd %in% c(13, 17) ~ "Stuyvesant Town/Turtle Bay",
+      addr_pct_cd %in% c(20, 24) ~ "Upper West Side",
+      addr_pct_cd == 19 ~ "Upper East Side",
+      addr_pct_cd == 22 ~ "Central Park",
+      addr_pct_cd %in% c(26, 30) ~ "Morningside Heights/Hamilton Heights",
+      addr_pct_cd %in% c(28, 32) ~ "Central Harlem",
+      addr_pct_cd %in% c(23, 25) ~ "East Harlem",
+      addr_pct_cd %in% c(33, 34) ~ "Washington Heights/Inwood",
+      # the bronx
+      addr_pct_cd %in% c(40, 41) ~ "Mott Haven/Hunts Point",
+      addr_pct_cd %in% c(42, 48) ~ "Morrisania/Belmont",
+      addr_pct_cd == 44 ~ "Highbridge/South Concourse",
+      addr_pct_cd == 46 ~ "University Heights/Fordham",
+      addr_pct_cd == 52 ~ "Kingsbridge Heights/Mosholu", 
+      addr_pct_cd == 50 ~ "Riverdale/Kingsbridge" ,
+      addr_pct_cd == 43 ~ "Soundview/Parkchester",
+      addr_pct_cd == 45 ~ "Throgs Neck/Co-op City",
+      addr_pct_cd == 49 ~ "Pelham Parkway",
+      addr_pct_cd == 47 ~ "Williamsbridge/Baychester",
+      # brooklyn
+      addr_pct_cd %in% c(90, 94) ~ "Williamsburg/Greenpoint",
+      addr_pct_cd %in% c(84, 88) ~ "Brooklyn Heights/Fort Greene",
+      addr_pct_cd %in% c(79, 81) ~ "Bedford Stuyvesant",
+      addr_pct_cd == 83 ~ "Bushwick",
+      addr_pct_cd == 75 ~ "East New York/Starrett City",
+      addr_pct_cd %in% c(76, 78) ~ "Park Slope/Carroll Gardens",
+      addr_pct_cd == 72 ~ "Sunset Park",
+      addr_pct_cd == 77 ~ "North Crown Heights/Prospect Heights",
+      addr_pct_cd == 71 ~ "South Crown Heights",
+      addr_pct_cd == 68 ~ "Bay Ridge",
+      addr_pct_cd == 62 ~ "Bensonhurst" ,
+      addr_pct_cd == 66 ~ "Borough Park",
+      addr_pct_cd == 60 ~ "Coney Island",
+      addr_pct_cd == 70 ~ "Flatbush",
+      addr_pct_cd == 61 ~ "Sheepshead Bay/Gravesend",
+      addr_pct_cd == 73 ~ "Brownsville/Ocean Hill",
+      addr_pct_cd == 67 ~ "East Flatbush",
+      addr_pct_cd %in% c(63, 69) ~ "Flatlands/Canarsie",
+      # queens
+      addr_pct_cd == 114 ~ "Astoria",
+      addr_pct_cd == 108 ~ "Sunnyside/Woodside",
+      addr_pct_cd == 115 ~ "Jackson Heights",
+      addr_pct_cd == 110 ~ "Elmhurst/Corona",
+      addr_pct_cd == 104 ~ "Middle Village/Ridgewood",
+      addr_pct_cd == 112 ~ "Rego Park/Forest Hills",
+      addr_pct_cd == 109 ~ "Flushing/Whitestone",
+      addr_pct_cd == 107 ~ "Hillcrest/Fresh Meadows",
+      addr_pct_cd == 102 ~ "Ozone Park/Woodhaven",
+      addr_pct_cd == 106 ~ "South Ozone Park/Howard Beach", 
+      addr_pct_cd == 111 ~ "Bayside/Little Neck",
+      addr_pct_cd %in% c(103, 113) ~ "Jamaica",
+      addr_pct_cd == 105 ~ "Queens Village",
+      addr_pct_cd %in% c(100, 101) ~ "Rockaways",
+      # staten island
+      addr_pct_cd %in% c(120, 121) ~ "North Shore",
+      addr_pct_cd == 122 ~ "Mid-Island",
+      addr_pct_cd == 123 ~ "South Shore"
+    )
+  ) |> 
+ drop_na(region_name) # excluded the data without the information of location 
+```
