@@ -13,10 +13,10 @@ navbar:
         href: General_Crime_Data.html
       - text: "Demographic"
         href: Demographic.html
-      - text: "crime_rate-analysis"
+      - text: "Crime Rate Analysis"
         href: crime-rate-analysis.html
-      - text: "victim-suspect-correlation"
-        href: victim-suspect-correlation.html   
+      - text: "Victim Suspect Correlation"
+        href: victim_suspect_correlation.html   
     - icon: fa-github fa-lg
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io
 output:
