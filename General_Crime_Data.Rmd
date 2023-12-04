@@ -1,11 +1,7 @@
 ---
 title: "General Crime Data"
 output: 
-  html_document:
-    code_folding: hide
-    always_allow_html: true
-    toc: true
-    toc_float: true
+  html_document
 ---
 
 ---
