@@ -14,6 +14,7 @@ library(htmltools)
 library(viridis)
 library(shiny)
 library(plotly)
+library(shinydashboard)
 
 # set knitr defaults
 knitr::opts_chunk$set(
@@ -45,7 +46,9 @@ scale_fill_discrete   = scale_fill_viridis_d
 
 ```{r load data}
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
-  janitor::clean_names()
+  janitor::clean_names() |> 
+  mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt)) |> 
+  mutate(year = lubridate::year(cmplnt_fr_dt))
 ```
 
 ```{r}
@@ -60,11 +63,10 @@ Decide to use ky_cd as crime classification code to avoid excessive complication
 
 ```{r}
 mapping <- df_nypd |> 
-  mutate(ofns_desc = ifelse(is.na(ofns_desc), pd_desc, ofns_desc)) |> 
   distinct(ky_cd, ofns_desc) 
 ```
 
-Since there are `r n(unique(ky_cd)` crime categories, which is still quite a lot to do interpretable visualizations, I decided to only include crime categories that make up 80% of all the crime data to capture most frequent crime categories.
+Since there are 71ho crime categories, which is still quite a lot to do interpretable visualizations, I decided to only include crime categories that make up 80% of all the crime data to capture most frequent crime categories.
 
 ## Temporal Patterns
 ```{r}
@@ -95,11 +97,126 @@ print(df_summary)
 ```
 The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
 
-Noteworthy, ky_cd `361` consists 2 different description, which could be combined, while `126` consists 2 that need further discussion.
+Noteworthyly, Among the 10 most frequent ky_cd `361` and `126` consists some NA values in `ofns_des`.
 
 
 ```{r}
 df_crime_patterns <- df_nypd %>%
-  filter(ky_cd %in% df_summary$ky_cd)
+  filter(ky_cd %in% df_summary$ky_cd) %>%
+  mutate(ofns_desc = ifelse(ky_cd == 361, 
+                            "OFF. AGNST PUB ORD SENSBLTY & PLACE FALSE BOMB", 
+                            ofns_desc),
+         ofns_desc = ifelse(ky_cd == 126, 
+                            "MISCELLANEOUS PENAL LAW", 
+                            ofns_desc))
+```
+
+```{r}
+plot_1 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[1,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of PETIT LARCENY in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_2 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[2,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of HARRASSMENT 2 in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_3 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[3,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_4 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[4,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_5 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[5,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_6 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[6,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_7 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[7,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+
+plot_8 = df_crime_patterns |>
+  filter(ky_cd == as.numeric(df_summary[8,1])) |>
+  group_by(year) |> 
+  summarize(count = n()) |> 
+  plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of ASSAULT 3 & RELATED OFFENSES in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+```
+
+```{r}
+p = df_crime_patterns |>
+  group_by(ky_cd, year) |> 
+  summarize(count = n()) |> 
+  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ky_cd)
+```
+
+```{r}
+ggplotly(p)
 ```
 
