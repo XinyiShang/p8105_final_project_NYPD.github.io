@@ -1,0 +1,46 @@
+---
+title: "EDA_social"
+author: "Yuki Joyama"
+date: "2023-12-05"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message=FALSE,
+  warning=FALSE)
+library(tidyverse)
+library(dplyr)
+```
+
+Import data
+```{r,include=FALSE}
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+  janitor::clean_names() 
+
+prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
+```
+
+# Heatmap
+
+
+
+
+
+
+# Crime type 
+
+
+
+
+
+
+# Line plot
+
+
+
+
+
+
+
