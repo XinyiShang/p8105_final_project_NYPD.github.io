@@ -4,7 +4,8 @@ output:
   html_document
 ---
 
----
+------------------------------------------------------------------------
+
 ```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(dplyr)
@@ -51,20 +52,24 @@ df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Co
 
 ```
 
-## Number of Cases in Each Year
+```{r}
+# Compare ky_cd vs pd_cd
+num_k = length(unique(df_nypd |> pull(ky_cd)))
+num_p = length(unique(df_nypd |> pull(pd_cd)))
+num_k
+num_p
+```
+Decide to use ky_cd as crime classification code to avoid excessive complication.
+
+
+## Temporal Patterns
 
 ```{r}
-df_nypd_test <- df_nypd  %>%
-  janitor::clean_names() %>%
-  mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt))
 
-df_nypd_test <- df_nypd_test %>%
-  mutate(year = lubridate::year(cmplnt_fr_dt))
+```
 
-year_counts <- df_nypd_test %>%
-  group_by(year) %>%
-  summarise(count = n())
 
+```{r}
 plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
       layout(
         title = "Number of Cases in Each Year",
@@ -105,5 +110,6 @@ ggplotly(figure)
 
 ## Top 10 Types of Crime by Borough and Year
 
-<iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/"> </iframe>
+<iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/">
 
+</iframe>
