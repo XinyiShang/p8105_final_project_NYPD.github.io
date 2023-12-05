@@ -18,7 +18,7 @@ library(dplyr)
 ```{r,include=FALSE}
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 ```
 
@@ -34,8 +34,15 @@ neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "D
   janitor::clean_names() |> 
   filter(region_type == "Sub-Borough Area") |> 
   rename(neighborhood = region_name) |> 
-  select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
+  select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
   filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
+
+neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
+  janitor::clean_names() |> 
+  filter(region_type == "Sub-Borough Area") |> 
+  rename(neighborhood = region_name) |> 
+  filter(year == "2017-2021") |> 
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
 ```
 
 `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
@@ -59,7 +66,8 @@ ses_df = nypd_ses_df |>
   summarise(crime_num = n())
 
 ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |> 
-  mutate(crime_rate = (crime_num/pop_num) * 100,000)
+  mutate(crime_rate = (crime_num/pop_num) * 100,000) |> 
+  left_join(neighbor_rent, by = "neighborhood")
 ```
 `ses_df` contains crime rate and other SES data per neighborhood, by year 
 
@@ -98,6 +106,21 @@ eda_plot8 = ses_df |> ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
 
 gridExtra::grid.arrange(
   eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)
+```
+
+Visualizing rent with crime rate:
+```{r}
+ses_df |> group_by(neighborhood) |> 
+  summarise(avg_rent_0_1beds = mean(gross_rent_0_1beds), 
+            avg_rent_2_3beds = mean(gross_rent_2_3beds)
+            , avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  ggplot(aes(x = avg_crime_rate)) +
+  geom_point(aes(y = avg_rent_0_1beds, color = "Average Rent 0-1 Beds")) +
+  geom_point(aes(y = avg_rent_2_3beds, color = "Average Rent 2-3 Beds")) +
+  scale_color_manual(values = c("Average Rent 0-1 Beds" = "red", "Average Rent 2-3 Beds" = "blue")) +
+  labs(title = "Point Plot of y and z against x",
+       x = "Crime rate",
+       y = "Average rent ($)") 
 ```
 
 
