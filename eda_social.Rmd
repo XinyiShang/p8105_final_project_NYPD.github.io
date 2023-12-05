@@ -14,12 +14,30 @@ library(tidyverse)
 library(dplyr)
 ```
 
-Import data
+Import and clead NYPD data
 ```{r,include=FALSE}
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
   janitor::clean_names() 
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
+
+#Merging neighborhood information with NYPD data, keep only relevant variables
+
+nypd_ses_df = df_nypd |> 
+  rename(precinct = addr_pct_cd) |> 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd,crm_atpt_cptd_cd, law_cat_cd, boro_nm, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |> 
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
+         year = format(cmplnt_fr_dt, "%Y")) |> 
+  left_join(prec_neighbor, by = "precinct")
+```
+
+Import and clean socio-economic data
+```{r}
+neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
+  janitor::clean_names() |> 
+  filter(region_type == "Sub-Borough Area") |> 
+  rename(neighborhood = region_name) |> 
+  select(pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) 
 ```
 
 # Heatmap
