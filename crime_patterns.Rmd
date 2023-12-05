@@ -43,73 +43,63 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete   = scale_fill_viridis_d
 ```
 
-```{r}
+```{r load data}
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
   janitor::clean_names()
-
-# df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
-#  janitor::clean_names()
-
 ```
 
 ```{r}
 # Compare ky_cd vs pd_cd
-num_k = length(unique(df_nypd |> pull(ky_cd)))
-num_p = length(unique(df_nypd |> pull(pd_cd)))
-num_k
-num_p
+length(unique(df_nypd |> pull(ky_cd)))
+length(unique(df_nypd |> pull(pd_cd)))
+sum(is.na(df_nypd$ky_cd))
+sum(is.na(df_nypd$pd_cd))
 ```
-Decide to use ky_cd as crime classification code to avoid excessive complication.
+Decide to use ky_cd as crime classification code to avoid excessive complication and missing values.
 
+
+```{r}
+mapping <- df_nypd |> 
+  mutate(ofns_desc = ifelse(is.na(ofns_desc), pd_desc, ofns_desc)) |> 
+  distinct(ky_cd, ofns_desc) 
+```
+
+Since there are `r n(unique(ky_cd)` crime categories, which is still quite a lot to do interpretable visualizations, I decided to only include crime categories that make up 80% of all the crime data to capture most frequent crime categories.
 
 ## Temporal Patterns
-
 ```{r}
 
+# Step 1: Group, count, and sort
+df_summary <- df_nypd %>%
+  group_by(ky_cd) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+# Calculate total number of observations
+total_n <- sum(df_summary$n)
+
+# Determine a cutoff, for example, 80% of the total
+cutoff <- total_n * 0.80
+
+# Calculate the cumulative sum and find out how many top categories 
+# make up for at least 80% of the data
+df_summary <- df_summary |> 
+  mutate(cumulative_n = cumsum(n))
+
+position <- which.max(df_summary$cumulative_n >= cutoff)
+# Select the top categories up to this position
+df_summary <- df_summary[1:position, ] |> 
+  left_join(mapping, by="ky_cd")
+# Optional: Viewing the result
+print(df_summary)
 ```
+The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
+
+Noteworthy, ky_cd `361` consists 2 different description, which could be combined, while `126` consists 2 that need further discussion.
 
 
 ```{r}
-plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
-      layout(
-        title = "Number of Cases in Each Year",
-        xaxis = list(title = "Year"),
-        yaxis = list(title = "Number of Cases"),
-        showlegend = FALSE
-      )
+df_crime_patterns <- df_nypd %>%
+  filter(ky_cd %in% df_summary$ky_cd)
 ```
 
-## Number of Cases by Year, Borough, and Law Category
-
-```{r }
-count_data <- df_nypd_test %>%
-  group_by(boro_nm, year, law_cat_cd) %>%
-  summarise(count = n()) |>
-  filter(boro_nm != "(null)")
-
-figure = ggplot(count_data, aes(x = year, y = count, color = law_cat_cd)) +
-  geom_point(position = position_dodge(width = 0.8)) +
-  geom_line(aes(group = law_cat_cd), position = position_dodge(width = 0.8)) +
-  facet_wrap(~boro_nm, ncol = 5) +
-  labs(title = "Number of Cases by Year, Borough, and Law Category",
-       x = "Year",
-       y = "Number of Cases",
-       color = "Law Category") +
-  theme_minimal() +
-  theme(legend.position = "bottom",
-        strip.background = element_rect(fill = "lightblue", color = "lightblue"),
-        plot.margin = margin(20, 10, 20, 20, unit = "pt"),
-        strip.text = element_text(size = 8),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.title.x = element_text(margin = margin(t = 15)),
-        legend.text = element_text(size = 8))
-
-ggplotly(figure)
-
-```
-
-## Top 10 Types of Crime by Borough and Year
-
-<iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/">
-
-</iframe>
