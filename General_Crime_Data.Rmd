@@ -43,11 +43,11 @@ scale_fill_discrete   = scale_fill_viridis_d
 ```
 
 ```{r}
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
-  janitor::clean_names()
-
-# df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
 #  janitor::clean_names()
+
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
+  janitor::clean_names()
 
 ```
 
@@ -73,6 +73,12 @@ plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'mar
         showlegend = FALSE
       )
 ```
+
+There is a subtle decreasing trend observed from 2017 to 2019, followed by a significant drop in the number of cases in 2020. This decline in 2020 could potentially be attributed to the impact of the COVID-19 pandemic, as people were under quarantine, and there may have been a shortage of police labor available to document cases during that time.
+
+Post-2020, a noteworthy and rapid increase in the number of cases is evident, surpassing the figures recorded in any previous years. The surge in cases after the initial drop in 2020 suggests a substantial rebound, possibly influenced by changes in social dynamics following by COVID-19.
+
+
 
 ## Number of Cases by Year, Borough, and Law Category
 
@@ -103,7 +109,22 @@ ggplotly(figure)
 
 ```
 
+In Bronx, Brooklyn, Manhattan, and Queens, misdemeanor cases are the most frequently observed, followed by felony cases as the middle category, and violations as the least common among the four boroughs, except for Staten Island. Staten Island exhibits a moderate similarity in the number of cases between felony and violation categories.
+
+Staten Island records the lowest number of cases, likely attributable to its relatively small population.
+
+The number of cases appears to be relatively consistent in Bronx, Brooklyn, Manhattan, and Queens. Notably, the number of felony cases shows an increasing trend in all five years, with the exception of 2020. The pattern of misdemeanor cases follows the overall trend, experiencing a decline from 2017 to 2020 followed by a sudden increase. However, the change in violation cases is not significant and remains relatively constant across all five boroughs
+
+
+
 ## Top 10 Types of Crime by Borough and Year
 
 <iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/"> </iframe>
 
+Overall, PETIT LARCENY stands out as the most frequently reported crime across the entire New York City. Following closely are HARASSMENT 2 and ASSAULT 3 & related offenses, which consistently rank among the top crimes over the five-year period, making them prevalent in the city.
+
+When examining individual boroughs, these three crimes remain prominent, although there are some variations. In Manhattan, PETIT LARCENY remains the most common, but GRAND LARCENY takes the second spot. This could be attributed to the affluence of Manhattan or potentially the higher level of sophistication among thieves. The prevalence of GRAND LARCENY may indicate a focus on more valuable targets in this borough.
+
+In STATEN ISLAND, the third most reported crime shifts to CRIMINAL MISCHIEF & RELATED OFFENSES, suggesting a different pattern of criminal activity in this borough compared to others. In BRONX, HARRASSMENT 2 surpasses PETIT LARCENY in reported cases.
+
+The data suggests that theft is notably prevalent in Manhattan, emphasizing the importance of vigilance in safeguarding personal belongings. Additionally, harassment and assault are consistently significant concerns across the city. Understanding these patterns can aid in the development of targeted crime prevention strategies tailored to the specific needs of each borough.

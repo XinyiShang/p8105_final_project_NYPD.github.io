@@ -18,7 +18,7 @@
 <script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -331,25 +331,46 @@ div.tocify {
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Sections
+    Crime Event
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="index.html">Home</a>
-    </li>
-    <li>
       <a href="General_Crime_Data.html">General Crime Analysis</a>
     </li>
+    <li>
+      <a href="crime_patterns.html">Crime Patterns</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Suspect and Victim
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
     <li>
       <a href="demographic.html">Demographic</a>
     </li>
     <li>
+      <a href="victim_suspect_correlation.html">Victim Suspect Correlation</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Socioeconomics
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
       <a href="crime-rate-analysis.html">Crime Rate Analysis</a>
     </li>
     <li>
-      <a href="victim_suspect_correlation.html">Victim Suspect Correlation</a>
+      <a href="eda_social.html">Social EDA</a>
     </li>
   </ul>
 </li>
@@ -392,7 +413,8 @@ precinct/neighboorhood, and only keeping the relevant SES indicators</p>
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
-  select(neighborhood, region_type, year, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_num, pop_foreign_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct) </code></pre>
+  select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
+  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))</code></pre>
 <p><code>neighbor_ses</code> df includes information on population,
 income, umemployment, poverty, education, and racial factors for every
 neighborhood.</p>
@@ -400,8 +422,8 @@ neighborhood.</p>
 more data cleaning. The resulting <code>nypd_ses_df</code> only contains
 variables of interest for SES analysis.</p>
 <pre class="r"><code>nypd_ses_df = df_nypd |&gt; 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, boro_nm, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
   rename(precinct = addr_pct_cd) |&gt; 
-  select(cmplnt_num, cmplnt_fr_dt, boro_nm, precinct, ofns_desc, pd_desc, law_cat_cd) |&gt; 
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
          year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
   left_join(prec_neighbor, by = &quot;precinct&quot;)</code></pre>
@@ -417,7 +439,6 @@ focus only on the 2021 data.</p>
   summarise(crime_num = n())
 
 ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
-  na.omit() |&gt; 
   mutate(crime_rate = (crime_num/pop_num) * 100,000)</code></pre>
 <p><code>ses_df</code> contains crime rate and other SES data per
 neighborhood, by year</p>

@@ -1,31 +1,43 @@
 name: "Website Settings"
 output_dir: "."
+
 navbar:
   title: "Home"
   left:
 
   right:
-    - text: Sections
+    - text: "Crime Event"
       menu:
-      - text: "Home"
-        href: index.html    
-      - text: "General Crime Analysis"
-        href: General_Crime_Data.html
-      - text: "Demographic"
-        href: demographic.html
-      - text: "Crime Rate Analysis"
-        href: crime-rate-analysis.html
-      - text: "Victim Suspect Correlation"
-        href: victim_suspect_correlation.html   
-    - icon: fa-github fa-lg
+        - text: "General Crime Analysis"
+          href: General_Crime_Data.html
+        - text: "Crime Patterns"
+          href: crime_patterns.html
+
+    - text: "Suspect and Victim"
+      menu:
+        - text: "Demographic"
+          href: demographic.html
+        - text: "Victim Suspect Correlation"
+          href: victim_suspect_correlation.html
+    - text: "Socioeconomics"
+      menu:
+        - text: "Crime Rate Analysis"
+          href: crime-rate-analysis.html
+        - text: "Social EDA"
+          href: eda_social.html
+    - icon: "fa-github fa-lg"
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io
+
+
 output:
-  html_document:
-    theme: journal
-    code_folding: hide
-    always_allow_html: true
-    toc: true
-    toc_float: true
+    html_document:
+      theme: flatly
+      code_folding: hide
+      always_allow_html: true
+      toc: true
+      toc_float: true
+
+
 
 
     
