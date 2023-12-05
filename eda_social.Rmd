@@ -38,6 +38,13 @@ neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "D
   rename(neighborhood = region_name) |> 
   select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
   filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022, "2017-2021"))
+
+neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
+  janitor::clean_names() |> 
+  filter(region_type == "Sub-Borough Area") |> 
+  rename(neighborhood = region_name) |> 
+  select(gross_rent_0_1beds, gross_rent_2_3beds) |> 
+  filter(year == "2017-2021")
 ```
 
 # Heatmap

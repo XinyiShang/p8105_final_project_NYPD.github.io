@@ -34,7 +34,8 @@ neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "D
   janitor::clean_names() |> 
   filter(region_type == "Sub-Borough Area") |> 
   rename(neighborhood = region_name) |> 
-  select(pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) 
+  select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
+  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
 ```
 
 `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
@@ -58,7 +59,6 @@ ses_df = nypd_ses_df |>
   summarise(crime_num = n())
 
 ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |> 
-  na.omit() |> 
   mutate(crime_rate = (crime_num/pop_num) * 100,000)
 ```
 `ses_df` contains crime rate and other SES data per neighborhood, by year 
