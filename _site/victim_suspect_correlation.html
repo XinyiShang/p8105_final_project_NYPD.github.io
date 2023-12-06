@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Nihaal Rahman" />
+
+
+<title>suspect_victim_correlations</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">suspect_victim_correlations</h1>
+<h4 class="author">Nihaal Rahman</h4>
+
+</div>
+
+
+<div id="demographic-distribution" class="section level2">
+<h2>Demographic Distribution</h2>
+<p>The following queries are exploring the demographic information
+breakdown in suspects and victims by the severity of the crime reported.
+Using the crime levels of violation, misdemeanor, and felony, these
+charts visualize the counts of suspects/victims by race, age, and sex,
+respectively.</p>
+<p>###Looking at suspect/victim race by level of offense</p>
+<pre class="r"><code>race_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;race&quot;, susp_race, vic_race)
+
+race_plot &lt;- ggplot(race_combined, aes(x = law_cat_cd, fill = race)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of supect and victim race by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Race&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(race_plot)</code></pre>
+<p><img src="victim_suspect_correlation_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Looking at this chart, we can see that black individuals have the
+highest counts across all crimes for both suspects and victims. In both
+charts, white Hispanic individuals make up the 2nd highest count, and
+then white individuals make up the 3rd. For suspects, black Hispanic
+individuals make up the 4th highest count, but Asian/Pacific Islander
+make up the 4th highest count of victims.</p>
+<p>###Looking at suspect/victim age by level of offense</p>
+<pre class="r"><code>age_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;age&quot;, susp_age_group, vic_age_group)
+
+age_plot &lt;- data |&gt; 
+  filter(susp_age_group %in% c(&#39;&lt;18&#39;, &#39;18-24&#39;, &#39;25-44&#39;, &#39;45-64&#39;, &#39;65+&#39;) &amp; vic_age_group %in% c(&#39;&lt;18&#39;, &#39;18-24&#39;, &#39;25-44&#39;, &#39;45-64&#39;, &#39;65+&#39;)) |&gt; 
+  gather(key = &quot;variable&quot;, value = &quot;age&quot;, susp_age_group, vic_age_group) |&gt; 
+  ggplot(aes(x = law_cat_cd, fill = age)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of suspect and victim age by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Age&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(age_plot)</code></pre>
+<p><img src="victim_suspect_correlation_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>In this chart we see that the 25-44 age group is the most populous
+for both suspects and victims across all levels of crime. Interestingly,
+the 18-24 group is the 2nd greatest for felony suspects, the 45-64 group
+is the 2nd highest for violation suspects, and both are relatively equal
+for misdemeanor suspects. Among the victims, 45-64 are consistently the
+2nd highest, with 18-24 following them.</p>
+<p>###Looking at suspect/victim sex by level of offense</p>
+<pre class="r"><code>sex_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;sex&quot;, susp_sex, vic_sex)
+
+sex_plot &lt;- data |&gt; 
+  filter(susp_sex %in% c(&#39;F&#39;, &#39;M&#39;) &amp; vic_sex %in% c(&#39;F&#39;, &#39;M&#39;)) |&gt; 
+  gather(key = &quot;variable&quot;, value = &quot;sex&quot;, susp_sex, vic_sex) |&gt; 
+  ggplot(aes(x = law_cat_cd, fill = sex)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of suspect and victim sex by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Sex&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(sex_plot)</code></pre>
+<p><img src="victim_suspect_correlation_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>In this chart we see that women make up a greater number of victims,
+while men make up a greater number of suspects. However, the disparity
+between sexes is smaller among the victims than it is among the
+suspects.</p>
+<p>Throughout our public health education, we have learned about the
+importance of intersectionality. While these snapshots give us
+information about key demographic identities, we may be missing some
+kind of bigger picture. So, now we will investigate which combinations
+of identities are the most prevalent among the suspects and victims.</p>
+<p>###Seeing the top 5 combinations of race+age+sex for both victim and
+suspect counts</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">vic_age_group</th>
+<th align="left">vic_race</th>
+<th align="left">vic_sex</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">149910</td>
+</tr>
+<tr class="even">
+<td align="left">25-44</td>
+<td align="left">WHITE HISPANIC</td>
+<td align="left">F</td>
+<td align="right">97297</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">78439</td>
+</tr>
+<tr class="even">
+<td align="left">45-64</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">66138</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">WHITE</td>
+<td align="left">F</td>
+<td align="right">63926</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">susp_age_group</th>
+<th align="left">susp_race</th>
+<th align="left">susp_sex</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">161899</td>
+</tr>
+<tr class="even">
+<td align="left">25-44</td>
+<td align="left">WHITE HISPANIC</td>
+<td align="left">M</td>
+<td align="right">84750</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">55501</td>
+</tr>
+<tr class="even">
+<td align="left">45-64</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">52222</td>
+</tr>
+<tr class="odd">
+<td align="left">18-24</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">50762</td>
+</tr>
+</tbody>
+</table>
+<p>After creating these tables, we are able to see that black women
+between the ages of 25-44 make up the highest count of victims, and
+black men between the ages of 25-44 make up the highest count of
+suspects. Policies targeted towards reducing crime and protecting
+civilians should take into consideration the unique socio-ecological
+factors surrounding these groups.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

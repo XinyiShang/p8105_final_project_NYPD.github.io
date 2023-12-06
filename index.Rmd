@@ -1,0 +1,65 @@
+---
+title: "The revealed reality: NYC’s safety demystified through NYPD data"
+output: html_document
+---
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message=FALSE,
+	warning = FALSE,
+	results = FALSE,
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%")
+```
+
+![ ](image/new_york.jpg){height=400}
+
+## About
+
+New York City, a city renowned for its diversity and dynamic energy, faces an ongoing challenge in ensuring the safety and security of its inhabitants. In this project, we conducted a comprehensive examination of safety in New York City through an in-depth analysis of NYPD complaint data spanning the years 2006 to 2019. The analysis will be intricately divided into three distinct layers, focusing on crime events, suspects/victims, and socioeconomic indicators. The primary objective is to discern patterns, trends, and correlations within these layers, with the ultimate goal of informing enhanced safety measures and refining law enforcement strategies.
+
+## Background
+
+## Team
+
+<pre>
+
+<div style="display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
+  <div style="flex: 0 0 auto; margin-left: 20px; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Yuki Joyama</strong><br>yj2803</p>
+  </div>
+  
+  <div style="flex: 0 0 auto; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Nihaal Rahman</strong><br>nkr2121</p>
+  </div>
+  
+  <div style="flex: 0 0 auto; margin-right: 20px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Siqing Wang</strong><br>sw3879</p>
+  </div>
+  
+</div>
+
+<div style="display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
+
+  <div style="flex: 0 0 auto; margin-left: 20px; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Miao Fu</strong><br>mf3593</p>
+  </div>
+
+  <div style="flex: 0 0 auto; margin-right: 80px; text-align: center;">
+    <img src="image/xinyi_shang.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Xinyi Shang</strong><br>xs2529</p>
+  </div>
+
+  <div style="flex: 0 0 auto; margin-right: 20px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <p><strong>Allison Xia</strong><br>zx2482</p>
+  </div>
+  
+</pre>

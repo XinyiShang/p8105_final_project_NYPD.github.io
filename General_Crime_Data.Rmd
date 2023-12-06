@@ -1,0 +1,200 @@
+---
+title: "General Crime Data"
+output: 
+  html_document
+---
+
+---
+```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(htmltools)
+library(viridis)
+library(shiny)
+library(plotly)
+
+# set knitr defaults
+knitr::opts_chunk$set(
+    echo      = TRUE
+  , message   = FALSE
+  , warning   = FALSE
+  , fig.align = "center"
+)
+
+# set theme defaults
+theme_set(
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+    , plot.title    = element_text(hjust = 0.5)
+    , plot.subtitle = element_text(hjust = 0.5)    
+    , plot.caption  = element_text(hjust = 0.0)
+  )
+)
+
+# set color scale defaults
+options(
+    ggplot2.continuous.colour = "viridis"
+  , ggplot2.continuous.fill   = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete   = scale_fill_viridis_d
+```
+
+```{r}
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
+#  janitor::clean_names()
+
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
+  janitor::clean_names()
+
+```
+
+## Number of Cases in Each Year
+
+<br>
+
+### New York City
+
+```{r}
+df_nypd_test <- df_nypd  %>%
+  janitor::clean_names() %>%
+  mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt))
+
+df_nypd_test <- df_nypd_test %>%
+  mutate(year = lubridate::year(cmplnt_fr_dt))
+
+year_counts <- df_nypd_test %>%
+  group_by(year) %>%
+  summarise(count = n())
+
+plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+      layout(
+        title = "Number of Cases in Each Year",
+        xaxis = list(title = "Year"),
+        yaxis = list(title = "Number of Cases"),
+        showlegend = FALSE
+      )
+```
+
+There is a subtle decreasing trend observed from 2017 to 2019, followed by a significant drop in the number of cases in 2020. This decline in 2020 could potentially be attributed to the impact of the COVID-19 pandemic, as people were under quarantine, and there may have been a shortage of police labor available to document cases during that time.
+
+Post-2020, a noteworthy and rapid increase in the number of cases is evident, surpassing the figures recorded in any previous years. The surge in cases after the initial drop in 2020 suggests a substantial rebound, possibly influenced by changes in social dynamics following by COVID-19.
+
+<br>
+
+### Boroughs
+```{r}
+boro_counts <- df_nypd_test %>%
+  group_by(year, boro_nm) %>%
+  summarise(count = n()) |>
+  filter(boro_nm != "(null)")
+
+figure <- ggplot(boro_counts, aes(x = year, y = count, color = boro_nm)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Number of Cases by Year and Borough",
+       x = "Year",
+       y = "Total Number of Cases",
+       color = "Borough") +
+  theme_minimal()
+
+ggplotly(figure)
+
+```
+
+From 2017 to 2022, Brooklyn consistently maintained its position as the borough with the highest number of reported crimes. Manhattan followed as the second-highest, while Staten Island consistently reported the lowest number of crime cases. Notably, from 2017 to 2020, the Bronx had a higher number of cases compared to Queens. However, a shift occurred in 2021, with Queens surpassing the Bronx in reported crime cases.
+
+<br>
+
+### Neighborhoods
+
+```{r}
+neighborhood_data <- read.csv("data/nyc_prec_neighborhood.csv") |>
+  mutate(police_precincts = precinct)
+df_nypd_neighborhood <- df_nypd_test |>
+  left_join(neighborhood_data, by = "police_precincts")
+
+neighborhood_counts <- df_nypd_neighborhood%>%
+  group_by(year, neighborhood) %>%
+  summarise(count = n()) |>
+  drop_na() |>
+  arrange(year, desc(count))
+
+neighborhood_counts <- neighborhood_counts %>%
+  arrange(neighborhood, desc(count))
+
+neighborhood_counts$neighborhood <- factor(neighborhood_counts$neighborhood, 
+                                           levels = unique(neighborhood_counts$neighborhood[order(-neighborhood_counts$count)]))
+
+
+figure_3 <- ggplot(neighborhood_counts, aes(x = neighborhood, y = count, fill = neighborhood))+
+  facet_wrap(~year, ncol = 1) +
+  geom_bar(stat = "identity") +  
+  labs(title = "Number of Cases by Year and Neighborhood",
+       y = "Total Number of Cases",
+       fill = "Neighborhood") +
+  theme_minimal()+
+  theme(axis.text.x = element_blank())
+
+ggplotly(figure_3)
+
+
+```
+
+
+Throughout the five-year period from 2017 to 2022, North Crown Heights/Prospect Heights consistently maintained its status as the neighborhood with the lowest number of reported crimes. Other neighborhoods such as Stuyvesant Town/Turtle Bay, Flatbush, Upper East Side, Riverdale/Kingsbridge, and Park Slope/Carroll Gardens also reported less than 5000 cases per year during this period. 
+
+On the other hand, Morningside Heights/Hamilton Heights consistently had the highest number of cases from 2017 to 2022, with the exception of 2020 when East Harlem reported the highest number of cases. The top three neighborhoods with the highest number of cases overall are Morningside Heights/Hamilton Heights, East Harlem, and Chelsea/Clinton/Midtown.
+
+<br>
+
+## Number of Cases by Year, Borough, and Law Category
+
+```{r }
+count_data <- df_nypd_test %>%
+  group_by(boro_nm, year, law_cat_cd) %>%
+  summarise(count = n()) |>
+  filter(boro_nm != "(null)")
+
+figure = ggplot(count_data, aes(x = year, y = count, color = law_cat_cd)) +
+  geom_point(position = position_dodge(width = 0.8)) +
+  geom_line(aes(group = law_cat_cd), position = position_dodge(width = 0.8)) +
+  facet_wrap(~boro_nm, ncol = 5) +
+  labs(title = "Number of Cases by Year, Borough, and Law Category",
+       x = "Year",
+       y = "Number of Cases",
+       color = "Law Category") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        strip.background = element_rect(fill = "lightblue", color = "lightblue"),
+        plot.margin = margin(20, 10, 20, 20, unit = "pt"),
+        strip.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_text(margin = margin(t = 15)),
+        legend.text = element_text(size = 8))
+
+ggplotly(figure)
+
+```
+
+In Bronx, Brooklyn, Manhattan, and Queens, misdemeanor cases are the most frequently observed, followed by felony cases as the middle category, and violations as the least common among the four boroughs, except for Staten Island. Staten Island exhibits a moderate similarity in the number of cases between felony and violation categories.
+
+Staten Island records the lowest number of cases, likely attributable to its relatively small population.
+
+The number of cases appears to be relatively consistent in Bronx, Brooklyn, Manhattan, and Queens. Notably, the number of felony cases shows an increasing trend in all five years, with the exception of 2020. The pattern of misdemeanor cases follows the overall trend, experiencing a decline from 2017 to 2020 followed by a sudden increase. However, the change in violation cases is not significant and remains relatively constant across all five boroughs
+
+<br>
+
+## Top 10 Types of Crime by Borough and Year
+
+<iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top10CrimetTypes/"> </iframe>
+
+Overall, PETIT LARCENY stands out as the most frequently reported crime across the entire New York City. Following closely are HARASSMENT 2 and ASSAULT 3 & related offenses, which consistently rank among the top crimes over the five-year period, making them prevalent in the city.
+
+When examining individual boroughs, these three crimes remain prominent, although there are some variations. In Manhattan, PETIT LARCENY remains the most common, but GRAND LARCENY takes the second spot. This could be attributed to the affluence of Manhattan or potentially the higher level of sophistication among thieves. The prevalence of GRAND LARCENY may indicate a focus on more valuable targets in this borough.
+
+In STATEN ISLAND, the third most reported crime shifts to CRIMINAL MISCHIEF & RELATED OFFENSES, suggesting a different pattern of criminal activity in this borough compared to others. In BRONX, HARRASSMENT 2 surpasses PETIT LARCENY in reported cases.
+
+The data suggests that theft is notably prevalent in Manhattan, emphasizing the importance of vigilance in safeguarding personal belongings. Additionally, harassment and assault are consistently significant concerns across the city. Understanding these patterns can aid in the development of targeted crime prevention strategies tailored to the specific needs of each borough.

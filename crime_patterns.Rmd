@@ -1,0 +1,218 @@
+---
+title: "General Crime Data"
+output: 
+  html_document
+---
+
+------------------------------------------------------------------------
+
+```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(htmltools)
+library(viridis)
+library(shiny)
+library(plotly)
+library(shinydashboard)
+library(leaflet)
+library(ggmap)
+library(leaflet.extras)
+# set knitr defaults
+knitr::opts_chunk$set(
+    echo      = TRUE
+  , message   = FALSE
+  , warning   = FALSE
+  , fig.align = "center"
+)
+
+# set theme defaults
+theme_set(
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+    , plot.title    = element_text(hjust = 0.5)
+    , plot.subtitle = element_text(hjust = 0.5)    
+    , plot.caption  = element_text(hjust = 0.0)
+  )
+)
+
+# set color scale defaults
+options(
+    ggplot2.continuous.colour = "viridis"
+  , ggplot2.continuous.fill   = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete   = scale_fill_viridis_d
+```
+
+```{r load data}
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
+```
+
+```{r data wrangling}
+df_nypd = df_nypd |> 
+  janitor::clean_names() |> 
+  mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt)) |> 
+  mutate(year = lubridate::year(cmplnt_fr_dt))
+```
+
+```{r Choose most frequent crime types}
+# Step 1: Group, count, and sort
+df_summary <- df_nypd %>%
+  group_by(ky_cd) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+# Calculate total number of observations
+total_n = sum(df_summary$count)
+
+# Determine a cutoff, for example, 80% of the total
+cutoff = 80
+
+# Calculate the cumulative sum and find out how many top categories 
+# make up for at least 80% of the data
+df_summary = df_summary |> 
+  mutate(cumulative_percentage = (cumsum(count)/sum(df_summary$count))*100)
+
+position = which.max(df_summary$cumulative_percentage >= cutoff)
+# Select the top categories up to this position
+df_summary =
+  df_summary[1:position, ] 
+```
+
+```{r create sub dataset of 10 most frequent crime types}
+df_crime_patterns <- df_nypd |> 
+  filter(ky_cd %in% df_summary$ky_cd) |> 
+  mutate(ofns_desc = ifelse(ky_cd == 361, 
+                            "OFF. AGNST PUB ORD SENSBLTY & PLACE FALSE BOMB", 
+                            ofns_desc),
+         ofns_desc = ifelse(ky_cd == 126, 
+                            "MISCELLANEOUS PENAL LAW", 
+                            ofns_desc)) |> 
+  mutate(cmplnt_fr_tm = lubridate::hms(cmplnt_fr_tm),
+         hour = lubridate::hour(cmplnt_fr_tm))
+```
+
+```{r}
+df_summary =
+  df_summary |> 
+  left_join(df_crime_patterns |> 
+              select(ky_cd,ofns_desc) |> 
+              distinct(), by = "ky_cd") 
+```
+
+The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
+
+## Number of Cases across Most Frequent 10 Offense Types in Each Year
+
+```{r}
+p_1 = df_crime_patterns |>
+  group_by(ofns_desc, year) |> 
+  summarize(count = n()) |> 
+  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc)+
+  xlab("Year") +ylab("Number of Cases")
+```
+
+```{r}
+ggplotly(p_1)
+```
+
+## Number of Cases across Most Frequent 10 Offense Types by Hour in Eash Year
+```{r}
+p_2= df_crime_patterns %>%
+  group_by(year, ofns_desc, hour) %>%
+  summarize(count = n(), .groups = 'drop') %>%
+  ggplot(aes(x = hour, y = count, color = ofns_desc)) +
+  geom_line() +
+  facet_wrap(~year)+
+  xlab("Hour") +
+  ylab("Count")+
+  labs(color = "Offense Type")
+  
+```
+
+```{r}
+ggplotly(p_2)
+```
+
+
+```{r create_plotly_function crime type}
+# Function to create a plot
+create_plot <- function(ofnsDesc) {
+  # Generate the plot title
+  plot_title <- paste("Number of", ofnsDesc, "in Each Year")
+
+  # Create the plot
+  df_crime_patterns |>
+    filter(ofns_desc == ofnsDesc) |>
+    group_by(year) |>
+    summarize(count = n()) |>
+    plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', 
+            marker = list(color = viridis(6))) |>
+    layout(
+      title = plot_title,
+      xaxis = list(title = "Year"),
+      yaxis = list(title = "Number of Cases"),
+      showlegend = FALSE
+    )
+}
+```
+
+```{r}
+crime_heatmap <- function(ofnsDesc, Year) {
+  # Filter the data based on the given ky_cd and year
+  filtered_data <- df_crime_patterns |> 
+    filter(ofns_desc == ofnsDesc & year == Year)
+
+  # Create the leaflet map
+  leaflet_map <- leaflet(filtered_data) %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addCircleMarkers(~longitude,
+                     ~latitude,
+                     stroke = FALSE, fillOpacity = 0.8,
+                     clusterOptions = markerClusterOptions(), # adds summary circles
+                     popup = ~as.character(ofns_desc)
+    ) %>% 
+    addHeatmap(lng=~longitude,
+               lat=~latitude,
+               radius = 8)
+  
+  return(leaflet_map)
+}
+```
+
+```{r}
+ui <- fluidPage(
+    titlePanel("Crime Data Visualization"),
+    
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("yr", "Year", 
+                        min = min(df_crime_patterns$year), 
+                        max = max(df_crime_patterns$year), 
+                        value = min(df_crime_patterns$year),
+                        step = 1),
+            selectInput("ofnsDesc", "Crime Tyoe",
+                        choices = unique(df_summary$ofns_desc))
+        ),
+        mainPanel(
+            leafletOutput("crimeMap"),
+            plotlyOutput("plotlyPlot")
+        )
+    )
+)
+
+server <- function(input, output) {
+  output$crimeMap <- renderLeaflet(
+    crime_heatmap(input$ofnsDesc, input$yr)
+  )
+  output$plotlyPlot = renderPlotly({
+    create_plot(
+      input$ofnsDesc)
+  })
+}
+
+```
+
+<iframe height="600" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map_Shiny/"> </iframe>
