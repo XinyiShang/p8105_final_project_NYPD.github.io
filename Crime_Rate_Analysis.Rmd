@@ -74,20 +74,82 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
 Visualizing potential association between poverty, income, and educational level with crime rate: 
 ```{r}
 eda_plot1 = ses_df |> ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
-  geom_point() +  labs(title = "Population in Poverty vs. Crime Rate")
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Population in Poverty vs. Crime Rate")
 
 eda_plot2 = ses_df |> ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
-  geom_point() + labs(title = "Median Household Income vs. Crime Rate")
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Median Household Income vs. Crime Rate")
 
 eda_plot3 = ses_df |> ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
-  geom_point() + labs(title = "Population Unemployment Percentage vs. Crime Rate")
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Population Unemployment Percentage vs. Crime Rate")
 
 eda_plot4 = ses_df |> ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
-  geom_point() + labs(title = "Population with No High School Education vs. Crime Rate")
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Population with No High School Education vs. Crime Rate")
 
 gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)
 ```
+
+It is observed that there is a stronger positive association between percentage of poverty population with crime rate; a weaker positive association between unemployment and lack of education with crime rate, and a negative association between median household income and crime rate. 
+
+We would like to fit a linear model to use these four SES indicators as predictors for crime rate outcome in a specific neighborhood.
+
+Let's first visualize the distribution of crime rate:
+```{r}
+ses_df |> ggplot(aes(x = crime_rate)) +
+  geom_histogram(alpha = 0.8, color = "white") + 
+  labs(
+    x = "Crime Rate" ,
+    y = "Count",
+    title = "Distribution of Crime Rate by Neighborhoods")
+```
+
+We can use Box-Cox Transformation to transform the data for linear fit
+```{r}
+initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+
+MASS::boxcox(initial_fit)
+```
+
+From the Box-Cox Transformation, log-transformation seems to be the best option. We will perform a log transformation on crime rate and use this as the predictor.
+```{r}
+ses_df = ses_df |> mutate(
+  log_crime_rate = log(crime_rate)
+)
+
+log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+
+broom::tidy(log_fit)
+```
+
+From the result of the MLR, it is observed that all 4 predictors are significant in terms of association with the crime rate outcome. We can run a regression diagnostic by plotting residuals for each borough:
+```{r}
+ses_df |> 
+  modelr::add_residuals(log_fit) |> 
+  ggplot(aes(x = borough, y = resid)) + geom_violin()
+```
+
+We can further inspect our model by plotting residuals against fitted values
+```{r}
+ses_df |> 
+  modelr::add_residuals(log_fit) |> 
+  modelr::add_predictions(log_fit) |> 
+  ggplot(aes(x = pred, y = resid, color = borough)) + geom_point()
+```
+
+From the two diagnostics plots above, we can see that the residuals are roughly centered around zero, and are relatively normal. This would indicate that our model is a relatively good fit. 
+
+
+
+
+## Are rent prices associated with crime rate?  (delete?)
 
 Visualizing trend: are crime rates associated with racial factors?
 ```{r}
