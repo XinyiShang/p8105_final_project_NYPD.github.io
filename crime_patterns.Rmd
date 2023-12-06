@@ -215,6 +215,4 @@ server <- function(input, output) {
 
 ```
 
-```{r}
-shinyApp(ui = ui, server = server)
-```
+<iframe height="600" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map_Shiny/"> </iframe>
