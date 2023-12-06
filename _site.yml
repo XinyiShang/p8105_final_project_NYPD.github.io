@@ -17,20 +17,17 @@ navbar:
       menu:
         - text: "Correlation Patterns"
           href: demographic.html
-<<<<<<< HEAD
 
     - text: "Crime Rate and Socioeconomics"
       menu:
         - text: "SES Analysis"
           href: Crime_Rate_Analysis.html
         - text: "Exploratory Data Visualization"
-=======
         - text: "Victim Suspect Correlation"
           href: victim_suspect_correlation.html
     - text: "Socioeconomic status"
       menu:
         - text: "Exploratory data analysis"
->>>>>>> bb71f8144b4faa821598fe689022bee4be40d0fe
           href: eda_social.html
         - text: "Primary Analysis - Behind the scenes"
           href: crime-rate-analysis.html
