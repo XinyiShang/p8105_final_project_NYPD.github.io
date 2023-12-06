@@ -404,9 +404,7 @@ div.tocify {
 </div>
 
 
-<p>Import and clead NYPD data</p>
-<p>Import and clean socio-economic data</p>
-<pre class="r"><code>#neighbor_SES has SES indicators (except rent) for each neighborhood 
+<pre class="r"><code>#Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
@@ -423,7 +421,7 @@ neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;,
   select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)</code></pre>
 <pre class="r"><code>#ses_df has crime rate and SES indicators for each neighborhood
 ses_df = nypd_ses_df |&gt; 
-  group_by(year, neighborhood, borough) |&gt; 
+  group_by(year, borough, neighborhood) |&gt; 
   summarise(crime_num = n())
 
 ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
@@ -436,9 +434,9 @@ ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighbo
 <h1>Crime type</h1>
 <div
 id="what-are-the-top-5-neighborhoods-with-highest-average-crime-rate"
-class="section level2">
-<h2>What are the top 5 neighborhoods with highest average crime
-rate?</h2>
+class="section level3">
+<h3>What are the top 5 neighborhoods with highest average crime
+rate?</h3>
 <pre class="r"><code>ses_df |&gt; group_by(borough, neighborhood) |&gt;
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
   arrange(desc(avg_crime_rate)) |&gt; head(5) |&gt; knitr::kable()</code></pre>
@@ -452,38 +450,37 @@ rate?</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">MANHATTAN</td>
+<td align="left">Manhattan</td>
 <td align="left">Chelsea/Clinton/Midtown</td>
-<td align="right">13.706981</td>
+<td align="right">13.715018</td>
 </tr>
 <tr class="even">
-<td align="left">BRONX</td>
+<td align="left">Bronx</td>
 <td align="left">University Heights/Fordham</td>
-<td align="right">13.344641</td>
+<td align="right">13.346104</td>
 </tr>
 <tr class="odd">
-<td align="left">BRONX</td>
+<td align="left">Bronx</td>
 <td align="left">Mott Haven/Hunts Point</td>
-<td align="right">11.154689</td>
+<td align="right">11.156934</td>
 </tr>
 <tr class="even">
-<td align="left">MANHATTAN</td>
+<td align="left">Manhattan</td>
 <td align="left">East Harlem</td>
-<td align="right">10.498538</td>
+<td align="right">10.517314</td>
 </tr>
 <tr class="odd">
-<td align="left">MANHATTAN</td>
+<td align="left">Manhattan</td>
 <td align="left">Lower East Side/Chinatown</td>
-<td align="right">8.829966</td>
+<td align="right">8.859599</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="what-are-the-most-common-types-of-crime-in-these-neighborhoods"
-class="section level2">
-<h2>What are the most common types of crime in these neighborhoods?</h2>
-<div id="chelseaclintonmidtown" class="section level3">
-<h3>Chelsea/Clinton/Midtown:</h3>
+class="section level3">
+<h3>What are the most common types of crime in these neighborhoods?</h3>
+<p>Chelsea/Clinton/Midtown:</p>
 <pre class="r"><code>nypd_ses_df |&gt; 
   filter(neighborhood ==&quot;Chelsea/Clinton/Midtown&quot;) |&gt; 
   count(ofns_desc) |&gt; 
@@ -491,11 +488,12 @@ class="section level2">
   head(5) |&gt; 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
   select(ofns_desc, percentage) |&gt; 
+  rename(crime_type = ofns_desc) |&gt; 
   knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">ofns_desc</th>
+<th align="left">crime_type</th>
 <th align="left">percentage</th>
 </tr>
 </thead>
@@ -522,9 +520,7 @@ class="section level2">
 </tr>
 </tbody>
 </table>
-</div>
-<div id="university-heightsfordham" class="section level3">
-<h3>University Heights/Fordham:</h3>
+<p>University Heights/Fordham:</p>
 <pre class="r"><code>nypd_ses_df |&gt; 
   filter(neighborhood == &quot;University Heights/Fordham&quot;) |&gt; 
   count(ofns_desc) |&gt; 
@@ -532,11 +528,12 @@ class="section level2">
   head(5) |&gt; 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
   select(ofns_desc, percentage) |&gt; 
-  knitr::kable()</code></pre>
+  rename(crime_type = ofns_desc) |&gt;
+  knitr::kable() </code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">ofns_desc</th>
+<th align="left">crime_type</th>
 <th align="left">percentage</th>
 </tr>
 </thead>
@@ -563,9 +560,7 @@ class="section level2">
 </tr>
 </tbody>
 </table>
-</div>
-<div id="mott-havenhunts-point-bronx" class="section level3">
-<h3>Mott Haven/Hunts Point, Bronx:</h3>
+<p>Mott Haven/Hunts Point:</p>
 <pre class="r"><code>nypd_ses_df |&gt; 
   filter(neighborhood == &quot;Mott Haven/Hunts Point&quot;) |&gt; 
   count(ofns_desc) |&gt; 
@@ -573,11 +568,12 @@ class="section level2">
   head(5) |&gt; 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
   select(ofns_desc, percentage) |&gt; 
-  knitr::kable()</code></pre>
+  rename(crime_type = ofns_desc) |&gt;
+  knitr::kable() </code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">ofns_desc</th>
+<th align="left">crime_type</th>
 <th align="left">percentage</th>
 </tr>
 </thead>
@@ -604,9 +600,7 @@ class="section level2">
 </tr>
 </tbody>
 </table>
-</div>
-<div id="east-harlem-manhattan" class="section level3">
-<h3>East Harlem, Manhattan:</h3>
+<p>East Harlem:</p>
 <pre class="r"><code>nypd_ses_df |&gt; 
   filter(neighborhood == &quot;East Harlem&quot;) |&gt; 
   count(ofns_desc) |&gt; 
@@ -614,11 +608,12 @@ class="section level2">
   head(5) |&gt; 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
   select(ofns_desc, percentage) |&gt; 
-  knitr::kable()</code></pre>
+  rename(crime_type = ofns_desc) |&gt;
+  knitr::kable() </code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">ofns_desc</th>
+<th align="left">crime_type</th>
 <th align="left">percentage</th>
 </tr>
 </thead>
@@ -645,21 +640,20 @@ class="section level2">
 </tr>
 </tbody>
 </table>
-</div>
-<div id="lower-east-sidechinatown-manhattan" class="section level3">
-<h3>Lower East Side/Chinatown, Manhattan:</h3>
+<p>Lower East Side/Chinatown:</p>
 <pre class="r"><code>nypd_ses_df |&gt; 
   filter(neighborhood == &quot;Lower East Side/Chinatown&quot;) |&gt; 
   count(ofns_desc) |&gt; 
   arrange(desc(n)) |&gt; 
   head(5) |&gt; 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
-  select(ofns_desc, percentage) |&gt; 
-  knitr::kable()</code></pre>
+  select(ofns_desc, percentage) |&gt;
+  rename(crime_type = ofns_desc) |&gt;
+  knitr::kable() </code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">ofns_desc</th>
+<th align="left">crime_type</th>
 <th align="left">percentage</th>
 </tr>
 </thead>
@@ -688,12 +682,11 @@ class="section level2">
 </table>
 </div>
 </div>
-</div>
 <div id="line-plot" class="section level1">
 <h1>Line plot</h1>
 <div id="is-there-an-association-between-rent-and-crime-rate"
-class="section level2">
-<h2>Is there an association between rent and crime rate?</h2>
+class="section level3">
+<h3>Is there an association between rent and crime rate?</h3>
 <pre class="r"><code>ses_df |&gt; group_by(neighborhood) |&gt; 
   summarise(avg_rent_0_1beds = mean(gross_rent_0_1beds), 
             avg_rent_2_3beds = mean(gross_rent_2_3beds)
@@ -702,7 +695,7 @@ class="section level2">
   geom_point(aes(y = avg_rent_0_1beds, color = &quot;Average Rent 0-1 Beds&quot;)) +
   geom_point(aes(y = avg_rent_2_3beds, color = &quot;Average Rent 2-3 Beds&quot;)) +
   scale_color_manual(values = c(&quot;Average Rent 0-1 Beds&quot; = &quot;red&quot;, &quot;Average Rent 2-3 Beds&quot; = &quot;blue&quot;)) +
-  labs(title = &quot;Point Plot of y and z against x&quot;,
+  labs(title = &quot;Point Plot of average rent against average crime rate&quot;,
        x = &quot;Crime rate&quot;,
        y = &quot;Average rent ($)&quot;) </code></pre>
 <p><img src="eda_social_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
