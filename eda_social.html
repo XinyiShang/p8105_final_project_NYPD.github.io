@@ -427,11 +427,11 @@ ses_df = nypd_ses_df |&gt;
 ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
   mutate(crime_rate = (crime_num/pop_num) * 100,000) |&gt; 
   left_join(neighbor_rent, by = &quot;neighborhood&quot;)</code></pre>
-<div id="heatmap" class="section level1">
-<h1>Heatmap</h1>
+<div id="heatmap" class="section level2">
+<h2>Heatmap</h2>
 </div>
-<div id="crime-type" class="section level1">
-<h1>Crime type</h1>
+<div id="crime-type" class="section level2">
+<h2>Crime type</h2>
 <div
 id="what-are-the-top-5-neighborhoods-with-highest-average-crime-rate"
 class="section level3">
@@ -476,6 +476,121 @@ rate?</h3>
 </tr>
 </tbody>
 </table>
+</div>
+<div
+id="what-are-the-top-5-neighborhoods-with-highest-average-crime-rate-1"
+class="section level3">
+<h3>What are the top 5 neighborhoods with highest average crime
+rate?</h3>
+<pre class="r"><code>ses_df |&gt; group_by(borough, neighborhood) |&gt;
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
+  arrange(desc(avg_crime_rate)) |&gt; tail(5) |&gt; knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">borough</th>
+<th align="left">neighborhood</th>
+<th align="right">avg_crime_rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Queens</td>
+<td align="left">Rego Park/Forest Hills</td>
+<td align="right">2.864067</td>
+</tr>
+<tr class="even">
+<td align="left">Brooklyn</td>
+<td align="left">Bensonhurst</td>
+<td align="right">2.761229</td>
+</tr>
+<tr class="odd">
+<td align="left">Brooklyn</td>
+<td align="left">Borough Park</td>
+<td align="right">2.679355</td>
+</tr>
+<tr class="even">
+<td align="left">Queens</td>
+<td align="left">Bayside/Little Neck</td>
+<td align="right">2.263316</td>
+</tr>
+<tr class="odd">
+<td align="left">Staten Island</td>
+<td align="left">South Shore</td>
+<td align="right">1.462068</td>
+</tr>
+</tbody>
+</table>
+<p>Since CUMC is located in Manhattan, let’s visualize the crime rate in
+Manhattan:</p>
+<pre class="r"><code>ses_df |&gt; group_by(borough, neighborhood) |&gt;
+  filter(borough == &quot;Manhattan&quot;) |&gt; 
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
+  arrange(desc(avg_crime_rate)) |&gt; knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">borough</th>
+<th align="left">neighborhood</th>
+<th align="right">avg_crime_rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="left">Chelsea/Clinton/Midtown</td>
+<td align="right">13.715018</td>
+</tr>
+<tr class="even">
+<td align="left">Manhattan</td>
+<td align="left">East Harlem</td>
+<td align="right">10.517314</td>
+</tr>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="left">Lower East Side/Chinatown</td>
+<td align="right">8.859599</td>
+</tr>
+<tr class="even">
+<td align="left">Manhattan</td>
+<td align="left">Central Harlem</td>
+<td align="right">8.010776</td>
+</tr>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="left">Greenwich Village/Financial District</td>
+<td align="right">7.483608</td>
+</tr>
+<tr class="even">
+<td align="left">Manhattan</td>
+<td align="left">Stuyvesant Town/Turtle Bay</td>
+<td align="right">7.272296</td>
+</tr>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="left">Morningside Heights/Hamilton Heights</td>
+<td align="right">5.145284</td>
+</tr>
+<tr class="even">
+<td align="left">Manhattan</td>
+<td align="left">Washington Heights/Inwood</td>
+<td align="right">4.571218</td>
+</tr>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="left">Upper West Side</td>
+<td align="right">4.494763</td>
+</tr>
+<tr class="even">
+<td align="left">Manhattan</td>
+<td align="left">Upper East Side</td>
+<td align="right">3.318232</td>
+</tr>
+</tbody>
+</table>
+<p>The top 5 neighborhoods of highest average crime rate are to our
+surprise, so we further looked into the common types of crimes in these
+neighorhoods.</p>
 </div>
 <div id="what-are-the-most-common-types-of-crime-in-these-neighborhoods"
 class="section level3">
@@ -680,10 +795,28 @@ class="section level3">
 </tr>
 </tbody>
 </table>
+<p>The high crime rate in Chelsea/Clinton/Midtown can be explained by
+the significant contribution of petite and grand larceny, which is as
+expected.</p>
+<p>Since CUMC is located in Washington Heights, let’s take a closer look
+at the top 10 crime types at Washington Heights:</p>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood == &quot;Washington Heights/Inwood&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(10) |&gt; 
+  mutate(percentage = n / sum(n) * 100) |&gt;
+  ggplot(aes(x = reorder(ofns_desc, -percentage), y = percentage)) + 
+  geom_bar(stat = &quot;identity&quot;) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + 
+   labs(title = &quot;Top 10 types of crime in Washington Heights/Inwood&quot;,
+       x = &quot;Percentage of all crimes&quot;,
+       y = &quot;Type of crimes&quot;) </code></pre>
+<p><img src="eda_social_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 </div>
-<div id="line-plot" class="section level1">
-<h1>Line plot</h1>
+<div id="line-plot" class="section level2">
+<h2>Line plot</h2>
 <div id="is-there-an-association-between-rent-and-crime-rate"
 class="section level3">
 <h3>Is there an association between rent and crime rate?</h3>
@@ -694,11 +827,15 @@ class="section level3">
   ggplot(aes(x = avg_crime_rate)) +
   geom_point(aes(y = avg_rent_0_1beds, color = &quot;Average Rent 0-1 Beds&quot;)) +
   geom_point(aes(y = avg_rent_2_3beds, color = &quot;Average Rent 2-3 Beds&quot;)) +
+  geom_smooth(aes(y = avg_rent_0_1beds), method = &quot;lm&quot;, se = TRUE, color = &quot;red&quot;) +
+  geom_smooth(aes(y = avg_rent_2_3beds), method = &quot;lm&quot;, se = TRUE, color = &quot;blue&quot;) +
   scale_color_manual(values = c(&quot;Average Rent 0-1 Beds&quot; = &quot;red&quot;, &quot;Average Rent 2-3 Beds&quot; = &quot;blue&quot;)) +
   labs(title = &quot;Point Plot of average rent against average crime rate&quot;,
        x = &quot;Crime rate&quot;,
        y = &quot;Average rent ($)&quot;) </code></pre>
-<p><img src="eda_social_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="eda_social_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>There appears to be no obvious association between rent and crime
+rate.</p>
 </div>
 </div>
 
