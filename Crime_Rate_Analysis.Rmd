@@ -3,7 +3,7 @@ title: "SES Analysis"
 output: html_document
 ---
 
-We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to gather populational data for each borough and neighborhood. 
+We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to gather population data for each borough and neighborhood. 
 
 To better conduct regression analysis, we have calculated the crime rate for each neighborhood as the following:
 Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000
@@ -16,23 +16,18 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(tidyr)
 library(dplyr)
+library(glmnet)
 ```
 
 ```{r,include=FALSE}
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
-```
 
-
-```{r}
 #Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
-```
 
-
-```{r}
 #Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
 nypd_ses_df = df_nypd |> 
   select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |> 
@@ -40,10 +35,7 @@ nypd_ses_df = df_nypd |>
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
   left_join(prec_neighbor, by = "precinct")
-```
 
-
-```{r}
 #Reading in the SES data for demographics information for each precinct/neighboorhood, and only keeping the relevant SES indicators. `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
 neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
@@ -58,10 +50,7 @@ neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "
   rename(neighborhood = region_name) |> 
   filter(year == "2017-2021") |> 
   select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
-```
 
-
-```{r}
 # Now, calculate the crime rate for every precinct. Crime rate is calculated by dividing the number of crimes committed per neighborhood over the total population of that neighborhood, then times 100,000. Then merge the crime rate data with other relevant socioeconomic data. We focus only on the 2021 data. `ses_df` contains crime rate and other SES data per neighborhood, by year 
 
 ses_df = nypd_ses_df |> 
@@ -155,6 +144,23 @@ ses_df |>
 ```
 
 From the two diagnostics plots above, we can see that the residuals are roughly centered around zero, and are relatively normal. This would indicate that our model is a relatively good fit. 
+
+Apply Lasso Regression to fine tune the prediction model and remove predictors that are not influential enough. 
+
+```{r}
+# Finding the best lambda
+cv_model <- cv.glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct')]), ses_df$crime_rate, alpha = 1)
+
+best_lambda <- cv_model$lambda.min
+
+# Conducting the Lasso fit 
+lasso_fit = glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct')]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
+
+coef(lasso_fit)
+```
+
+TO DO: add diagnostics and compare with MLR 
+
 
 Visualizing trend: are crime rates associated with racial factors? (delete??)
 ```{r}
