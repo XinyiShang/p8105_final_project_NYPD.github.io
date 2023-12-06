@@ -13,7 +13,7 @@
 
 <title>SES Analysis</title>
 
-<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -324,7 +324,9 @@ div.tocify {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        
+        <li>
+  <a href="Report.html">Report</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -364,24 +366,8 @@ div.tocify {
     <li>
       <a href="Crime_Rate_Analysis.html">SES Analysis</a>
     </li>
-    <li class="dropdown-header">Exploratory Data Visualization</li>
-    <li>
-      <a href="victim_suspect_correlation.html">Victim Suspect Correlation</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Socioeconomic status
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
     <li>
       <a href="eda_social.html">Exploratory data analysis</a>
-    </li>
-    <li>
-      <a href="crime-rate-analysis.html">Primary Analysis - Behind the scenes</a>
     </li>
   </ul>
 </li>
@@ -527,11 +513,11 @@ lasso_fit = glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med
 coef(lasso_fit)</code></pre>
 <pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
 ##                             s0
-## (Intercept)      -1.482090e+00
-## pop_pov_pct       2.719072e+01
-## hh_inc_med_adj    3.264745e-05
-## pop16_unemp_pct   2.676655e+00
-## pop_edu_nohs_pct -2.229206e+00</code></pre>
+## (Intercept)      -1.630759e+00
+## pop_pov_pct       2.770070e+01
+## hh_inc_med_adj    3.370468e-05
+## pop16_unemp_pct   2.940526e+00
+## pop_edu_nohs_pct -2.468178e+00</code></pre>
 <p>TO DO: add diagnostics and compare with MLR</p>
 <p>Visualizing trend: are crime rates associated with racial factors?
 (delete??)</p>

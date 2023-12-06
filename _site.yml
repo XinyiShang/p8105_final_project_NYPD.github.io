@@ -4,6 +4,9 @@ output_dir: "."
 navbar:
   title: "Home"
   left:
+    - text: "Report"
+      href: Report.html
+
 
   right:
     - text: "Crime Event"
@@ -22,15 +25,8 @@ navbar:
       menu:
         - text: "SES Analysis"
           href: Crime_Rate_Analysis.html
-        - text: "Exploratory Data Visualization"
-        - text: "Victim Suspect Correlation"
-          href: victim_suspect_correlation.html
-    - text: "Socioeconomic status"
-      menu:
         - text: "Exploratory data analysis"
           href: eda_social.html
-        - text: "Primary Analysis - Behind the scenes"
-          href: crime-rate-analysis.html
     - icon: "fa-github fa-lg"
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io
 

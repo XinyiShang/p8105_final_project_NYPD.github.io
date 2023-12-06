@@ -23,7 +23,7 @@ df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Co
     ##   dat <- vroom(...)
     ##   problems(dat)
 
-    ## Rows: 249 Columns: 1
+    ## Rows: 207 Columns: 1
     ## ── Column specification ───────────────────────
     ## Delimiter: ","
     ## chr (1): <!DOCTYPE html>
@@ -31,7 +31,7 @@ df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Co
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-The file size is 0.97GB. The dataset should have 1 variables and 249
+The file size is 0.97GB. The dataset should have 1 variables and 207
 rows.  
 
 Column names are changed to lower cases using `janitor::clean_names()`.
