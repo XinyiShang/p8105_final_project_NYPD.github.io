@@ -1,8 +1,6 @@
 ---
-title: "EDA_social"
-author: "Yuki Joyama"
-date: "2023-12-05"
-output: github_document
+title: "Exploratory Data Visualization"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +20,7 @@ library(dplyr)
 
 ## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
 
-df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")

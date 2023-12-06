@@ -48,7 +48,7 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
 <div style="display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
 
   <div style="flex: 0 0 auto; margin-left: 20px; margin-right: 80px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <img src="image/miao_fu.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Miao Fu</strong><br>mf3593</p>
   </div>
 

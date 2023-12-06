@@ -8,22 +8,21 @@ navbar:
   right:
     - text: "Crime Event"
       menu:
-        - text: "General Crime Analysis"
+        - text: "Crime Count Visualization"
           href: General_Crime_Data.html
-        - text: "Crime Patterns"
+        - text: "Offense Type Visualization"
           href: crime_patterns.html
 
-    - text: "Suspect and Victim"
+    - text: "Suspect and Victim Analysis"
       menu:
-        - text: "Demographic"
+        - text: "Correlation Patterns"
           href: demographic.html
-        - text: "Victim Suspect Correlation"
-          href: victim_suspect_correlation.html
-    - text: "Socioeconomics"
+
+    - text: "Crime Rate and Socioeconomics"
       menu:
-        - text: "Crime Rate Analysis"
-          href: crime-rate-analysis.html
-        - text: "Social EDA"
+        - text: "SES Analysis"
+          href: Crime_Rate_Analysis.html
+        - text: "Exploratory Data Visualization"
           href: eda_social.html
     - icon: "fa-github fa-lg"
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io

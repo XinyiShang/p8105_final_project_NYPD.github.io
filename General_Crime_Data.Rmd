@@ -1,7 +1,6 @@
 ---
-title: "General Crime Data"
-output: 
-  html_document
+title: "Crime Count Visualization"
+output: html_document
 ---
 
 ---

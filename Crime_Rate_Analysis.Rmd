@@ -1,8 +1,6 @@
 ---
-title: "Crime Rate Analysis"
-author: "Siqing Wang"
-date: "2023-12-02"
-output: github_document
+title: "SES Analysis"
+output: html_document
 ---
 
 We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to gather populational data for each borough and neighborhood. 
@@ -23,7 +21,7 @@ library(dplyr)
 ```{r,include=FALSE}
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
-df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 ```
 
