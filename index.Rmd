@@ -28,18 +28,18 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
 <pre>
 
 <div style="display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
-  <div style="flex: 0 0 auto; margin-left: 50px; margin-right: 100px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-left: 20px; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Yuki Joyama</strong><br>yj2803</p>
   </div>
   
-  <div style="flex: 0 0 auto; margin-right: 100px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Nihaal Rahman</strong><br>nkr2121</p>
   </div>
   
-  <div style="flex: 0 0 auto; margin-right: 50px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-right: 20px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Siqing Wang</strong><br>sw3879</p>
   </div>
   
@@ -47,18 +47,18 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
 
 <div style="display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap;">
 
-  <div style="flex: 0 0 auto; margin-left: 50px; margin-right: 100px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-left: 20px; margin-right: 80px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Miao Fu</strong><br>mf3593</p>
   </div>
 
-  <div style="flex: 0 0 auto; margin-right: 100px; text-align: center;">
-    <img src="image/xinyi.jpg" alt="Xinyi Shang" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-right: 80px; text-align: center;">
+    <img src="image/xinyi_shang.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Xinyi Shang</strong><br>xs2529</p>
   </div>
 
-  <div style="flex: 0 0 auto; margin-right: 50px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 150px; height: 150px; border-radius: 50%;">
+  <div style="flex: 0 0 auto; margin-right: 20px; text-align: center;">
+    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Allison Xia</strong><br>zx2482</p>
   </div>
   
