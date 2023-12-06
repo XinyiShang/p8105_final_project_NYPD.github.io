@@ -13,7 +13,7 @@
 
 <title>General Crime Data</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -36,13 +36,6 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
-<script src="site_libs/plotly-binding-4.10.3/plotly.js"></script>
-<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
-<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
-<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
-<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
-<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 <link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
@@ -408,10 +401,8 @@ div.tocify {
 
 
 <hr />
-<pre class="r"><code>#df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt;
-#  janitor::clean_names() |&gt; 
-df_nypd = read_csv(&#39;data/NYPD_Complaint_Data_Historic.csv&#39;) |&gt;
-  janitor::clean_names() |&gt;
+<pre class="r"><code>df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt;
+  janitor::clean_names() |&gt; 
   mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt)) |&gt; 
   mutate(year = lubridate::year(cmplnt_fr_dt))</code></pre>
 <pre class="r"><code># Compare ky_cd vs pd_cd
@@ -452,25 +443,9 @@ df_summary &lt;- df_summary |&gt;
 
 position &lt;- which.max(df_summary$cumulative_n &gt;= cutoff)
 # Select the top categories up to this position
-df_summary &lt;- df_summary[1:position, ] |&gt; 
-  left_join(mapping, by=&quot;ky_cd&quot;)
-# Optional: Viewing the result
-print(df_summary)</code></pre>
-<pre><code>## # A tibble: 12 × 4
-##    ky_cd      n cumulative_n ofns_desc                     
-##    &lt;dbl&gt;  &lt;int&gt;        &lt;int&gt; &lt;chr&gt;                         
-##  1   341 541926       541926 PETIT LARCENY                 
-##  2   578 432087       974013 HARRASSMENT 2                 
-##  3   344 303502      1277515 ASSAULT 3 &amp; RELATED OFFENSES  
-##  4   109 256120      1533635 GRAND LARCENY                 
-##  5   351 210043      1743678 CRIMINAL MISCHIEF &amp; RELATED OF
-##  6   106 131263      1874941 FELONY ASSAULT                
-##  7   361 112266      1987207 OFF. AGNST PUB ORD SENSBLTY &amp; 
-##  8   361 112266      1987207 (null)                        
-##  9   105  84824      2072031 ROBBERY                       
-## 10   126  80377      2152408 MISCELLANEOUS PENAL LAW       
-## 11   126  80377      2152408 (null)                        
-## 12   107  78949      2231357 BURGLARY</code></pre>
+df_summary &lt;- df_summary[1:position, ]
+df_summary = df_summary |&gt; 
+  mutate(order = (1:10))</code></pre>
 <p>The most frequent 10 crime categories constitute at least 80% of all
 the crimes in NYC.</p>
 <p>Noteworthyly, Among the 10 most frequent ky_cd <code>361</code> and
@@ -482,109 +457,85 @@ the crimes in NYC.</p>
                             ofns_desc),
          ofns_desc = ifelse(ky_cd == 126, 
                             &quot;MISCELLANEOUS PENAL LAW&quot;, 
-                            ofns_desc))</code></pre>
-<pre class="r"><code>plot_1 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[1,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of PETIT LARCENY in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
+                            ofns_desc),
+         crime_type = factor(ky_cd, levels = unique(ky_cd), labels = unique(ofns_desc))
+         )</code></pre>
+<pre class="r"><code># Function to create a plot
+create_plot &lt;- function(ky_cd_value) {
+  # Get the offense description for the given ky_cd_value
+  ofns_desc &lt;- df_crime_patterns |&gt;
+    filter(ky_cd == as.numeric(ky_cd_value)) |&gt;
+    pull(ofns_desc) |&gt;
+    unique()
 
-plot_2 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[2,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of HARRASSMENT 2 in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
+  # Generate the plot title
+  plot_title &lt;- paste(&quot;Number of&quot;, ofns_desc, &quot;in Each Year&quot;)
 
-plot_3 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[3,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
+  # Create the plot
+  df_crime_patterns |&gt;
+    filter(ky_cd == as.numeric(ky_cd_value)) |&gt;
+    group_by(year) |&gt;
+    summarize(count = n()) |&gt;
+    plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, 
+            marker = list(color = viridis(6))) |&gt;
+    layout(
+      title = plot_title,
+      xaxis = list(title = &quot;Year&quot;),
+      yaxis = list(title = &quot;Number of Cases&quot;),
+      showlegend = FALSE
+    )
+}</code></pre>
+<pre class="r"><code>crime_heatmap &lt;- function(code, yr) {
+  # Filter the data based on the given ky_cd and year
+  filtered_data &lt;- df_crime_patterns |&gt; 
+    filter(ky_cd == code &amp; year == yr)
 
-plot_4 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[4,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
+  # Create the leaflet map
+  leaflet_map &lt;- leaflet(filtered_data) %&gt;%
+    addProviderTiles(providers$CartoDB.Positron) %&gt;%
+    addCircleMarkers(~longitude,
+                     ~latitude,
+                     stroke = FALSE, fillOpacity = 0.8,
+                     clusterOptions = markerClusterOptions(), # adds summary circles
+                     popup = ~as.character(ofns_desc)
+    ) %&gt;% 
+    addHeatmap(lng=~longitude,
+               lat=~latitude,
+               radius = 8)
+  
+  return(leaflet_map)
+}</code></pre>
+<pre class="r"><code>ui &lt;- fluidPage(
+    titlePanel(&quot;Crime Data Visualization&quot;),
+    
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput(&quot;yr&quot;, &quot;Year&quot;, 
+                        min = min(df_crime_patterns$year), 
+                        max = max(df_crime_patterns$year), 
+                        value = min(df_crime_patterns$year),
+                        step = 1),
+            selectInput(&quot;cd&quot;, &quot;Ky_cd&quot;,
+                        choices = unique(df_summary$ky_cd))
+        ),
+        mainPanel(
+            leafletOutput(&quot;crimeMap&quot;),
+            plotlyOutput(&quot;plotlyPlot&quot;)
+        )
+    )
+)
 
-plot_5 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[5,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
-
-plot_6 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[6,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
-
-plot_7 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[7,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )
-
-plot_8 = df_crime_patterns |&gt;
-  filter(ky_cd == as.numeric(df_summary[8,1])) |&gt;
-  group_by(year) |&gt; 
-  summarize(count = n()) |&gt; 
-  plot_ly(x = ~year, y = ~count, type = &#39;scatter&#39;, mode = &#39;markers+lines&#39;, marker = list(color = viridis(6))) %&gt;%
-      layout(
-        title = &quot;Number of ASSAULT 3 &amp; RELATED OFFENSES in Each Year&quot;,
-        xaxis = list(title = &quot;Year&quot;),
-        yaxis = list(title = &quot;Number of Cases&quot;),
-        showlegend = FALSE
-      )</code></pre>
-<pre class="r"><code>p = df_crime_patterns |&gt;
-  group_by(ky_cd, year) |&gt; 
-  summarize(count = n()) |&gt; 
-  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ky_cd)</code></pre>
-<pre class="r"><code>ggplotly(p)</code></pre>
-<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-a9360a866b613cb7a974" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-a9360a866b613cb7a974">{"x":{"data":[{"x":[2017,2018,2019,2020,2021,2022],"y":[13999,12965,13434,13187,13857,17382],"text":["year: 2017<br />count:  13999","year: 2018<br />count:  12965","year: 2019<br />count:  13434","year: 2020<br />count:  13187","year: 2021<br />count:  13857","year: 2022<br />count:  17382"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[20169,20399,20854,20808,23067,25966],"text":["year: 2017<br />count:  20169","year: 2018<br />count:  20399","year: 2019<br />count:  20854","year: 2020<br />count:  20808","year: 2021<br />count:  23067","year: 2022<br />count:  25966"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x2","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[12135,11756,10886,15652,12890,15630],"text":["year: 2017<br />count:  12135","year: 2018<br />count:  11756","year: 2019<br />count:  10886","year: 2020<br />count:  15652","year: 2021<br />count:  12890","year: 2022<br />count:  15630"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x3","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[43195,43513,43065,35573,41968,48806],"text":["year: 2017<br />count:  43195","year: 2018<br />count:  43513","year: 2019<br />count:  43065","year: 2020<br />count:  35573","year: 2021<br />count:  41968","year: 2022<br />count:  48806"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x4","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[12548,12661,13671,12288,14057,15152],"text":["year: 2017<br />count:  12548","year: 2018<br />count:  12661","year: 2019<br />count:  13671","year: 2020<br />count:  12288","year: 2021<br />count:  14057","year: 2022<br />count:  15152"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[83542,86249,88972,82333,87165,113665],"text":["year: 2017<br />count:  83542","year: 2018<br />count:  86249","year: 2019<br />count:  88972","year: 2020<br />count:  82333","year: 2021<br />count:  87165","year: 2022<br />count: 113665"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[51458,53061,52612,43417,48326,54628],"text":["year: 2017<br />count:  51458","year: 2018<br />count:  53061","year: 2019<br />count:  52612","year: 2020<br />count:  43417","year: 2021<br />count:  48326","year: 2022<br />count:  54628"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x3","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[39237,36653,35648,35647,32509,30349],"text":["year: 2017<br />count:  39237","year: 2018<br />count:  36653","year: 2019<br />count:  35648","year: 2020<br />count:  35647","year: 2021<br />count:  32509","year: 2022<br />count:  30349"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x4","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[21768,20542,19206,15565,17146,18039],"text":["year: 2017<br />count:  21768","year: 2018<br />count:  20542","year: 2019<br />count:  19206","year: 2020<br />count:  15565","year: 2021<br />count:  17146","year: 2022<br />count:  18039"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[2017,2018,2019,2020,2021,2022],"y":[66526,70248,71724,66735,74793,82061],"text":["year: 2017<br />count:  66526","year: 2018<br />count:  70248","year: 2019<br />count:  71724","year: 2020<br />count:  66735","year: 2021<br />count:  74793","year: 2022<br />count:  82061"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x2","yaxis":"y3","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":37.917808219178085,"r":7.3059360730593621,"b":40.182648401826491,"l":54.794520547945211},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,0.24592302674494454],"automargin":true,"type":"linear","autorange":false,"range":[2016.75,2022.25],"tickmode":"array","ticktext":["2017","2018","2019","2020","2021","2022"],"tickvals":[2017,2018,2019,2020,2021,2022],"categoryorder":"array","categoryarray":["2017","2018","2019","2020","2021","2022"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y3","title":"","hoverformat":".2f"},"annotations":[{"text":"year","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-21.917808219178088},{"text":"count","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-39.452054794520549},{"text":"105","x":0.12296151337247227,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"106","x":0.375,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"107","x":0.625,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"109","x":0.8770384866275277,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"126","x":0.12296151337247227,"y":0.65182648401826493,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"341","x":0.375,"y":0.65182648401826493,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"344","x":0.625,"y":0.65182648401826493,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"351","x":0.8770384866275277,"y":0.65182648401826493,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"361","x":0.12296151337247227,"y":0.31849315068493156,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"578","x":0.375,"y":0.31849315068493156,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0.68150684931506855,1],"automargin":true,"type":"linear","autorange":false,"range":[5747.0499999999993,118803.95],"tickmode":"array","ticktext":["30000","60000","90000"],"tickvals":[30000,60000,90000],"categoryorder":"array","categoryarray":["30000","60000","90000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0.68150684931506855,"y1":1},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0.68150684931506855,"y1":1},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":0.7459230267449446,"y0":0.68150684931506855,"y1":1},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":0.7459230267449446,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.7540769732550554,"x1":1,"y0":0.68150684931506855,"y1":1},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.7540769732550554,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0.34817351598173518,"y1":0.65182648401826493},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":0.65182648401826493,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0.34817351598173518,"y1":0.65182648401826493},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":0.65182648401826493,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":0.7459230267449446,"y0":0.34817351598173518,"y1":0.65182648401826493},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.5040769732550554,"x1":0.7459230267449446,"y0":0,"y1":23.37899543378996,"yanchor":0.65182648401826493,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.7540769732550554,"x1":1,"y0":0.34817351598173518,"y1":0.65182648401826493},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.7540769732550554,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.65182648401826493,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0,"y1":0.31849315068493156},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":0.24592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":0.31849315068493156,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0,"y1":0.31849315068493156},{"type":"rect","fillcolor":"rgba(217,217,217,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0.25407697325505546,"x1":0.49592302674494454,"y0":0,"y1":23.37899543378996,"yanchor":0.31849315068493156,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[2016.75,2022.25],"tickmode":"array","ticktext":["2017","2018","2019","2020","2021","2022"],"tickvals":[2017,2018,2019,2020,2021,2022],"categoryorder":"array","categoryarray":["2017","2018","2019","2020","2021","2022"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.25407697325505546,0.49592302674494454],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y3","title":"","hoverformat":".2f"},"xaxis3":{"type":"linear","autorange":false,"range":[2016.75,2022.25],"tickmode":"array","ticktext":["2017","2018","2019","2020","2021","2022"],"tickvals":[2017,2018,2019,2020,2021,2022],"categoryorder":"array","categoryarray":["2017","2018","2019","2020","2021","2022"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.5040769732550554,0.7459230267449446],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y2","title":"","hoverformat":".2f"},"xaxis4":{"type":"linear","autorange":false,"range":[2016.75,2022.25],"tickmode":"array","ticktext":["2017","2018","2019","2020","2021","2022"],"tickvals":[2017,2018,2019,2020,2021,2022],"categoryorder":"array","categoryarray":["2017","2018","2019","2020","2021","2022"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.7540769732550554,1],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y2","title":"","hoverformat":".2f"},"yaxis2":{"type":"linear","autorange":false,"range":[5747.0499999999993,118803.95],"tickmode":"array","ticktext":["30000","60000","90000"],"tickvals":[30000,60000,90000],"categoryorder":"array","categoryarray":["30000","60000","90000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.34817351598173518,0.65182648401826493],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"yaxis3":{"type":"linear","autorange":false,"range":[5747.0499999999993,118803.95],"tickmode":"array","ticktext":["30000","60000","90000"],"tickvals":[30000,60000,90000],"categoryorder":"array","categoryarray":["30000","60000","90000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,0.31849315068493156],"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"76f46bf61a9":{"x":{},"y":{},"type":"scatter"}},"cur_data":"76f46bf61a9","visdat":{"76f46bf61a9":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+server &lt;- function(input, output) {
+  output$crimeMap &lt;- renderLeaflet(
+    crime_heatmap(input$cd, input$yr)
+  )
+  output$plotlyPlot = renderPlotly({
+    create_plot(
+      input$cd)
+  })
+}</code></pre>
+<pre class="r"><code>shinyApp(ui = ui, server = server)</code></pre>
+<div style="width: 100% ; height: 400px ; text-align: center; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;" class="muted well">Shiny applications not supported in static R Markdown documents</div>
 </div>
 
 
