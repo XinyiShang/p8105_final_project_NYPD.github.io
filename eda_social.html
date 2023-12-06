@@ -13,7 +13,7 @@
 
 <title>Exploratory Data Visualization</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -366,6 +366,7 @@ div.tocify {
     <li>
       <a href="Crime_Rate_Analysis.html">SES Analysis</a>
     </li>
+    <li class="dropdown-header">Exploratory Data Visualization</li>
     <li>
       <a href="eda_social.html">Exploratory data analysis</a>
     </li>
@@ -399,7 +400,33 @@ div.tocify {
 </div>
 
 
-<pre class="r"><code>#Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
+<p>While examining the NYPD crime complaint data, we expect crime rate
+to be indicative by the socioeconomic status of a specific neighborhood.
+In this section, we calculated the crime rate for each neighborhood each
+year, and displayed the top neighborhoods with highest crime rate, along
+with what their crime composition looks like. We are also interested in
+whether crime rate can be predictive of rent in corresponding
+neighborhoods.</p>
+<pre class="r"><code># Import and clead NYPD data
+# df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
+#   janitor::clean_names() 
+
+## Siqing&#39; note: I&#39;m currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
+
+df_nypd = read_csv(&quot;../NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
+  janitor::clean_names()
+
+prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)
+
+#Merging neighborhood information with NYPD data, keep only relevant variables
+nypd_ses_df = df_nypd |&gt; 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
+  rename(precinct = addr_pct_cd) |&gt; 
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
+         year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
+  left_join(prec_neighbor, by = &quot;precinct&quot;)
+
+#Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
@@ -413,8 +440,9 @@ neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;,
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
   filter(year == &quot;2017-2021&quot;) |&gt; 
-  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)</code></pre>
-<pre class="r"><code>#ses_df has crime rate and SES indicators for each neighborhood
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
+
+#ses_df has crime rate and SES indicators for each neighborhood
 ses_df = nypd_ses_df |&gt; 
   group_by(year, borough, neighborhood) |&gt; 
   summarise(crime_num = n())
@@ -516,8 +544,8 @@ rate?</h3>
 </tr>
 </tbody>
 </table>
-<p>Since CUMC is located in Manhattan, let’s visualize the crime rate in
-Manhattan:</p>
+<p>Since CUMC is located in Manhattan, let’s also visualize the crime
+rate in Manhattan:</p>
 <pre class="r"><code>ses_df |&gt; group_by(borough, neighborhood) |&gt;
   filter(borough == &quot;Manhattan&quot;) |&gt; 
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
@@ -807,7 +835,7 @@ at the top 10 crime types at Washington Heights:</p>
    labs(title = &quot;Top 10 types of crime in Washington Heights/Inwood&quot;,
        x = &quot;Percentage of all crimes&quot;,
        y = &quot;Type of crimes&quot;) </code></pre>
-<p><img src="eda_social_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="eda_social_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 </div>
 <div id="line-plot" class="section level2">
@@ -828,10 +856,13 @@ class="section level3">
   labs(title = &quot;Point Plot of average rent against average crime rate&quot;,
        x = &quot;Crime rate&quot;,
        y = &quot;Average rent ($)&quot;) </code></pre>
-<p><img src="eda_social_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="eda_social_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>There appears to be no obvious association between rent and crime
 rate.</p>
 </div>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
 </div>
 
 
