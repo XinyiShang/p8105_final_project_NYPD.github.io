@@ -5,6 +5,11 @@ date: "2023-12-02"
 output: github_document
 ---
 
+We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to gather populational data for each borough and neighborhood. 
+
+To better conduct regression analysis, we have calculated the crime rate for each neighborhood as the following:
+Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -22,8 +27,9 @@ df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |>
   janitor::clean_names()
 ```
 
-Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
+
 ```{r}
+#Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 ```
 
@@ -46,7 +52,7 @@ neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "D
   filter(region_type == "Sub-Borough Area") |> 
   rename(neighborhood = region_name) |> 
   select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
-  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
+  filter(year %in% c(2017, 2018, 2019, 2021)) #2020 and 2022 data missing
 
 neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
@@ -133,7 +139,10 @@ From the result of the MLR, it is observed that all 4 predictors are significant
 ```{r}
 ses_df |> 
   modelr::add_residuals(log_fit) |> 
-  ggplot(aes(x = borough, y = resid)) + geom_violin()
+  ggplot(aes(x = borough, y = resid)) + geom_violin() + 
+  labs(title = "MLR residuals for each borough", 
+       xlab = "Borough", 
+       ylab = "Residuals")
 ```
 
 We can further inspect our model by plotting residuals against fitted values
@@ -141,17 +150,15 @@ We can further inspect our model by plotting residuals against fitted values
 ses_df |> 
   modelr::add_residuals(log_fit) |> 
   modelr::add_predictions(log_fit) |> 
-  ggplot(aes(x = pred, y = resid, color = borough)) + geom_point()
+  ggplot(aes(x = pred, y = resid, color = borough)) + geom_point() +
+  labs(title = "MLR residuals against fitted value", 
+       xlab = "Residuals", 
+       ylab = "Fitted Values")
 ```
 
 From the two diagnostics plots above, we can see that the residuals are roughly centered around zero, and are relatively normal. This would indicate that our model is a relatively good fit. 
 
-
-
-
-## Are rent prices associated with crime rate?  (delete?)
-
-Visualizing trend: are crime rates associated with racial factors?
+Visualizing trend: are crime rates associated with racial factors? (delete??)
 ```{r}
 eda_plot5 = ses_df |> ggplot(aes(x = pop_race_asian_pct, y = crime_rate)) +
   geom_point() +  labs(title = "Asian% in Poverty vs. Crime Rate")

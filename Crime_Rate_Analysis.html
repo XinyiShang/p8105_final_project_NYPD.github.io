@@ -404,9 +404,17 @@ div.tocify {
 </div>
 
 
-<p>Reading in the dataset that map each precinct to a neighborhood, for
-further SES analysis</p>
-<pre class="r"><code>prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)</code></pre>
+<p>We are interested in exploring whether socioeconomic factors are
+associated or can be used as predictors to assess crime rate. Since our
+NYPD complaint dataset only contains individual complaints, we utilized
+a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to
+gather populational data for each borough and neighborhood.</p>
+<p>To better conduct regression analysis, we have calculated the crime
+rate for each neighborhood as the following: Crime Rate = (Total number
+of complaints in a neighborhood in a given year / Total population in a
+neighborhood in a given year) * 100,000</p>
+<pre class="r"><code>#Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
+prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)</code></pre>
 <pre class="r"><code>#Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
 nypd_ses_df = df_nypd |&gt; 
   select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
@@ -420,7 +428,7 @@ neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
   select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
-  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
+  filter(year %in% c(2017, 2018, 2019, 2021)) #2020 and 2022 data missing
 
 neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
@@ -445,22 +453,92 @@ level?</h2>
 <p>Visualizing potential association between poverty, income, and
 educational level with crime rate:</p>
 <pre class="r"><code>eda_plot1 = ses_df |&gt; ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
-  geom_point() +  labs(title = &quot;Population in Poverty vs. Crime Rate&quot;)
+  geom_point() +  
+  geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
+  labs(title = &quot;Population in Poverty vs. Crime Rate&quot;)
 
 eda_plot2 = ses_df |&gt; ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
-  geom_point() + labs(title = &quot;Median Household Income vs. Crime Rate&quot;)
+  geom_point() + 
+  geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
+  labs(title = &quot;Median Household Income vs. Crime Rate&quot;)
 
 eda_plot3 = ses_df |&gt; ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
-  geom_point() + labs(title = &quot;Population Unemployment Percentage vs. Crime Rate&quot;)
+  geom_point() + 
+  geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
+  labs(title = &quot;Population Unemployment Percentage vs. Crime Rate&quot;)
 
 eda_plot4 = ses_df |&gt; ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
-  geom_point() + labs(title = &quot;Population with No High School Education vs. Crime Rate&quot;)
+  geom_point() + 
+  geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
+  labs(title = &quot;Population with No High School Education vs. Crime Rate&quot;)
 
 gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)</code></pre>
 <p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<p>Visualizing trend: are crime rates associated with racial
-factors?</p>
+<p>It is observed that there is a stronger positive association between
+percentage of poverty population with crime rate; a weaker positive
+association between unemployment and lack of education with crime rate,
+and a negative association between median household income and crime
+rate.</p>
+<p>We would like to fit a linear model to use these four SES indicators
+as predictors for crime rate outcome in a specific neighborhood.</p>
+<p>Let’s first visualize the distribution of crime rate:</p>
+<pre class="r"><code>ses_df |&gt; ggplot(aes(x = crime_rate)) +
+  geom_histogram(alpha = 0.8, color = &quot;white&quot;) + 
+  labs(
+    x = &quot;Crime Rate&quot; ,
+    y = &quot;Count&quot;,
+    title = &quot;Distribution of Crime Rate by Neighborhoods&quot;)</code></pre>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>We can use Box-Cox Transformation to transform the data for linear
+fit</p>
+<pre class="r"><code>initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+
+MASS::boxcox(initial_fit)</code></pre>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>From the Box-Cox Transformation, log-transformation seems to be the
+best option. We will perform a log transformation on crime rate and use
+this as the predictor.</p>
+<pre class="r"><code>ses_df = ses_df |&gt; mutate(
+  log_crime_rate = log(crime_rate)
+)
+
+log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+
+broom::tidy(log_fit)</code></pre>
+<pre><code>## # A tibble: 5 × 5
+##   term                estimate  std.error statistic  p.value
+##   &lt;chr&gt;                  &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)       0.421      0.203          2.07  3.94e- 2
+## 2 pop_pov_pct       4.64       0.483          9.61  2.27e-18
+## 3 hh_inc_med_adj    0.00000550 0.00000140     3.92  1.19e- 4
+## 4 pop16_unemp_pct   0.560      0.749          0.748 4.55e- 1
+## 5 pop_edu_nohs_pct -0.439      0.493         -0.890 3.74e- 1</code></pre>
+<p>From the result of the MLR, it is observed that all 4 predictors are
+significant in terms of association with the crime rate outcome. We can
+run a regression diagnostic by plotting residuals for each borough:</p>
+<pre class="r"><code>ses_df |&gt; 
+  modelr::add_residuals(log_fit) |&gt; 
+  ggplot(aes(x = borough, y = resid)) + geom_violin() + 
+  labs(title = &quot;MLR residuals for each borough&quot;, 
+       xlab = &quot;Borough&quot;, 
+       ylab = &quot;Residuals&quot;)</code></pre>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>We can further inspect our model by plotting residuals against fitted
+values</p>
+<pre class="r"><code>ses_df |&gt; 
+  modelr::add_residuals(log_fit) |&gt; 
+  modelr::add_predictions(log_fit) |&gt; 
+  ggplot(aes(x = pred, y = resid, color = borough)) + geom_point() +
+  labs(title = &quot;MLR residuals against fitted value&quot;, 
+       xlab = &quot;Residuals&quot;, 
+       ylab = &quot;Fitted Values&quot;)</code></pre>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>From the two diagnostics plots above, we can see that the residuals
+are roughly centered around zero, and are relatively normal. This would
+indicate that our model is a relatively good fit.</p>
+<p>Visualizing trend: are crime rates associated with racial factors?
+(delete??)</p>
 <pre class="r"><code>eda_plot5 = ses_df |&gt; ggplot(aes(x = pop_race_asian_pct, y = crime_rate)) +
   geom_point() +  labs(title = &quot;Asian% in Poverty vs. Crime Rate&quot;)
 
@@ -475,7 +553,7 @@ eda_plot8 = ses_df |&gt; ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
 
 gridExtra::grid.arrange(
   eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 
 
