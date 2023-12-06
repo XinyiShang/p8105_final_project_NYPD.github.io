@@ -15,7 +15,7 @@
 
 <title>EDA_social</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -406,28 +406,307 @@ div.tocify {
 
 <p>Import and clead NYPD data</p>
 <p>Import and clean socio-economic data</p>
-<pre class="r"><code>neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
+<pre class="r"><code>#neighbor_SES has SES indicators (except rent) for each neighborhood 
+neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
-  select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
-  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022, &quot;2017-2021&quot;))
+  select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
+  filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
 
+#neighbor_rent has rent data for each neighborhood 
 neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
-  select(gross_rent_0_1beds, gross_rent_2_3beds, year) |&gt; #i just added the year in the column selection
-  filter(between(as.numeric(year), 2017, 2022)) # used to be filter ( year == &quot;2017-2022&quot;)
-  # sorry for the modification because i&#39;m trying to use the &quot;build&quot; to create the website and have to resolve errors :&lt; </code></pre>
+  filter(year == &quot;2017-2021&quot;) |&gt; 
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)</code></pre>
+<pre class="r"><code>#ses_df has crime rate and SES indicators for each neighborhood
+ses_df = nypd_ses_df |&gt; 
+  group_by(year, neighborhood, borough) |&gt; 
+  summarise(crime_num = n())
+
+ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
+  mutate(crime_rate = (crime_num/pop_num) * 100,000) |&gt; 
+  left_join(neighbor_rent, by = &quot;neighborhood&quot;)</code></pre>
 <div id="heatmap" class="section level1">
 <h1>Heatmap</h1>
 </div>
 <div id="crime-type" class="section level1">
 <h1>Crime type</h1>
+<div
+id="what-are-the-top-5-neighborhoods-with-highest-average-crime-rate"
+class="section level2">
+<h2>What are the top 5 neighborhoods with highest average crime
+rate?</h2>
+<pre class="r"><code>ses_df |&gt; group_by(borough, neighborhood) |&gt;
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
+  arrange(desc(avg_crime_rate)) |&gt; head(5) |&gt; knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">borough</th>
+<th align="left">neighborhood</th>
+<th align="right">avg_crime_rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MANHATTAN</td>
+<td align="left">Chelsea/Clinton/Midtown</td>
+<td align="right">13.706981</td>
+</tr>
+<tr class="even">
+<td align="left">BRONX</td>
+<td align="left">University Heights/Fordham</td>
+<td align="right">13.344641</td>
+</tr>
+<tr class="odd">
+<td align="left">BRONX</td>
+<td align="left">Mott Haven/Hunts Point</td>
+<td align="right">11.154689</td>
+</tr>
+<tr class="even">
+<td align="left">MANHATTAN</td>
+<td align="left">East Harlem</td>
+<td align="right">10.498538</td>
+</tr>
+<tr class="odd">
+<td align="left">MANHATTAN</td>
+<td align="left">Lower East Side/Chinatown</td>
+<td align="right">8.829966</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="what-are-the-most-common-types-of-crime-in-these-neighborhoods"
+class="section level2">
+<h2>What are the most common types of crime in these neighborhoods?</h2>
+<div id="chelseaclintonmidtown" class="section level3">
+<h3>Chelsea/Clinton/Midtown:</h3>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood ==&quot;Chelsea/Clinton/Midtown&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(5) |&gt; 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
+  select(ofns_desc, percentage) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ofns_desc</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PETIT LARCENY</td>
+<td align="left">36.8%</td>
+</tr>
+<tr class="even">
+<td align="left">GRAND LARCENY</td>
+<td align="left">26.8%</td>
+</tr>
+<tr class="odd">
+<td align="left">HARRASSMENT 2</td>
+<td align="left">15.2%</td>
+</tr>
+<tr class="even">
+<td align="left">ASSAULT 3 &amp; RELATED OFFENSES</td>
+<td align="left">12.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">CRIMINAL MISCHIEF &amp; RELATED OF</td>
+<td align="left">8.8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="university-heightsfordham" class="section level3">
+<h3>University Heights/Fordham:</h3>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood == &quot;University Heights/Fordham&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(5) |&gt; 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
+  select(ofns_desc, percentage) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ofns_desc</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PETIT LARCENY</td>
+<td align="left">26.2%</td>
+</tr>
+<tr class="even">
+<td align="left">HARRASSMENT 2</td>
+<td align="left">24.8%</td>
+</tr>
+<tr class="odd">
+<td align="left">ASSAULT 3 &amp; RELATED OFFENSES</td>
+<td align="left">22.6%</td>
+</tr>
+<tr class="even">
+<td align="left">CRIMINAL MISCHIEF &amp; RELATED OF</td>
+<td align="left">15.7%</td>
+</tr>
+<tr class="odd">
+<td align="left">GRAND LARCENY</td>
+<td align="left">10.7%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="mott-havenhunts-point-bronx" class="section level3">
+<h3>Mott Haven/Hunts Point, Bronx:</h3>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood == &quot;Mott Haven/Hunts Point&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(5) |&gt; 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
+  select(ofns_desc, percentage) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ofns_desc</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">HARRASSMENT 2</td>
+<td align="left">26.4%</td>
+</tr>
+<tr class="even">
+<td align="left">PETIT LARCENY</td>
+<td align="left">24.1%</td>
+</tr>
+<tr class="odd">
+<td align="left">ASSAULT 3 &amp; RELATED OFFENSES</td>
+<td align="left">21.1%</td>
+</tr>
+<tr class="even">
+<td align="left">CRIMINAL MISCHIEF &amp; RELATED OF</td>
+<td align="left">16.7%</td>
+</tr>
+<tr class="odd">
+<td align="left">FELONY ASSAULT</td>
+<td align="left">11.6%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="east-harlem-manhattan" class="section level3">
+<h3>East Harlem, Manhattan:</h3>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood == &quot;East Harlem&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(5) |&gt; 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
+  select(ofns_desc, percentage) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ofns_desc</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PETIT LARCENY</td>
+<td align="left">25.4%</td>
+</tr>
+<tr class="even">
+<td align="left">HARRASSMENT 2</td>
+<td align="left">24.4%</td>
+</tr>
+<tr class="odd">
+<td align="left">ASSAULT 3 &amp; RELATED OFFENSES</td>
+<td align="left">19.4%</td>
+</tr>
+<tr class="even">
+<td align="left">CRIMINAL MISCHIEF &amp; RELATED OF</td>
+<td align="left">17.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">DANGEROUS DRUGS</td>
+<td align="left">13.8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="lower-east-sidechinatown-manhattan" class="section level3">
+<h3>Lower East Side/Chinatown, Manhattan:</h3>
+<pre class="r"><code>nypd_ses_df |&gt; 
+  filter(neighborhood == &quot;Lower East Side/Chinatown&quot;) |&gt; 
+  count(ofns_desc) |&gt; 
+  arrange(desc(n)) |&gt; 
+  head(5) |&gt; 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |&gt; 
+  select(ofns_desc, percentage) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">ofns_desc</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PETIT LARCENY</td>
+<td align="left">34.5%</td>
+</tr>
+<tr class="even">
+<td align="left">GRAND LARCENY</td>
+<td align="left">19.4%</td>
+</tr>
+<tr class="odd">
+<td align="left">HARRASSMENT 2</td>
+<td align="left">17.9%</td>
+</tr>
+<tr class="even">
+<td align="left">ASSAULT 3 &amp; RELATED OFFENSES</td>
+<td align="left">15.1%</td>
+</tr>
+<tr class="odd">
+<td align="left">CRIMINAL MISCHIEF &amp; RELATED OF</td>
+<td align="left">13.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="line-plot" class="section level1">
 <h1>Line plot</h1>
+<div id="is-there-an-association-between-rent-and-crime-rate"
+class="section level2">
+<h2>Is there an association between rent and crime rate?</h2>
+<pre class="r"><code>ses_df |&gt; group_by(neighborhood) |&gt; 
+  summarise(avg_rent_0_1beds = mean(gross_rent_0_1beds), 
+            avg_rent_2_3beds = mean(gross_rent_2_3beds)
+            , avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |&gt; 
+  ggplot(aes(x = avg_crime_rate)) +
+  geom_point(aes(y = avg_rent_0_1beds, color = &quot;Average Rent 0-1 Beds&quot;)) +
+  geom_point(aes(y = avg_rent_2_3beds, color = &quot;Average Rent 2-3 Beds&quot;)) +
+  scale_color_manual(values = c(&quot;Average Rent 0-1 Beds&quot; = &quot;red&quot;, &quot;Average Rent 2-3 Beds&quot; = &quot;blue&quot;)) +
+  labs(title = &quot;Point Plot of y and z against x&quot;,
+       x = &quot;Crime rate&quot;,
+       y = &quot;Average rent ($)&quot;) </code></pre>
+<p><img src="eda_social_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
 </div>
 
 

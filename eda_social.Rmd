@@ -16,8 +16,13 @@ library(dplyr)
 
 Import and clead NYPD data
 ```{r,include=FALSE}
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
-  janitor::clean_names() 
+# df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+#   janitor::clean_names() 
+
+## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
+
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
+  janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
@@ -25,6 +30,7 @@ prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 nypd_ses_df = df_nypd |> 
   select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, boro_nm, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |> 
   rename(precinct = addr_pct_cd) |> 
+  rename(borough = boro_nm) |>
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
   left_join(prec_neighbor, by = "precinct")
@@ -32,19 +38,32 @@ nypd_ses_df = df_nypd |>
 
 Import and clean socio-economic data
 ```{r}
+#neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
   filter(region_type == "Sub-Borough Area") |> 
   rename(neighborhood = region_name) |> 
-  select(neighborhood, year, pop_num, gross_rent_0_1beds, gross_rent_2_3beds, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
+  select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |> 
   filter(year %in% c(2017, 2018, 2019, 2020, 2021, 2022))
 
+#neighbor_rent has rent data for each neighborhood 
 neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
   filter(region_type == "Sub-Borough Area") |> 
   rename(neighborhood = region_name) |> 
-  select(year, gross_rent_0_1beds, gross_rent_2_3beds) |> 
-  filter(year == "2017-2021")
+  filter(year == "2017-2021") |> 
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
+```
+
+```{r}
+#ses_df has crime rate and SES indicators for each neighborhood
+ses_df = nypd_ses_df |> 
+  group_by(year, neighborhood, borough) |> 
+  summarise(crime_num = n())
+
+ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |> 
+  mutate(crime_rate = (crime_num/pop_num) * 100,000) |> 
+  left_join(neighbor_rent, by = "neighborhood")
 ```
 
 # Heatmap
@@ -54,15 +73,94 @@ neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "
 
 
 
-# Crime type 
+# Crime type
 
+## What are the top 5 neighborhoods with highest average crime rate?
+```{r}
+ses_df |> group_by(borough, neighborhood) |>
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
+```
 
+## What are the most common types of crime in these neighborhoods?
 
+### Chelsea/Clinton/Midtown: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood =="Chelsea/Clinton/Midtown") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
 
+### University Heights/Fordham: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "University Heights/Fordham") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
 
+### Mott Haven/Hunts Point, Bronx: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "Mott Haven/Hunts Point") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+### East Harlem, Manhattan: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "East Harlem") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+### Lower East Side/Chinatown, Manhattan: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "Lower East Side/Chinatown") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
 
 # Line plot
 
+## Is there an association between rent and crime rate?
+
+```{r}
+ses_df |> group_by(neighborhood) |> 
+  summarise(avg_rent_0_1beds = mean(gross_rent_0_1beds), 
+            avg_rent_2_3beds = mean(gross_rent_2_3beds)
+            , avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  ggplot(aes(x = avg_crime_rate)) +
+  geom_point(aes(y = avg_rent_0_1beds, color = "Average Rent 0-1 Beds")) +
+  geom_point(aes(y = avg_rent_2_3beds, color = "Average Rent 2-3 Beds")) +
+  scale_color_manual(values = c("Average Rent 0-1 Beds" = "red", "Average Rent 2-3 Beds" = "blue")) +
+  labs(title = "Point Plot of average rent against average crime rate",
+       x = "Crime rate",
+       y = "Average rent ($)") 
+```
 
 
 
