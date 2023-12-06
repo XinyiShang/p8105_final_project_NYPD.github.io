@@ -53,7 +53,9 @@ df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
 
 ## Number of Cases in Each Year
 
-#### New York City
+<br>
+
+### New York City
 
 ```{r}
 df_nypd_test <- df_nypd  %>%
@@ -80,7 +82,9 @@ There is a subtle decreasing trend observed from 2017 to 2019, followed by a sig
 
 Post-2020, a noteworthy and rapid increase in the number of cases is evident, surpassing the figures recorded in any previous years. The surge in cases after the initial drop in 2020 suggests a substantial rebound, possibly influenced by changes in social dynamics following by COVID-19.
 
-#### Boroughs
+<br>
+
+### Boroughs
 ```{r}
 boro_counts <- df_nypd_test %>%
   group_by(year, boro_nm) %>%
@@ -100,8 +104,12 @@ ggplotly(figure)
 
 ```
 
+From 2017 to 2022, Brooklyn consistently maintained its position as the borough with the highest number of reported crimes. Manhattan followed as the second-highest, while Staten Island consistently reported the lowest number of crime cases. Notably, from 2017 to 2020, the Bronx had a higher number of cases compared to Queens. However, a shift occurred in 2021, with Queens surpassing the Bronx in reported crime cases.
 
-#### Neighborhoods
+<br>
+
+### Neighborhoods
+
 ```{r}
 neighborhood_data <- read.csv("data/nyc_prec_neighborhood.csv") |>
   mutate(police_precincts = precinct)
@@ -113,13 +121,6 @@ neighborhood_counts <- df_nypd_neighborhood%>%
   summarise(count = n()) |>
   drop_na() |>
   arrange(year, desc(count))
-
-
-```
-
-```{r}
-library(dplyr)
-library(ggplot2)
 
 neighborhood_counts <- neighborhood_counts %>%
   arrange(neighborhood, desc(count))
@@ -142,6 +143,12 @@ ggplotly(figure_3)
 
 ```
 
+
+Throughout the five-year period from 2017 to 2022, North Crown Heights/Prospect Heights consistently maintained its status as the neighborhood with the lowest number of reported crimes. Other neighborhoods such as Stuyvesant Town/Turtle Bay, Flatbush, Upper East Side, Riverdale/Kingsbridge, and Park Slope/Carroll Gardens also reported less than 5000 cases per year during this period. 
+
+On the other hand, Morningside Heights/Hamilton Heights consistently had the highest number of cases from 2017 to 2022, with the exception of 2020 when East Harlem reported the highest number of cases. The top three neighborhoods with the highest number of cases overall are Morningside Heights/Hamilton Heights, East Harlem, and Chelsea/Clinton/Midtown.
+
+<br>
 
 ## Number of Cases by Year, Borough, and Law Category
 
@@ -178,7 +185,7 @@ Staten Island records the lowest number of cases, likely attributable to its rel
 
 The number of cases appears to be relatively consistent in Bronx, Brooklyn, Manhattan, and Queens. Notably, the number of felony cases shows an increasing trend in all five years, with the exception of 2020. The pattern of misdemeanor cases follows the overall trend, experiencing a decline from 2017 to 2020 followed by a sudden increase. However, the change in violation cases is not significant and remains relatively constant across all five boroughs
 
-
+<br>
 
 ## Top 10 Types of Crime by Borough and Year
 
