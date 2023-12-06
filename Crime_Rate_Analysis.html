@@ -409,9 +409,8 @@ further SES analysis</p>
 <pre class="r"><code>prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)</code></pre>
 <pre class="r"><code>#Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
 nypd_ses_df = df_nypd |&gt; 
-  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, boro_nm, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
   rename(precinct = addr_pct_cd) |&gt; 
-  rename(borough = boro_nm) |&gt;
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
          year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
   left_join(prec_neighbor, by = &quot;precinct&quot;)</code></pre>
@@ -432,7 +431,7 @@ neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;,
 <pre class="r"><code># Now, calculate the crime rate for every precinct. Crime rate is calculated by dividing the number of crimes committed per neighborhood over the total population of that neighborhood, then times 100,000. Then merge the crime rate data with other relevant socioeconomic data. We focus only on the 2021 data. `ses_df` contains crime rate and other SES data per neighborhood, by year 
 
 ses_df = nypd_ses_df |&gt; 
-  group_by(year, neighborhood) |&gt; 
+  group_by(year, borough, neighborhood) |&gt; 
   summarise(crime_num = n())
 
 ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
