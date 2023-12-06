@@ -123,4 +123,71 @@ ses_df |> group_by(neighborhood) |>
        y = "Average rent ($)") 
 ```
 
+What are the top 5 neighborhoods with highest average crime rate?
+```{r}
+ses_df |> group_by(borough, neighborhood) |>
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
+```
 
+What are the most common types of crime in these neighborhoods?
+
+Chelsea/Clinton/Midtown: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood =="Chelsea/Clinton/Midtown") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+University Heights/Fordham: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "University Heights/Fordham") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+Mott Haven/Hunts Point, Bronx: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "Mott Haven/Hunts Point") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+East Harlem, Manhattan: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "East Harlem") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
+
+Lower East Side/Chinatown, Manhattan: 
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "Lower East Side/Chinatown") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(5) |> 
+  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
+  select(ofns_desc, percentage) |> 
+  knitr::kable()
+```
