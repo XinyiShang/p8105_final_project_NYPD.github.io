@@ -2,7 +2,10 @@
 title: "EDA_social"
 author: "Siqing Wang"
 date: "2023-12-05"
-output: github_document
+output: 
+  html_document:
+    keep_md: yes
+  github_document: default
 ---
 
 ```{r setup, include=FALSE}
