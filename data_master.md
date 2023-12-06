@@ -18,20 +18,9 @@ df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Co
   janitor::clean_names() 
 ```
 
-    ## Warning: One or more parsing issues, call `problems()` on your data frame for details,
-    ## e.g.:
+    ## Warning: One or more parsing issues, call `problems()` on your data frame for details, e.g.:
     ##   dat <- vroom(...)
     ##   problems(dat)
-
-    ## Rows: 2772016 Columns: 40
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: ","
-    ## chr  (22): CMPLNT_FR_DT, CMPLNT_TO_DT, RPT_DT, OFNS_DESC, PD_DESC, CRM_ATPT_...
-    ## dbl  (16): CMPLNT_NUM, ADDR_PCT_CD, KY_CD, PD_CD, JURISDICTION_CODE, HOUSING...
-    ## time  (2): CMPLNT_FR_TM, CMPLNT_TO_TM
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 The file size is 0.97GB. The dataset should have 40 variables and
 2772016 rows.  
