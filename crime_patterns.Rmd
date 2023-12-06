@@ -3,7 +3,6 @@ title: "General Crime Data"
 output: 
   html_document
 ---
-
 ------------------------------------------------------------------------
 
 ```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
@@ -15,7 +14,9 @@ library(viridis)
 library(shiny)
 library(plotly)
 library(shinydashboard)
-
+library(leaflet)
+library(ggmap)
+library(leaflet.extras)
 # set knitr defaults
 knitr::opts_chunk$set(
     echo      = TRUE
@@ -90,8 +91,7 @@ df_summary <- df_summary |>
 
 position <- which.max(df_summary$cumulative_n >= cutoff)
 # Select the top categories up to this position
-df_summary <- df_summary[1:position, ] |> 
-  left_join(mapping, by="ky_cd")
+df_summary <- df_summary[1:position, ]
 # Optional: Viewing the result
 print(df_summary)
 ```
@@ -108,7 +108,49 @@ df_crime_patterns <- df_nypd %>%
                             ofns_desc),
          ofns_desc = ifelse(ky_cd == 126, 
                             "MISCELLANEOUS PENAL LAW", 
-                            ofns_desc))
+                            ofns_desc),
+         crime_type = factor(ky_cd, levels = unique(ky_cd), labels = unique(ofns_desc))
+         )
+```
+
+```{r create_plotly_function}
+# Function to create a plot
+create_plot <- function(ky_cd_value) {
+  # Get the offense description for the given ky_cd_value
+  ofns_desc <- df_crime_patterns |>
+    filter(ky_cd == as.numeric(ky_cd_value)) |>
+    pull(ofns_desc) |>
+    unique()
+
+  # Generate the plot title
+  plot_title <- paste("Number of", ofns_desc, "in Each Year")
+
+  # Create the plot
+  df_crime_patterns |>
+    filter(ky_cd == as.numeric(ky_cd_value)) |>
+    group_by(year) |>
+    summarize(count = n()) |>
+    plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', 
+            marker = list(color = viridis(6))) |>
+    layout(
+      title = plot_title,
+      xaxis = list(title = "Year"),
+      yaxis = list(title = "Number of Cases"),
+      showlegend = FALSE
+    )
+}
+```
+
+
+```{r }
+# Call function
+plots <- list()
+
+# Loop to create plots
+for (i in 1:10) {
+  plot_title <- paste("Plot", i)
+  plots[[i]] <- create_plot(df_summary[i, 1])
+}
 ```
 
 ```{r}
@@ -213,10 +255,167 @@ plot_8 = df_crime_patterns |>
 p = df_crime_patterns |>
   group_by(ky_cd, year) |> 
   summarize(count = n()) |> 
+  arrange(desc(count)) |> 
   ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ky_cd)
 ```
 
 ```{r}
 ggplotly(p)
 ```
+```{r}
+# Put code to create your interactive map here:
+# pal <- colorFactor(c("#dd3497",
+#                      "#ae017e",
+#                      "#7a0177",
+#                      "#feebe2",
+#                      "#fcc5c0",
+#                      "#fa9fb5",
+#                      "#f768a1"),
+#                     domain = c("$2500>= & <$4500",
+#                                "$4500>= & <$6500",
+#                                "$6500>= & <$8500",
+#                                "$8500>= & <$10500"
+#                                "$10500>= & <$12500",
+#                                "$12500>= & <$14500",
+#                                "$14500>= & <$20000"))
+long_center = 73
+lat_center = 40
+nyc_hm <- df_crime_patterns%>%
+  leaflet() %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$OpenStreetMap.DE) %>% 
+  setView(long_center,lat_center,6) %>%
+  addHeatmap(lng=~longitude,lat=~latitude,intensity=~Trend,max=100,radius=20,blur=10)
+```
 
+```{r}
+
+map_ny <- get_map('New York', zoom = 12, maptype = 'satellite')
+```
+```{r}
+df_crime_patterns %>% 
+  filter(ky_cd == as.numeric(df_summary[1,1]) & year == 2017) |> 
+  leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(~longitude,
+                   ~latitude,
+                   stroke = FALSE, fillOpacity = 0.8,
+                   clusterOptions = markerClusterOptions(), # adds summary circles
+                   popup = ~as.character(ofns_desc)
+  ) %>% 
+  addHeatmap(lng=~longitude,
+             lat=~latitude,
+             radius = 8)
+
+```
+```{r}
+crime_heatmap <- function(code, yr) {
+  # Filter the data based on the given ky_cd and year
+  filtered_data <- df_crime_patterns |> 
+    filter(ky_cd == code & year == yr)
+
+  # Create the leaflet map
+  leaflet_map <- leaflet(filtered_data) %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addCircleMarkers(~longitude,
+                     ~latitude,
+                     stroke = FALSE, fillOpacity = 0.8,
+                     clusterOptions = markerClusterOptions(), # adds summary circles
+                     popup = ~as.character(ofns_desc)
+    ) %>% 
+    addHeatmap(lng=~longitude,
+               lat=~latitude,
+               radius = 8)
+  
+  return(leaflet_map)
+}
+```
+
+```{r}
+crime_heatmap_1_2017 = crime_heatmap(as.numeric(df_summary[1,1]),2017)
+crime_heatmap_1_2017
+```
+
+
+```{r}
+# map_nyc +
+#   stat_density2d(data = df_crime_patterns |> slice(1:200), aes(x = longitude, y = latitude, fill = ..density..), geom = 'tile', contour = F, alpha = .5) +
+#   scale_fill_viridis(option = 'inferno') +
+#   labs(title = str_c('SF has largest concentration of crime\n'
+#                      ,'near Downtown & Tenderloin'
+#                      )
+#        ,subtitle = 'There are also moderate pockets of crime in SOMA & the Mission'
+#        ,fill = str_c('Number of', '\ncrime incidents')
+#        ) +
+#   theme(text = element_text(color = "#444444")
+#         ,plot.title = element_text(size = 22, face = 'bold')
+#         ,plot.subtitle = element_text(size = 12)
+#         ,axis.text = element_blank()
+#         ,axis.title = element_blank()
+#         ,axis.ticks = element_blank()
+#         ) +
+#   guides(fill = guide_legend(override.aes= list(alpha = 1)))
+
+```
+
+
+```{r}
+# map_nyc =
+#   leaflet() |> 
+#   addTiles() |> 
+#   addMarkers(data = df_crime_patterns |> slice(1:200),
+#                       lng = ~longitude, lat = ~latitude,
+#                       labelOptions = labelOptions(noHide = F,
+#                                                   direction = "auto"),
+#                       label = ~as.character(ofns_desc)) 
+
+nyc_hm
+
+# bj <- split(beijing_housing_price_2018, beijing_housing_price_2018$price.level)
+# 
+# b2 <- b1
+# 
+# names(bj) |> 
+#   purrr::walk(function(df) {
+#     b2 <<- b2 %>%
+#       addCircleMarkers(data = bj[[df]],
+#                           lng = ~Lng, lat = ~Lat,
+#                           popup = ~as.character(priceinUSD),
+#                           group = df,
+#                           color = ~pal(price.level),
+#                           labelOptions = labelOptions(noHide = F,
+#                                                        direction = "auto"))
+#       })
+
+# b2 %>%
+#   addLayersControl(
+#     overlayGroups = names(bj),
+#     options = layersControlOptions(collapsed = FALSE)
+#   )
+```
+
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(title = "Plotly Graphs"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Tab 1", tabName = "tab1"),
+      menuItem("Tab 2", tabName = "tab2")
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "tab1", plotlyOutput("plot_1")),
+      tabItem(tabName = "tab2", plotlyOutput("plot_2"))
+  
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$plot_1 <- renderPlotly({ plot_1 })
+  output$plot_2 <- renderPlotly({ plot_2 })
+}
+
+shinyApp(ui, server)
+```

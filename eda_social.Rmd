@@ -14,8 +14,9 @@ library(tidyverse)
 library(dplyr)
 ```
 
-Import and clead NYPD data
+
 ```{r,include=FALSE}
+# Import and clead NYPD data
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
 
@@ -28,17 +29,16 @@ prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
 #Merging neighborhood information with NYPD data, keep only relevant variables
 nypd_ses_df = df_nypd |> 
-  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, boro_nm, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |> 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |> 
   rename(precinct = addr_pct_cd) |> 
-  rename(borough = boro_nm) |>
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
   left_join(prec_neighbor, by = "precinct")
 ```
 
-Import and clean socio-economic data
+
 ```{r}
-#neighbor_SES has SES indicators (except rent) for each neighborhood 
+#Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
   filter(region_type == "Sub-Borough Area") |> 
@@ -58,7 +58,7 @@ neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "
 ```{r}
 #ses_df has crime rate and SES indicators for each neighborhood
 ses_df = nypd_ses_df |> 
-  group_by(year, neighborhood, borough) |> 
+  group_by(year, borough, neighborhood) |> 
   summarise(crime_num = n())
 
 ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |> 
@@ -66,25 +66,44 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
   left_join(neighbor_rent, by = "neighborhood")
 ```
 
-# Heatmap
+## Heatmap
 
 
 
 
 
 
-# Crime type
+## Crime type
 
-## What are the top 5 neighborhoods with highest average crime rate?
+### What are the top 5 neighborhoods with highest average crime rate?
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
   arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
 ```
 
-## What are the most common types of crime in these neighborhoods?
+### What are the top 5 neighborhoods with highest average crime rate?
 
-### Chelsea/Clinton/Midtown: 
+```{r}
+ses_df |> group_by(borough, neighborhood) |>
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  arrange(desc(avg_crime_rate)) |> tail(5) |> knitr::kable()
+```
+
+Since CUMC is located in Manhattan, let's visualize the crime rate in Manhattan: 
+
+```{r}
+ses_df |> group_by(borough, neighborhood) |>
+  filter(borough == "Manhattan") |> 
+  summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
+  arrange(desc(avg_crime_rate)) |> knitr::kable()
+```
+
+The top 5 neighborhoods of highest average crime rate are to our surprise, so we further looked into the common types of crimes in these neighorhoods. 
+
+### What are the most common types of crime in these neighborhoods?
+
+Chelsea/Clinton/Midtown:
 ```{r}
 nypd_ses_df |> 
   filter(neighborhood =="Chelsea/Clinton/Midtown") |> 
@@ -93,10 +112,11 @@ nypd_ses_df |>
   head(5) |> 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
   select(ofns_desc, percentage) |> 
+  rename(crime_type = ofns_desc) |> 
   knitr::kable()
 ```
 
-### University Heights/Fordham: 
+University Heights/Fordham: 
 ```{r}
 nypd_ses_df |> 
   filter(neighborhood == "University Heights/Fordham") |> 
@@ -105,10 +125,11 @@ nypd_ses_df |>
   head(5) |> 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
   select(ofns_desc, percentage) |> 
-  knitr::kable()
+  rename(crime_type = ofns_desc) |>
+  knitr::kable() 
 ```
 
-### Mott Haven/Hunts Point, Bronx: 
+Mott Haven/Hunts Point: 
 ```{r}
 nypd_ses_df |> 
   filter(neighborhood == "Mott Haven/Hunts Point") |> 
@@ -117,10 +138,11 @@ nypd_ses_df |>
   head(5) |> 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
   select(ofns_desc, percentage) |> 
-  knitr::kable()
+  rename(crime_type = ofns_desc) |>
+  knitr::kable() 
 ```
 
-### East Harlem, Manhattan: 
+East Harlem:
 ```{r}
 nypd_ses_df |> 
   filter(neighborhood == "East Harlem") |> 
@@ -129,10 +151,11 @@ nypd_ses_df |>
   head(5) |> 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
   select(ofns_desc, percentage) |> 
-  knitr::kable()
+  rename(crime_type = ofns_desc) |>
+  knitr::kable() 
 ```
 
-### Lower East Side/Chinatown, Manhattan: 
+Lower East Side/Chinatown: 
 ```{r}
 nypd_ses_df |> 
   filter(neighborhood == "Lower East Side/Chinatown") |> 
@@ -140,13 +163,34 @@ nypd_ses_df |>
   arrange(desc(n)) |> 
   head(5) |> 
   mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |> 
-  knitr::kable()
+  select(ofns_desc, percentage) |>
+  rename(crime_type = ofns_desc) |>
+  knitr::kable() 
 ```
 
-# Line plot
+The high crime rate in Chelsea/Clinton/Midtown can be explained by the significant contribution of petite and grand larceny, which is as expected. 
 
-## Is there an association between rent and crime rate?
+Since CUMC is located in Washington Heights, let's take a closer look at the top 10 crime types at Washington Heights: 
+
+```{r}
+nypd_ses_df |> 
+  filter(neighborhood == "Washington Heights/Inwood") |> 
+  count(ofns_desc) |> 
+  arrange(desc(n)) |> 
+  head(10) |> 
+  mutate(percentage = n / sum(n) * 100) |>
+  ggplot(aes(x = reorder(ofns_desc, -percentage), y = percentage)) + 
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + 
+   labs(title = "Top 10 types of crime in Washington Heights/Inwood",
+       x = "Percentage of all crimes",
+       y = "Type of crimes") 
+```
+
+
+## Line plot
+
+### Is there an association between rent and crime rate?
 
 ```{r}
 ses_df |> group_by(neighborhood) |> 
@@ -156,14 +200,15 @@ ses_df |> group_by(neighborhood) |>
   ggplot(aes(x = avg_crime_rate)) +
   geom_point(aes(y = avg_rent_0_1beds, color = "Average Rent 0-1 Beds")) +
   geom_point(aes(y = avg_rent_2_3beds, color = "Average Rent 2-3 Beds")) +
+  geom_smooth(aes(y = avg_rent_0_1beds), method = "lm", se = TRUE, color = "red") +
+  geom_smooth(aes(y = avg_rent_2_3beds), method = "lm", se = TRUE, color = "blue") +
   scale_color_manual(values = c("Average Rent 0-1 Beds" = "red", "Average Rent 2-3 Beds" = "blue")) +
   labs(title = "Point Plot of average rent against average crime rate",
        x = "Crime rate",
        y = "Average rent ($)") 
 ```
 
-
-
+There appears to be no obvious association between rent and crime rate.  
 
 
 
