@@ -78,10 +78,7 @@ df_summary = df_summary |>
 position = which.max(df_summary$cumulative_percentage >= cutoff)
 # Select the top categories up to this position
 df_summary =
-  df_summary[1:position, ] |> 
-  left_join(df_crime_patterns |> 
-              select(ky_cd,ofns_desc) |> 
-              distinct(), by = "ky_cd") 
+  df_summary[1:position, ] 
 ```
 
 ```{r create sub dataset of 10 most frequent crime types}
@@ -96,6 +93,15 @@ df_crime_patterns <- df_nypd |>
   mutate(cmplnt_fr_tm = lubridate::hms(cmplnt_fr_tm),
          hour = lubridate::hour(cmplnt_fr_tm))
 ```
+
+```{r}
+df_summary =
+  df_summary |> 
+  left_join(df_crime_patterns |> 
+              select(ky_cd,ofns_desc) |> 
+              distinct(), by = "ky_cd") 
+```
+
 The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
 
 ## Number of Cases across Most Frequent 10 Offense Types in Each Year
