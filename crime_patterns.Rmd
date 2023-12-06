@@ -3,6 +3,7 @@ title: "General Crime Data"
 output: 
   html_document
 ---
+
 ------------------------------------------------------------------------
 
 ```{r defaults, echo = FALSE, message = FALSE, warning = FALSE}
@@ -48,7 +49,6 @@ scale_fill_discrete   = scale_fill_viridis_d
 ```{r load data}
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
 ```
-
 
 ```{r data wrangling}
 df_nypd = df_nypd |> 
@@ -96,47 +96,39 @@ df_crime_patterns <- df_nypd |>
   mutate(cmplnt_fr_tm = lubridate::hms(cmplnt_fr_tm),
          hour = lubridate::hour(cmplnt_fr_tm))
 ```
+The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
 
-#
+## Number of Cases across Most Frequent 10 Offense Types in Each Year
+
 ```{r}
 p_1 = df_crime_patterns |>
   group_by(ofns_desc, year) |> 
   summarize(count = n()) |> 
-  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc)
-
+  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc)+
+  xlab("Year") +ylab("Number of Cases")
 ```
 
 ```{r}
 ggplotly(p_1)
 ```
 
+## Number of Cases across Most Frequent 10 Offense Types by Hour in Eash Year
 ```{r}
 p_2= df_crime_patterns %>%
   group_by(year, ofns_desc, hour) %>%
   summarize(count = n(), .groups = 'drop') %>%
   ggplot(aes(x = hour, y = count, color = ofns_desc)) +
   geom_line() +
-  facet_wrap(~year)
+  facet_wrap(~year)+
+  xlab("Hour") +
+  ylab("Count")+
+  labs(color = "Offense Type")
+  
 ```
 
 ```{r}
 ggplotly(p_2)
 ```
-
-```{r}
-# Compare ky_cd vs pd_cd
-# length(unique(df_nypd |> pull(ky_cd)))
-# length(unique(df_nypd |> pull(pd_cd)))
-# sum(is.na(df_nypd$ky_cd))
-# sum(is.na(df_nypd$pd_cd))
-```
-Decide to use ky_cd as crime classification code to avoid excessive complication and missing values.
-
-
-
-The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
-
-Noteworthyly, Among the 10 most frequent ky_cd `361` and `126` consists some NA values in `ofns_des`.
 
 
 ```{r create_plotly_function crime type}
@@ -161,8 +153,6 @@ create_plot <- function(ofnsDesc) {
 }
 ```
 
-
-
 ```{r}
 crime_heatmap <- function(ofnsDesc, Year) {
   # Filter the data based on the given ky_cd and year
@@ -185,8 +175,6 @@ crime_heatmap <- function(ofnsDesc, Year) {
   return(leaflet_map)
 }
 ```
-
-
 
 ```{r}
 ui <- fluidPage(
@@ -221,8 +209,6 @@ server <- function(input, output) {
 
 ```
 
-
-```{r} 
+```{r}
 shinyApp(ui = ui, server = server)
 ```
-
