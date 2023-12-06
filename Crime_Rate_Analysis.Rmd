@@ -19,7 +19,7 @@ library(dplyr)
 library(glmnet)
 ```
 
-```{r,include=FALSE}
+```{r}
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
 df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
@@ -64,7 +64,7 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
 
 ## Are crime rates associated with poverty, income, and educational level? 
 
-Visualizing potential association between poverty, income, and educational level with crime rate: 
+### Visualizing potential association between poverty, income, and educational level with crime rate: 
 ```{r}
 eda_plot1 = ses_df |> ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
@@ -92,7 +92,7 @@ gridExtra::grid.arrange(
 
 It is observed that there is a stronger positive association between percentage of poverty population with crime rate; a weaker positive association between unemployment and lack of education with crime rate, and a negative association between median household income and crime rate. 
 
-We would like to fit a linear model to use these four SES indicators as predictors for crime rate outcome in a specific neighborhood.
+### We would like to fit a linear model to use these four SES indicators as predictors for crime rate outcome in a specific neighborhood.
 
 Let's first visualize the distribution of crime rate:
 ```{r}
@@ -145,7 +145,7 @@ ses_df |>
 
 From the two diagnostics plots above, we can see that the residuals are roughly centered around zero, and are relatively normal. This would indicate that our model is a relatively good fit. 
 
-Apply Lasso Regression to fine tune the prediction model and remove predictors that are not influential enough. 
+### Apply Lasso Regression to fine tune the prediction model and remove predictors that are not influential enough. 
 
 ```{r}
 # Finding the best lambda
@@ -156,7 +156,7 @@ best_lambda <- cv_model$lambda.min
 # Conducting the Lasso fit 
 lasso_fit = glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct')]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
 
-coef(lasso_fit)
+coef(lasso_fit) 
 ```
 
 TO DO: add diagnostics and compare with MLR 
@@ -180,3 +180,5 @@ gridExtra::grid.arrange(
   eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)
 ```
 
+
+## Discussion

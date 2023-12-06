@@ -422,13 +422,56 @@ gather population data for each borough and neighborhood.</p>
 rate for each neighborhood as the following: Crime Rate = (Total number
 of complaints in a neighborhood in a given year / Total population in a
 neighborhood in a given year) * 100,000</p>
+<pre class="r"><code># df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
+#   janitor::clean_names() 
+df_nypd = read_csv(&quot;../NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
+  janitor::clean_names()
+
+#Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
+prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)
+
+#Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
+nypd_ses_df = df_nypd |&gt; 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
+  rename(precinct = addr_pct_cd) |&gt; 
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
+         year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
+  left_join(prec_neighbor, by = &quot;precinct&quot;)
+
+#Reading in the SES data for demographics information for each precinct/neighboorhood, and only keeping the relevant SES indicators. `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
+neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
+  janitor::clean_names() |&gt; 
+  filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
+  rename(neighborhood = region_name) |&gt; 
+  select(neighborhood, year, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_edu_nohs_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
+  filter(year %in% c(2017, 2018, 2019, 2021)) #2020 and 2022 data missing
+
+neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
+  janitor::clean_names() |&gt; 
+  filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
+  rename(neighborhood = region_name) |&gt; 
+  filter(year == &quot;2017-2021&quot;) |&gt; 
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
+
+# Now, calculate the crime rate for every precinct. Crime rate is calculated by dividing the number of crimes committed per neighborhood over the total population of that neighborhood, then times 100,000. Then merge the crime rate data with other relevant socioeconomic data. We focus only on the 2021 data. `ses_df` contains crime rate and other SES data per neighborhood, by year 
+
+ses_df = nypd_ses_df |&gt; 
+  group_by(year, borough, neighborhood) |&gt; 
+  summarise(crime_num = n())
+
+ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
+  mutate(crime_rate = (crime_num/pop_num) * 100,000) |&gt; 
+  left_join(neighbor_rent, by = &quot;neighborhood&quot;)</code></pre>
 <div
 id="are-crime-rates-associated-with-poverty-income-and-educational-level"
 class="section level2">
 <h2>Are crime rates associated with poverty, income, and educational
 level?</h2>
-<p>Visualizing potential association between poverty, income, and
-educational level with crime rate:</p>
+<div
+id="visualizing-potential-association-between-poverty-income-and-educational-level-with-crime-rate"
+class="section level3">
+<h3>Visualizing potential association between poverty, income, and
+educational level with crime rate:</h3>
 <pre class="r"><code>eda_plot1 = ses_df |&gt; ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
@@ -457,8 +500,12 @@ percentage of poverty population with crime rate; a weaker positive
 association between unemployment and lack of education with crime rate,
 and a negative association between median household income and crime
 rate.</p>
-<p>We would like to fit a linear model to use these four SES indicators
-as predictors for crime rate outcome in a specific neighborhood.</p>
+</div>
+<div
+id="we-would-like-to-fit-a-linear-model-to-use-these-four-ses-indicators-as-predictors-for-crime-rate-outcome-in-a-specific-neighborhood."
+class="section level3">
+<h3>We would like to fit a linear model to use these four SES indicators
+as predictors for crime rate outcome in a specific neighborhood.</h3>
 <p>Let’s first visualize the distribution of crime rate:</p>
 <pre class="r"><code>ses_df |&gt; ggplot(aes(x = crime_rate)) +
   geom_histogram(alpha = 0.8, color = &quot;white&quot;) + 
@@ -514,8 +561,12 @@ values</p>
 <p>From the two diagnostics plots above, we can see that the residuals
 are roughly centered around zero, and are relatively normal. This would
 indicate that our model is a relatively good fit.</p>
-<p>Apply Lasso Regression to fine tune the prediction model and remove
-predictors that are not influential enough.</p>
+</div>
+<div
+id="apply-lasso-regression-to-fine-tune-the-prediction-model-and-remove-predictors-that-are-not-influential-enough."
+class="section level3">
+<h3>Apply Lasso Regression to fine tune the prediction model and remove
+predictors that are not influential enough.</h3>
 <pre class="r"><code># Finding the best lambda
 cv_model &lt;- cv.glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1)
 
@@ -524,14 +575,14 @@ best_lambda &lt;- cv_model$lambda.min
 # Conducting the Lasso fit 
 lasso_fit = glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
 
-coef(lasso_fit)</code></pre>
+coef(lasso_fit) </code></pre>
 <pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
 ##                             s0
-## (Intercept)      -1.482090e+00
-## pop_pov_pct       2.719072e+01
-## hh_inc_med_adj    3.264745e-05
-## pop16_unemp_pct   2.676655e+00
-## pop_edu_nohs_pct -2.229206e+00</code></pre>
+## (Intercept)      -1.580157e+00
+## pop_pov_pct       2.752896e+01
+## hh_inc_med_adj    3.334451e-05
+## pop16_unemp_pct   2.848241e+00
+## pop_edu_nohs_pct -2.387501e+00</code></pre>
 <p>TO DO: add diagnostics and compare with MLR</p>
 <p>Visualizing trend: are crime rates associated with racial factors?
 (delete??)</p>
@@ -550,6 +601,10 @@ eda_plot8 = ses_df |&gt; ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
 gridExtra::grid.arrange(
   eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)</code></pre>
 <p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
 </div>
 
 

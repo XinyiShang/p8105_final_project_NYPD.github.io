@@ -12,15 +12,17 @@ library(tidyverse)
 library(dplyr)
 ```
 
+While examining the NYPD crime complaint data, we expect crime rate to be indicative by the socioeconomic status of a specific neighborhood. In this section, we calculated the crime rate for each neighborhood each year, and displayed the top neighborhoods with highest crime rate, along with what their crime composition looks like. We are also interested in whether crime rate can be predictive of rent in corresponding neighborhoods. 
 
-```{r,include=FALSE}
+
+```{r}
 # Import and clead NYPD data
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
 
 ## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
 
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
@@ -32,10 +34,7 @@ nypd_ses_df = df_nypd |>
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
   left_join(prec_neighbor, by = "precinct")
-```
 
-
-```{r}
 #Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
@@ -51,9 +50,7 @@ neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "
   rename(neighborhood = region_name) |> 
   filter(year == "2017-2021") |> 
   select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
-```
 
-```{r}
 #ses_df has crime rate and SES indicators for each neighborhood
 ses_df = nypd_ses_df |> 
   group_by(year, borough, neighborhood) |> 
@@ -88,7 +85,7 @@ ses_df |> group_by(borough, neighborhood) |>
   arrange(desc(avg_crime_rate)) |> tail(5) |> knitr::kable()
 ```
 
-Since CUMC is located in Manhattan, let's visualize the crime rate in Manhattan: 
+Since CUMC is located in Manhattan, let's also visualize the crime rate in Manhattan:
 
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
@@ -207,6 +204,8 @@ ses_df |> group_by(neighborhood) |>
 ```
 
 There appears to be no obvious association between rent and crime rate.  
+
+## Discussion
 
 
 
