@@ -1,6 +1,6 @@
 ---
 title: "EDA_social"
-author: "Siqing Wang"
+author: "Siqing Wang/Yuki Joyama"
 date: "2023-12-05"
 output: 
   html_document:
@@ -19,6 +19,8 @@ library(sf)
 library(tmap)
 library(leaflet)
 library(leafgl)
+library(plotly)
+library(leaflet.extras)
 ```
 
 
@@ -40,7 +42,7 @@ prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
 #Merging neighborhood information with NYPD data, keep only relevant variables
 nypd_ses_df = df_nypd |> 
-  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc, latitude, longitude) |> 
+  select(addr_pct_cd, cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc, latitude, longitude) |> 
   rename(precinct = addr_pct_cd) |> 
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
@@ -79,88 +81,98 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
 ```
 
 ## Heatmap
-
 ```{r}
 # NYC neighborhoods borders
-nyc = read_sf(here::here("data", "NTA_map.geojson")) |> 
-  select(-shape_area, -shape_leng, -ntacode)
+nyc = read_sf(here::here("data", "Police_Precincts.geojson")) |> 
+  select(-shape_area, -shape_leng) |> 
+  mutate(
+    precinct = as.double(precinct)
+  )
 
-# 
-nypd_ses_df_heat = nypd_ses_df |>  
-    st_as_sf(
-        # which columns to use as coordinates
-        coords=c('longitude', 'latitude'), 
-        # keep the coordinate columns
-        remove=FALSE,
-        # projection system
-        crs=4326
-    ) |> 
-  select(cmplnt_num, law_cat_cd, latitude, longitude) |> 
-  filter(law_cat_cd == "VIOLATION") 
+# prepare data set for mapping
+# population data by precinct (2020 census, P1_001N: total population)
+df_pop = read_csv(here::here("data", "nyc_precinct_2020pop.csv")) |> 
+  rename(pop = P1_001N) |> 
+  select(precinct, pop)
 
-nyc |> select(geometry) |> plot()
-nypd_ses_df_heat |> select(geometry) |> plot(col='blue', add=TRUE)
+# select ses variables
+ses_heat = neighbor_ses |> 
+  filter(year == 2021) |> # visualize 2021 data
+  mutate(
+    pop16_unemp_pct = pop16_unemp_pct * 100, 
+    pop_edu_collp_pct = pop_edu_collp_pct * 100, 
+    pop_pov_pct = pop_pov_pct * 100
+  ) |> 
+  select(neighborhood, pop_num, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct)
 
-# ggplot
-ggplot(nypd_ses_df_heat) + 
-  geom_sf(data = nyc) + 
-  geom_sf() +
-  coord_sf()
+# merge with nypd dataset and calculate relevant indicators
+nypd_ses_heat = nypd_ses_df |>  
+  filter(year == 2021) |> 
+  left_join(ses_heat, by = "neighborhood") |> # combine with ses data
+  st_as_sf(
+    # which columns to use as coordinates
+    coords = c("longitude", "latitude"), 
+    # keep the coordinate columns
+    remove = FALSE,
+    # projection system
+    crs = 4326
+  ) |> 
+  merge(df_pop, by = "precinct") |> 
+  group_by(precinct) |> 
+  mutate(
+    "crime_rate" = (sum(ofns_desc == "FELONY ASSAULT") / pop) * 100000, # calculate crime rate per 100,000 using 2020 population census data by precinct
+    "violation" = (sum(law_cat_cd == "VIOLATION") / n()) * 100, # the rate of violation among all complaints
+    "misdemeanor" = (sum(law_cat_cd == "MISDEMEANOR") / n()) * 100, # the rate of misdemeanor among all complaints
+    "felony" = (sum(law_cat_cd == "FELONY") / n()) * 100 # the rate of felony among all complaints
+  ) |> 
+  select(precinct, neighborhood, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct, geometry, crime_rate, felony, misdemeanor, violation)
 
 # spatial join
-felony_in_neighborhoods = nypd_ses_df_heat |> 
-    # only care about the felony and geometry
-    select(cmplnt_num, geometry) |> 
-    # spatial join
-    st_join(
-        # only need these columns from neighborhood tibble
-        nyc |> select(boroname, ntaname, geometry),
-        # join rows where there is some over lap between
-        # a dock and a neighborhod
-        join = st_intersects,
-        # keep only docks that are in a neighborhood
-        # this will ignore Jersey City
-        left = FALSE
-    )
+df_spj = nypd_ses_heat |>
+  # spatial join
+  st_join(
+    # only need these columns from nyc tibble
+    nyc |> select(precinct, geometry),
+    # join rows where there is some overlap between a dock and a precinct
+    join = st_intersects,
+    left = FALSE
+  ) |> 
+  select(-precinct.y) |> 
+  rename(precinct = precinct.x)
 
-count_by_neighborhood = felony_in_neighborhoods |> 
+count_by_neighborhood = df_spj |> 
   # remove geometry for fast counting
   st_drop_geometry() |> 
-  count(ntaname) |> 
+  distinct() |> 
   # join the counts into the nyc neighborhood object
-  right_join(nyc, by=c('ntaname'='ntaname')) |> 
+  right_join(nyc, by=c("precinct" = "precinct")) |> 
+  mutate(
+    "pre_nei" = paste(precinct, "-", neighborhood, sep = " ") 
+  ) |> 
   st_as_sf() |> 
-  select(ntaname, n, boroname, geometry)
-
-ggplot(count_by_neighborhood, aes(fill = n)) +
-  geom_sf() +
-  coord_sf() +
-  theme_bw()
+  drop_na()  # drop central park due to the lack of data
 
 # tmap
-tm_shape(nypd_ses_df_heat) +
-  tm_dots()
-
-tm_shape(nyc) +
-  tm_polygons() +
-  tm_shape(nypd_ses_df_heat) +
-  tm_dots()
+tmap_mode("view") # set tmap to the view mode
 
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "n")
+  tm_polygons(col = "crime_rate", id = "pre_nei", breaks=c(0, 50, 100, 300, 600, 1000, 1600), title = "Crime rate per 100,000")
 
-# leaflet
-leaflet(elementId = "nypd_ses_df_heat") |> 
-  addTiles() |> 
-  addCircles(data = nypd_ses_df_heat)
+tm_shape(count_by_neighborhood) +
+  tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median household’s income (USD/yr)", palette = "Blues") +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
 
-dock_palette = colorQuantile(palette = "Dark2", domain = count_by_neighborhood$n, 
-                              na.color = "transparant")
+tm_shape(count_by_neighborhood) +
+  tm_polygons(col = "pop16_unemp_pct", id = "pre_nei", title = "Unemployment rate (%)") +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
 
-leaflet(elementId='DocksHoodsCountZoomed') |> addTiles() |> 
-    addPolygons(data=count_by_neighborhood, opacity=1, color='black',
-                fillColor=~dock_palette(n), stroke=TRUE, weight=.5) |> 
-    setView(lng=-73.85, lat=40.75, zoom=11)
+tm_shape(count_by_neighborhood) +
+  tm_polygons(col = "pop_edu_collp_pct", id = "pre_nei", title = "College graduates (%)", palette = "Blues") +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
+
+tm_shape(count_by_neighborhood) +
+  tm_polygons(col = "pop_pov_pct", id = "pre_nei", title = "Below poverty threshold (%)") +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
 ```
 
 ## Crime type
