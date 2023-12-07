@@ -23,13 +23,13 @@ While examining the NYPD crime complaint data, we expect crime rate to be indica
 
 ```{r}
 # Import and clead NYPD data
-# df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
-#   janitor::clean_names() 
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/1j6emjrdo3zbjrt5ehgq0/NYPD_Complaint_Data_Historic.csv?rlkey=co02d6vsgxr0aj44r7uhnbz64&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+  janitor::clean_names()
 
 ## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
 
-df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
-  janitor::clean_names()
+# df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
+#   janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
@@ -142,8 +142,8 @@ count_by_neighborhood = df_spj |>
 # tmap
 tmap_mode("view") # set tmap to the view mode
 
-tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "crime_rate", id = "pre_nei", breaks=c(0, 50, 100, 300, 600, 1000, 1600), title = "Crime rate per 100,000")
+# tm_shape(count_by_neighborhood) +
+#   tm_polygons(col = "crime_rate", id = "pre_nei", breaks=c(0, 50, 100, 300, 600, 1000, 1600), title = "Crime rate per 100,000")
 
 tm_shape(count_by_neighborhood) +
   tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median household’s income (USD/yr)", palette = "Blues") +
