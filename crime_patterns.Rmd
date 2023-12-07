@@ -108,17 +108,18 @@ The most frequent 10 crime categories constitute at least 80% of all the crimes 
 ## Number of Cases across Most Frequent 10 Offense Types in Each Year
 
 ```{r}
-p_1 = df_crime_patterns |>
-  group_by(ofns_desc, year) |> 
-  summarize(count = n()) |> 
-  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc, ncol = 5)+
-  xlab("Year") +ylab("Number of Cases") + 
+p_1 <- df_crime_patterns |>
+  group_by(ofns_desc, year) |>
+  summarize(count = n()) |>
+  ggplot(aes(x = year, y = count, fill = ofns_desc)) +
+  geom_col(position = "stack") +
+  scale_fill_viridis_d() +
+  xlab("Year") +
+  ylab("Number of Cases") +
+  labs(fill = "Offense Type")+
   theme_minimal() +
-  theme(strip.background = element_rect(fill = "lightblue", color = "lightblue"))
-  
-```
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-```{r}
 ggplotly(p_1)
 ```
 
@@ -135,12 +136,10 @@ p_2 = df_crime_patterns %>%
   labs(color = "Offense Type") +
   theme_minimal()
 
-```
-
-```{r}
 ggplotly(p_2)
 ```
 
+## Crime Type Map
 
 ```{r create_plotly_function crime type}
 # Function to create a plot
