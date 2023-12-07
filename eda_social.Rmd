@@ -18,15 +18,13 @@ library(tmap)
 library(plotly)
 ```
 
-While examining the NYPD crime complaint data, we expect crime rate to be indicative by the socioeconomic status of a specific neighborhood. In this section, we calculated the crime rate for each neighborhood each year, and displayed the top neighborhoods with highest crime rate, along with what their crime composition looks like. We are also interested in whether crime rate can be predictive of rent in corresponding neighborhoods. 
-
+While examining the NYPD crime complaint data, we expect crime rate to be indicative by the socioeconomic status of a specific neighborhood. In this section, we calculated the crime rate for each neighborhood each year, visualized various socioeconomic status by each police precint (neighborhood), and displayed the top neighborhoods with highest crime rate, along with what their crime composition looks like. We are also interested in whether crime rate can be predictive of rent in corresponding neighborhoods.   
+Since the primary data used did not have neighborhood information, we used NYPD precinct data to classify neighborhoods, following Golub et al. (2006)
 
 ```{r}
 # Import and clead NYPD data
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/1j6emjrdo3zbjrt5ehgq0/NYPD_Complaint_Data_Historic.csv?rlkey=co02d6vsgxr0aj44r7uhnbz64&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
   janitor::clean_names()
-
-## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
 
 # df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
 #   janitor::clean_names()
@@ -67,7 +65,12 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
   left_join(neighbor_rent, by = "neighborhood")
 ```
 
-## Heatmap
+## Cloropleth maps 
+### Data 
+In this section, we mapped the crime rate (with a specific focused on "felony assault") and the socioeconomic status in each police precinct. The data used for this analysis were 2021 NYPD crime complaint data and 2020 Census population data.  
+Crimes categorized under "felony assault" share common characteristics such as physical injury, intentional and reckless actions, the use of deadly weapons or dangerous instruments, and others as defined by New York Penal Law.  
+The crime rate was determined by dividing the total number of felony assault complaints in each precinct by the total population in that precinct. Note that due to lack of data, data on crime complaints and socioeconomic status are based on 2021 records, while data on total population are from 2020.     
+
 ```{r}
 # NYC neighborhoods borders
 nyc = read_sf(here::here("data", "Police_Precincts.geojson")) |> 
@@ -137,29 +140,53 @@ count_by_neighborhood = df_spj |>
     "pre_nei" = paste(precinct, "-", neighborhood, sep = " ") 
   ) |> 
   st_as_sf() |> 
-  drop_na()  # drop central park due to the lack of data
+  filter(precinct != 22) # remove central park data
+```
 
+### Level of offense
+This map shows the proportion of different offense levels among all complaints reported in each precinct/neighborhood.  
+```{r}
 # tmap
 tmap_mode("view") # set tmap to the view mode
 
-# tm_shape(count_by_neighborhood) +
-#   tm_polygons(col = "crime_rate", id = "pre_nei", breaks=c(0, 50, 100, 300, 600, 1000, 1600), title = "Crime rate per 100,000")
-
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median household’s income (USD/yr)", palette = "Blues") +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
+  tm_polygons(col = c("violation", "misdemeanor", "felony"), id = "pre_nei", title = c("Violation (%)", "Misdemeanor (%)", "Felony (%)"), popup.vars = c("Violation: " = "violation", "Misdemeanor: " = "misdemeanor", "Felony: " = "felony")) +
+  tm_facets(sync = TRUE, ncol = 3)
 
+```
+  
+  
+### Median household's income
+The median household's total income of all members of the household aged 15 years or older.
+```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop16_unemp_pct", id = "pre_nei", title = "Unemployment rate (%)") +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
+  tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median income (USD/yr)", palette = "Blues", popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Crime rate (per 100,000): " = "crime_rate")) +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Crime rate (per 100,000): " = "crime_rate"))
+```
 
+### Unemployment rate
+The number of people aged 16 years and older in the civilian labor force who are unemployed, divided by the total number of people aged 16 years and older in the civilian labor force.
+```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop_edu_collp_pct", id = "pre_nei", title = "College graduates (%)", palette = "Blues") +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
+  tm_polygons(col = "pop16_unemp_pct", id = "pre_nei", title = "Unemployment rate (%)", popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Crime rate (per 100,000): " = "crime_rate")) +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Crime rate (per 100,000): " = "crime_rate"))
+```
 
+### Education
+The percentage of the population aged 25 and older who have attained a bachelor's degree or higher.
+```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop_pov_pct", id = "pre_nei", title = "Below poverty threshold (%)") +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5)
+  tm_polygons(col = "pop_edu_collp_pct", id = "pre_nei", title = "College graduates (%)", palette = "Blues", popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Crime rate (per 100,000): " = "crime_rate")) +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Crime rate (per 100,000): " = "crime_rate"))
+```
+
+### Poverty
+The number of people below the poverty threshold divided by the number of people for whom poverty status was determined.
+The poverty threshold in 2021 was $27,479 for a family of four (two adults and two children under 18 years).
+```{r}
+tm_shape(count_by_neighborhood) +
+  tm_polygons(col = "pop_pov_pct", id = "pre_nei", title = "Below poverty threshold (%)", popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "crime_rate")) +
+  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "crime_rate"))
 ```
 
 ## Crime type
@@ -301,5 +328,10 @@ There appears to be no obvious association between rent and crime rate.
 
 ## Discussion
 
-
+## References 
+- Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.
+- NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)
+- CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s CoreData.nyc. [Link](https://furmancenter.org/coredata/userguide/about)
+- Bureau, U. C. (2022, November 29). 2020 census. Census.gov. [Link](https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html)
+- Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz)
 
