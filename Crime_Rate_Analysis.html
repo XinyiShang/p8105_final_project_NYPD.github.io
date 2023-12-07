@@ -9,13 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Siqing Wang" />
 
-<meta name="date" content="2023-12-02" />
 
-<title>Crime Rate Analysis</title>
+<title>SES Analysis</title>
 
-<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -326,7 +324,9 @@ div.tocify {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        
+        <li>
+  <a href="Report.html">Report</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -337,40 +337,37 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="General_Crime_Data.html">General Crime Analysis</a>
+      <a href="General_Crime_Data.html">Crime Count Visualization</a>
     </li>
     <li>
-      <a href="crime_patterns.html">Crime Patterns</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Suspect and Victim
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="demographic.html">Demographic</a>
-    </li>
-    <li>
-      <a href="victim_suspect_correlation.html">Victim Suspect Correlation</a>
+      <a href="crime_patterns.html">Offense Type Visualization</a>
     </li>
   </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Socioeconomics
+    Suspect and Victim Analysis
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="crime-rate-analysis.html">Crime Rate Analysis</a>
+      <a href="demographic.html">Correlation Patterns</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Crime Rate and Socioeconomics
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Crime_Rate_Analysis.html">SES Analysis</a>
     </li>
     <li>
-      <a href="eda_social.html">Social EDA</a>
+      <a href="eda_social.html">Exploratory data analysis</a>
     </li>
   </ul>
 </li>
@@ -397,9 +394,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Crime Rate Analysis</h1>
-<h4 class="author">Siqing Wang</h4>
-<h4 class="date">2023-12-02</h4>
+<h1 class="title toc-ignore">SES Analysis</h1>
 
 </div>
 
@@ -408,21 +403,28 @@ div.tocify {
 associated or can be used as predictors to assess crime rate. Since our
 NYPD complaint dataset only contains individual complaints, we utilized
 a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to
-gather populational data for each borough and neighborhood.</p>
+gather population data for each borough and neighborhood.</p>
 <p>To better conduct regression analysis, we have calculated the crime
 rate for each neighborhood as the following: Crime Rate = (Total number
 of complaints in a neighborhood in a given year / Total population in a
 neighborhood in a given year) * 100,000</p>
-<pre class="r"><code>#Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
-prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)</code></pre>
-<pre class="r"><code>#Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
+<pre class="r"><code># df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
+#   janitor::clean_names() 
+df_nypd = read_csv(&quot;../NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
+  janitor::clean_names()
+
+#Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
+prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)
+
+#Merging `prec_neighboor` with NYPD dataset, conducting more data cleaning. The resulting `nypd_ses_df` only contains variables of interest for SES analysis. `nypd_ses_df` now contains neighboorhood information, as well as other necessary data from the original master data 
 nypd_ses_df = df_nypd |&gt; 
   select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc) |&gt; 
   rename(precinct = addr_pct_cd) |&gt; 
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
          year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
-  left_join(prec_neighbor, by = &quot;precinct&quot;)</code></pre>
-<pre class="r"><code>#Reading in the SES data for demographics information for each precinct/neighboorhood, and only keeping the relevant SES indicators. `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
+  left_join(prec_neighbor, by = &quot;precinct&quot;)
+
+#Reading in the SES data for demographics information for each precinct/neighboorhood, and only keeping the relevant SES indicators. `neighbor_ses` df includes information on population, income, umemployment, poverty, education, and racial factors for every neighborhood. 
 neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
   janitor::clean_names() |&gt; 
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
@@ -435,8 +437,9 @@ neighbor_rent = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;,
   filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
   rename(neighborhood = region_name) |&gt; 
   filter(year == &quot;2017-2021&quot;) |&gt; 
-  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)</code></pre>
-<pre class="r"><code># Now, calculate the crime rate for every precinct. Crime rate is calculated by dividing the number of crimes committed per neighborhood over the total population of that neighborhood, then times 100,000. Then merge the crime rate data with other relevant socioeconomic data. We focus only on the 2021 data. `ses_df` contains crime rate and other SES data per neighborhood, by year 
+  select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
+
+# Now, calculate the crime rate for every precinct. Crime rate is calculated by dividing the number of crimes committed per neighborhood over the total population of that neighborhood, then times 100,000. Then merge the crime rate data with other relevant socioeconomic data. We focus only on the 2021 data. `ses_df` contains crime rate and other SES data per neighborhood, by year 
 
 ses_df = nypd_ses_df |&gt; 
   group_by(year, borough, neighborhood) |&gt; 
@@ -450,8 +453,11 @@ id="are-crime-rates-associated-with-poverty-income-and-educational-level"
 class="section level2">
 <h2>Are crime rates associated with poverty, income, and educational
 level?</h2>
-<p>Visualizing potential association between poverty, income, and
-educational level with crime rate:</p>
+<div
+id="visualizing-potential-association-between-poverty-income-and-educational-level-with-crime-rate"
+class="section level3">
+<h3>Visualizing potential association between poverty, income, and
+educational level with crime rate:</h3>
 <pre class="r"><code>eda_plot1 = ses_df |&gt; ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
@@ -474,14 +480,18 @@ eda_plot4 = ses_df |&gt; ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
 
 gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>It is observed that there is a stronger positive association between
 percentage of poverty population with crime rate; a weaker positive
 association between unemployment and lack of education with crime rate,
 and a negative association between median household income and crime
 rate.</p>
-<p>We would like to fit a linear model to use these four SES indicators
-as predictors for crime rate outcome in a specific neighborhood.</p>
+</div>
+<div
+id="we-would-like-to-fit-a-linear-model-to-use-these-four-ses-indicators-as-predictors-for-crime-rate-outcome-in-a-specific-neighborhood."
+class="section level3">
+<h3>We would like to fit a linear model to use these four SES indicators
+as predictors for crime rate outcome in a specific neighborhood.</h3>
 <p>Let’s first visualize the distribution of crime rate:</p>
 <pre class="r"><code>ses_df |&gt; ggplot(aes(x = crime_rate)) +
   geom_histogram(alpha = 0.8, color = &quot;white&quot;) + 
@@ -489,13 +499,13 @@ as predictors for crime rate outcome in a specific neighborhood.</p>
     x = &quot;Crime Rate&quot; ,
     y = &quot;Count&quot;,
     title = &quot;Distribution of Crime Rate by Neighborhoods&quot;)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>We can use Box-Cox Transformation to transform the data for linear
 fit</p>
 <pre class="r"><code>initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
 
 MASS::boxcox(initial_fit)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>From the Box-Cox Transformation, log-transformation seems to be the
 best option. We will perform a log transformation on crime rate and use
 this as the predictor.</p>
@@ -523,7 +533,7 @@ run a regression diagnostic by plotting residuals for each borough:</p>
   labs(title = &quot;MLR residuals for each borough&quot;, 
        xlab = &quot;Borough&quot;, 
        ylab = &quot;Residuals&quot;)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>We can further inspect our model by plotting residuals against fitted
 values</p>
 <pre class="r"><code>ses_df |&gt; 
@@ -533,10 +543,33 @@ values</p>
   labs(title = &quot;MLR residuals against fitted value&quot;, 
        xlab = &quot;Residuals&quot;, 
        ylab = &quot;Fitted Values&quot;)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>From the two diagnostics plots above, we can see that the residuals
 are roughly centered around zero, and are relatively normal. This would
 indicate that our model is a relatively good fit.</p>
+</div>
+<div
+id="apply-lasso-regression-to-fine-tune-the-prediction-model-and-remove-predictors-that-are-not-influential-enough."
+class="section level3">
+<h3>Apply Lasso Regression to fine tune the prediction model and remove
+predictors that are not influential enough.</h3>
+<pre class="r"><code># Finding the best lambda
+cv_model &lt;- cv.glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1)
+
+best_lambda &lt;- cv_model$lambda.min
+
+# Conducting the Lasso fit 
+lasso_fit = glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
+
+coef(lasso_fit) </code></pre>
+<pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                             s0
+## (Intercept)      -1.630759e+00
+## pop_pov_pct       2.770070e+01
+## hh_inc_med_adj    3.370468e-05
+## pop16_unemp_pct   2.940526e+00
+## pop_edu_nohs_pct -2.468178e+00</code></pre>
+<p>TO DO: add diagnostics and compare with MLR</p>
 <p>Visualizing trend: are crime rates associated with racial factors?
 (delete??)</p>
 <pre class="r"><code>eda_plot5 = ses_df |&gt; ggplot(aes(x = pop_race_asian_pct, y = crime_rate)) +
@@ -553,7 +586,11 @@ eda_plot8 = ses_df |&gt; ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
 
 gridExtra::grid.arrange(
   eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+</div>
+<div id="discussion" class="section level2">
+<h2>Discussion</h2>
 </div>
 
 

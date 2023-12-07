@@ -1,7 +1,6 @@
 ---
-title: "General Crime Data"
-output: 
-  html_document
+title: "Offense Type Visualization"
+output: html_document
 ---
 
 ------------------------------------------------------------------------
@@ -47,7 +46,9 @@ scale_fill_discrete   = scale_fill_viridis_d
 ```
 
 ```{r load data}
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
+  janitor::clean_names() 
 ```
 
 ```{r data wrangling}
@@ -110,8 +111,11 @@ The most frequent 10 crime categories constitute at least 80% of all the crimes 
 p_1 = df_crime_patterns |>
   group_by(ofns_desc, year) |> 
   summarize(count = n()) |> 
-  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc)+
-  xlab("Year") +ylab("Number of Cases")
+  ggplot(aes(x = year, y = count)) + geom_line() + facet_wrap(~ofns_desc, ncol = 5)+
+  xlab("Year") +ylab("Number of Cases") + 
+  theme_minimal() +
+  theme(strip.background = element_rect(fill = "lightblue", color = "lightblue"))
+  
 ```
 
 ```{r}
@@ -120,16 +124,17 @@ ggplotly(p_1)
 
 ## Number of Cases across Most Frequent 10 Offense Types by Hour in Eash Year
 ```{r}
-p_2= df_crime_patterns %>%
+p_2 = df_crime_patterns %>%
   group_by(year, ofns_desc, hour) %>%
   summarize(count = n(), .groups = 'drop') %>%
   ggplot(aes(x = hour, y = count, color = ofns_desc)) +
   geom_line() +
-  facet_wrap(~year)+
+  facet_wrap(~year) +
   xlab("Hour") +
-  ylab("Count")+
-  labs(color = "Offense Type")
-  
+  ylab("Count") +
+  labs(color = "Offense Type") +
+  theme_minimal()
+
 ```
 
 ```{r}

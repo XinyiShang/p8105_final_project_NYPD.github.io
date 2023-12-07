@@ -9,9 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Miao Fu" />
 
-<meta name="date" content="2023-11-25" />
 
 <title>Suspect and Victim Analysis</title>
 
@@ -326,7 +324,9 @@ div.tocify {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        
+        <li>
+  <a href="Report.html">Report</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -337,40 +337,37 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="General_Crime_Data.html">General Crime Analysis</a>
+      <a href="General_Crime_Data.html">Crime Count Visualization</a>
     </li>
     <li>
-      <a href="crime_patterns.html">Crime Patterns</a>
-    </li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Suspect and Victim
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="demographic.html">Demographic</a>
-    </li>
-    <li>
-      <a href="victim_suspect_correlation.html">Victim Suspect Correlation</a>
+      <a href="crime_patterns.html">Offense Type Visualization</a>
     </li>
   </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Socioeconomics
+    Suspect and Victim Analysis
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="crime-rate-analysis.html">Crime Rate Analysis</a>
+      <a href="demographic.html">Correlation Patterns</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Crime Rate and Socioeconomics
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Crime_Rate_Analysis.html">SES Analysis</a>
     </li>
     <li>
-      <a href="eda_social.html">Social EDA</a>
+      <a href="eda_social.html">Exploratory data analysis</a>
     </li>
   </ul>
 </li>
@@ -398,8 +395,6 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Suspect and Victim Analysis</h1>
-<h4 class="author">Miao Fu</h4>
-<h4 class="date">2023-11-25</h4>
 
 </div>
 
@@ -411,7 +406,53 @@ breakdown in suspects and victims. The analysis is done through three
 aspects: race, age, and sex. We divided the exploration into different
 boroughs as it is a representative way of looking at NYC.</p>
 <div id="race-distribution-across-boroughs" class="section level3">
-<h3>race distribution across boroughs</h3>
+<h3>Race Distribution across Boroughs</h3>
+<pre class="r"><code>susp_race=demo|&gt;
+  select(boro_nm,susp_race)|&gt;
+  group_by(boro_nm,susp_race)|&gt;
+  summarise(count=n())|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(susp_race)=c(&quot;boro_nm&quot;,&quot;race&quot;,&quot;percent_susp&quot;)
+
+vic_race=demo|&gt;
+  select(boro_nm,vic_race)|&gt;
+  group_by(boro_nm,vic_race)|&gt;
+  summarise(count=n())|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(vic_race)=c(&quot;boro_nm&quot;,&quot;race&quot;,&quot;percent_vic&quot;)
+
+combined_race=vic_race|&gt;
+  full_join(susp_race,by=c(&quot;boro_nm&quot;,&quot;race&quot;))|&gt;
+  pivot_longer(
+    cols=starts_with(&quot;percent&quot;),
+    names_to=&quot;category&quot;,
+    values_to=&quot;percent&quot;
+  )|&gt;
+  mutate(
+    category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
+  )
+
+combined_race|&gt;
+  ggplot(aes(x=boro_nm,y=percent,fill=race))+
+  geom_bar(stat=&quot;identity&quot;)+
+  facet_grid(~category)+
+  labs(
+    title=&quot;Race Distribution in Suspects and Victims&quot;,
+    x=&quot;NYC boroughs&quot;,
+    y=&quot;Percentage(%)&quot;
+  )+
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Spectral&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>This figure shows the percentage of different race for all NYC
 boroughs. Black, white, and white hispanic are the top three percent in
@@ -419,95 +460,301 @@ both suspects and victims across boroughs. The distribution of races is
 similar between suspects and victims for each borough.</p>
 </div>
 <div id="age-distribution-across-boroughs" class="section level3">
-<h3>age distribution across boroughs</h3>
+<h3>Age Distribution across Boroughs</h3>
+<pre class="r"><code>susp_age=demo|&gt;
+  select(boro_nm,susp_age_group)|&gt;
+  group_by(boro_nm,susp_age_group)|&gt;
+  summarise(count=n())|&gt;
+  filter(count&gt;10)|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(susp_age)=c(&quot;boro_nm&quot;,&quot;age&quot;,&quot;percent_susp&quot;)
+
+vic_age=demo|&gt;
+  select(boro_nm,vic_age_group)|&gt;
+  group_by(boro_nm,vic_age_group)|&gt;
+  summarise(count=n())|&gt;
+  filter(count&gt;10)|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(vic_age)=c(&quot;boro_nm&quot;,&quot;age&quot;,&quot;percent_vic&quot;)
+
+combined_age=vic_age|&gt;
+  full_join(susp_age)|&gt;
+  pivot_longer(
+    cols=starts_with(&quot;percent&quot;),
+    names_to=&quot;category&quot;,
+    values_to=&quot;percent&quot;
+  )|&gt;
+  mutate(
+    category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
+  )
+
+combined_age|&gt;
+  ggplot(aes(x=boro_nm,y=percent,fill=age))+
+  geom_bar(stat=&quot;identity&quot;)+
+  facet_grid(~category)+
+  labs(
+    title=&quot;Age Distribution in Suspects and Victims&quot;,
+    x=&quot;NYC boroughs&quot;,
+    y=&quot;Percentage(%)&quot;
+  )+
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>This figure shows the percentage of age group for suspect and victim
 in all NYC boroughs. Majority of suspects and victims come from the age
 group of 25-44. The distribution of age is similar between suspects and
 victims for each borough as well as across boroughs.</p>
+<pre class="r"><code>data=df_nypd|&gt;
+  select(law_cat_cd,susp_age_group,susp_race,susp_sex,vic_age_group,vic_race,vic_sex)|&gt;
+  mutate_all(~na_if(.,&quot;UNKNOWN&quot;))|&gt;
+  na.omit()</code></pre>
 </div>
 <div id="sex-distribution-across-boroughs" class="section level3">
-<h3>sex distribution across boroughs</h3>
-<p><img src="demographic_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<h3>Sex Distribution across Boroughs</h3>
+<pre class="r"><code>susp_sex=demo|&gt;
+  select(boro_nm,susp_sex)|&gt;
+  group_by(boro_nm,susp_sex)|&gt;
+  summarise(count=n())|&gt;
+  filter(susp_sex!=&quot;U&quot;)|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(susp_sex)=c(&quot;boro_nm&quot;,&quot;sex&quot;,&quot;percent_susp&quot;)
+
+vic_sex=demo|&gt;
+  select(boro_nm,vic_sex)|&gt;
+  group_by(boro_nm,vic_sex)|&gt;
+  summarise(count=n())|&gt;
+  filter(vic_sex%in%c(&quot;F&quot;,&quot;M&quot;))|&gt;
+  group_by(boro_nm)|&gt;
+  mutate(total=sum(count),
+         percent=(count/total)*100)|&gt;
+  select(-count,-total)
+
+colnames(vic_sex)=c(&quot;boro_nm&quot;,&quot;sex&quot;,&quot;percent_vic&quot;)
+
+combined_sex=vic_sex|&gt;
+  full_join(susp_sex)|&gt;
+  pivot_longer(
+    cols=starts_with(&quot;percent&quot;),
+    names_to=&quot;category&quot;,
+    values_to=&quot;percent&quot;
+  )|&gt;
+  mutate(
+    category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
+  )
+
+combined_sex|&gt;
+  ggplot(aes(x=boro_nm,y=percent,fill=sex))+
+  geom_bar(stat=&quot;identity&quot;)+
+  facet_grid(~category)+
+  labs(
+    title=&quot;Sex Distribution in Suspects and Victims&quot;,
+    x=&quot;NYC boroughs&quot;,
+    y=&quot;Percentage(%)&quot;
+  )+
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
+<p><img src="demographic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>This figure shows the percentage of sex in suspects and victims for
 all NYC boroughs. Around 75% of suspects are male and around 25% are
 female for all boroughs. Around 70% of victims are female and around 30%
 are male for all boroughs.</p>
+<p>The following queries are exploring the demographic information
+breakdown in suspects and victims by the severity of the crime reported.
+Using the crime levels of violation, misdemeanor, and felony, these
+charts visualize the counts of suspects/victims by race, age, and sex,
+respectively.</p>
 </div>
 </div>
-<div id="project-report-paragaph" class="section level2">
-<h2>Project Report paragaph</h2>
-<div id="data" class="section level3">
-<h3>Data</h3>
-<p>A subset of the master dataset was created specifically for
-demographic distribution analysis by selecting the relevant variables.
-Rows with missing values were dropped for data cleaning purpose. The
-demographic dataset is further divided into suspects and victims
-datasets to calculate the percentage of race, age and sex. Columns with
-incorrect data values are further cleaned up. The demographic dataset
-has following variables:</p>
-<ul>
-<li><code>boro_nm</code>: NYC borough name<br />
-</li>
-<li><code>susp_age_group</code>: Age group the suspect belongs to
-(&lt;18, 18-24, 25-44, 45-64, 65+)<br />
-</li>
-<li><code>susp_race</code>: Suspect race (AMERICAN INDIAN/ALASKAN
-NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE
-HISPANIC)<br />
-</li>
-<li><code>susp_sex</code>: Suspect sex (Female, Male)<br />
-</li>
-<li><code>vic_age_group</code>: Age group the victim belongs to (&lt;18,
-18-24, 25-44, 45-64, 65+)<br />
-</li>
-<li><code>vic_race</code>: Victim race (AMERICAN INDIAN/ALASKAN NATIVE,
-ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE
-HISPANIC)<br />
-</li>
-<li><code>vic_sex</code>: Victim sex (Female, Male)</li>
-</ul>
+<div id="correlation-patterns-vs.-level-of-offense"
+class="section level2">
+<h2>Correlation Patterns vs. Level of Offense</h2>
+<div id="suspectvictim-race-by-level-of-offense" class="section level3">
+<h3>Suspect/Victim Race by Level of Offense</h3>
+<pre class="r"><code>race_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;race&quot;, susp_race, vic_race)
+
+race_plot &lt;- ggplot(race_combined, aes(x = law_cat_cd, fill = race)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of supect and victim race by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Race&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(race_plot)</code></pre>
+<p><img src="demographic_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Looking at this chart, we can see that black individuals have the
+highest counts across all crimes for both suspects and victims. In both
+charts, white Hispanic individuals make up the 2nd highest count, and
+then white individuals make up the 3rd. For suspects, black Hispanic
+individuals make up the 4th highest count, but Asian/Pacific Islander
+make up the 4th highest count of victims.</p>
 </div>
-<div id="exploratory-analysis" class="section level3">
-<h3>Exploratory analysis</h3>
-<p>Three barplots were created to visualize the distribution of race,
-age, and sex in suspects and victims. Number of suspects and number of
-victims are separately counted in each race, age, and sex groups.
-Initially, count of suspects and victims in each race, age, and sex
-groups were plotted. However, the different total population of each
-borough made it difficult to directly visualize the distributions. Thus,
-percentage of suspects and victims in each race, age, and sex groups
-were calculated by dividing the count by total number of suspects or
-victims in each borough.</p>
+<div id="suspectvictim-age-by-level-of-offense" class="section level3">
+<h3>Suspect/Victim Age by Level of Offense</h3>
+<pre class="r"><code>age_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;age&quot;, susp_age_group, vic_age_group)
+
+age_plot &lt;- data |&gt; 
+  filter(susp_age_group %in% c(&#39;&lt;18&#39;, &#39;18-24&#39;, &#39;25-44&#39;, &#39;45-64&#39;, &#39;65+&#39;) &amp; vic_age_group %in% c(&#39;&lt;18&#39;, &#39;18-24&#39;, &#39;25-44&#39;, &#39;45-64&#39;, &#39;65+&#39;)) |&gt; 
+  gather(key = &quot;variable&quot;, value = &quot;age&quot;, susp_age_group, vic_age_group) |&gt; 
+  ggplot(aes(x = law_cat_cd, fill = age)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of suspect and victim age by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Age&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(age_plot)</code></pre>
+<p><img src="demographic_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>In this chart we see that the 25-44 age group is the most populous
+for both suspects and victims across all levels of crime. Interestingly,
+the 18-24 group is the 2nd greatest for felony suspects, the 45-64 group
+is the 2nd highest for violation suspects, and both are relatively equal
+for misdemeanor suspects. Among the victims, 45-64 are consistently the
+2nd highest, with 18-24 following them.</p>
 </div>
-<div id="discussion" class="section level3">
-<h3>Discussion</h3>
-<p>It is interesting to see the distribution of race are quite similar
-between suspects and victims. This suggests that the racial composition
-of individuals involved as suspects or victims is consistent across the
-dataset. The distribution of race are also similar between boroughs.
-This suggests that there is no significant variation in the racial
-demographics of incidents across different boroughs. The distribution of
-age group are also similar between suspects and victims, as well as
-across boroughs. This implies consistency in age demographics across
-dataset and NYC boroughs. In combined, we observe consistency in the
-race and age group distribution in suspects and victims in NYC crimes.
-The distributions are uniform throughout the city, which was not
-expected. The uniformity in demographic patterns may indicate systemic
-factors influencing incidents rather than borough-specific or
-role-specific(suspect vs victim) factors.<br />
-</p>
-<p>On the other hand, the distribution of sex in suspects and victims
-show significantly more male suspects than female suspects across all 7
-NYC boroughs. This suggests a consistent gender disparity among
-individuals identified as suspects. Additionally, there are
-significantly more female victims than male victims across all 7 NYC
-boroughs. In combined, the data highlights a gender imbalance with a
-higher proportion of males being identified as suspects and a higher
-proportion of females being victims. The gender distribution is not
-surprising and confirms what we expected. The observed gender
-disparities may suggests potential sociological or systemic factors
-influencing crime reporting, law enforcement, or victimization.</p>
+<div id="suspectvictim-sex-by-level-of-offense" class="section level3">
+<h3>Suspect/Victim Sex by Level of Offense</h3>
+<pre class="r"><code>sex_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;sex&quot;, susp_sex, vic_sex)
+
+sex_plot &lt;- data |&gt; 
+  filter(susp_sex %in% c(&#39;F&#39;, &#39;M&#39;) &amp; vic_sex %in% c(&#39;F&#39;, &#39;M&#39;)) |&gt; 
+  gather(key = &quot;variable&quot;, value = &quot;sex&quot;, susp_sex, vic_sex) |&gt; 
+  ggplot(aes(x = law_cat_cd, fill = sex)) +
+  geom_bar(position = &quot;dodge&quot;) +
+  labs(title = &quot;Distribution of suspect and victim sex by level of offense&quot;) +
+  guides(fill = guide_legend(title = &quot;Sex&quot;)) +
+  facet_wrap(~variable, scales = &quot;free_x&quot;, ncol = 2) +
+  theme_minimal()+
+  scale_fill_viridis_d()+
+  #scale_fill_brewer(palette = &quot;Dark2&quot;)+
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+print(sex_plot)</code></pre>
+<p><img src="demographic_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>In this chart we see that women make up a greater number of victims,
+while men make up a greater number of suspects. However, the disparity
+between sexes is smaller among the victims than it is among the
+suspects.</p>
+<p>Throughout our public health education, we have learned about the
+importance of intersectionality. While these snapshots give us
+information about key demographic identities, we may be missing some
+kind of bigger picture. So, now we will investigate which combinations
+of identities are the most prevalent among the suspects and victims.</p>
+</div>
+<div id="top-5-combinations-for-both-victim-and-suspect"
+class="section level3">
+<h3>Top 5 Combinations for both Victim and Suspect</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">vic_age_group</th>
+<th align="left">vic_race</th>
+<th align="left">vic_sex</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">116922</td>
+</tr>
+<tr class="even">
+<td align="left">25-44</td>
+<td align="left">WHITE HISPANIC</td>
+<td align="left">F</td>
+<td align="right">75828</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">48217</td>
+</tr>
+<tr class="even">
+<td align="left">45-64</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">46294</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">WHITE</td>
+<td align="left">F</td>
+<td align="right">39104</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">susp_age_group</th>
+<th align="left">susp_race</th>
+<th align="left">susp_sex</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">161899</td>
+</tr>
+<tr class="even">
+<td align="left">25-44</td>
+<td align="left">WHITE HISPANIC</td>
+<td align="left">M</td>
+<td align="right">84750</td>
+</tr>
+<tr class="odd">
+<td align="left">25-44</td>
+<td align="left">BLACK</td>
+<td align="left">F</td>
+<td align="right">55501</td>
+</tr>
+<tr class="even">
+<td align="left">45-64</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">52222</td>
+</tr>
+<tr class="odd">
+<td align="left">18-24</td>
+<td align="left">BLACK</td>
+<td align="left">M</td>
+<td align="right">50762</td>
+</tr>
+</tbody>
+</table>
+<p>After creating these tables, we are able to see that black women
+between the ages of 25-44 make up the highest count of victims, and
+black men between the ages of 25-44 make up the highest count of
+suspects. Policies targeted towards reducing crime and protecting
+civilians should take into consideration the unique socio-ecological
+factors surrounding these groups.</p>
 </div>
 </div>
 

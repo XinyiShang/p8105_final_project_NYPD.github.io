@@ -15,7 +15,9 @@ library(gridExtra)
 ```
 
 ```{r,include=FALSE}
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
+#  janitor::clean_names() 
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
   janitor::clean_names() 
 
 data=df_nypd|>

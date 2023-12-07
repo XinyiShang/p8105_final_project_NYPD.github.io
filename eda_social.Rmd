@@ -1,7 +1,5 @@
 ---
-title: "EDA_social"
-author: "Siqing Wang/Yuki Joyama"
-date: "2023-12-05"
+title: "Exploratory Data Visualization"
 output: 
   html_document:
     keep_md: yes
@@ -17,41 +15,32 @@ library(tidyverse)
 library(dplyr)
 library(sf)
 library(tmap)
-library(leaflet)
-library(leafgl)
 library(plotly)
-library(leaflet.extras)
 ```
 
+While examining the NYPD crime complaint data, we expect crime rate to be indicative by the socioeconomic status of a specific neighborhood. In this section, we calculated the crime rate for each neighborhood each year, and displayed the top neighborhoods with highest crime rate, along with what their crime composition looks like. We are also interested in whether crime rate can be predictive of rent in corresponding neighborhoods. 
 
-```{r,include=FALSE}
+
+```{r}
 # Import and clead NYPD data
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
 
 ## Siqing' note: I'm currently reading from my local file. Yuki, when you run this file please comment out the chunk below and use the dropbox. Thanks!!
 
-# df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
-#   janitor::clean_names()
-
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/1j6emjrdo3zbjrt5ehgq0/NYPD_Complaint_Data_Historic.csv?rlkey=co02d6vsgxr0aj44r7uhnbz64&dl=1", na = "(null)") |> 
-  janitor::clean_names() 
-
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
+  janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
 #Merging neighborhood information with NYPD data, keep only relevant variables
 nypd_ses_df = df_nypd |> 
-  select(addr_pct_cd, cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc, latitude, longitude) |> 
+  select(cmplnt_num, cmplnt_fr_dt, addr_pct_cd, crm_atpt_cptd_cd, law_cat_cd, susp_age_group, susp_race, susp_sex, vic_age_group, vic_race, vic_sex, ofns_desc, pd_desc, latitude, longitude) |> 
   rename(precinct = addr_pct_cd) |> 
   mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = "%m/%d/%Y"),
          year = format(cmplnt_fr_dt, "%Y")) |> 
-  left_join(prec_neighbor, by = "precinct") |> 
-  drop_na(neighborhood) # drop values missing neighborhood info 
-```
+  left_join(prec_neighbor, by = "precinct")
 
-
-```{r}
 #Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
 neighbor_ses = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "Data") |> 
   janitor::clean_names() |> 
@@ -67,9 +56,7 @@ neighbor_rent = readxl::read_excel("data/neighorhood_indicators.xlsx", sheet = "
   rename(neighborhood = region_name) |> 
   filter(year == "2017-2021") |> 
   select(neighborhood, gross_rent_0_1beds, gross_rent_2_3beds)
-```
 
-```{r}
 #ses_df has crime rate and SES indicators for each neighborhood
 ses_df = nypd_ses_df |> 
   group_by(year, borough, neighborhood) |> 
@@ -192,7 +179,7 @@ ses_df |> group_by(borough, neighborhood) |>
   arrange(desc(avg_crime_rate)) |> tail(5) |> knitr::kable()
 ```
 
-Since CUMC is located in Manhattan, let's visualize the crime rate in Manhattan: 
+Since CUMC is located in Manhattan, let's also visualize the crime rate in Manhattan:
 
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
@@ -311,6 +298,8 @@ ses_df |> group_by(neighborhood) |>
 ```
 
 There appears to be no obvious association between rent and crime rate.  
+
+## Discussion
 
 
 
