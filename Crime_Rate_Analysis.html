@@ -11,9 +11,9 @@
 
 
 
-<title>SES Analysis</title>
+<title>Crime Rate Analysis</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -394,7 +394,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">SES Analysis</h1>
+<h1 class="title toc-ignore">Crime Rate Analysis</h1>
 
 </div>
 
@@ -448,20 +448,17 @@ ses_df = nypd_ses_df |&gt;
 ses_df = ses_df |&gt; merge(neighbor_ses, by = c(&quot;year&quot;, &quot;neighborhood&quot;)) |&gt; 
   mutate(crime_rate = (crime_num/pop_num) * 100,000) |&gt; 
   left_join(neighbor_rent, by = &quot;neighborhood&quot;)</code></pre>
-<div
-id="are-crime-rates-associated-with-poverty-income-and-educational-level"
-class="section level2">
-<h2>Are crime rates associated with poverty, income, and educational
-level?</h2>
-<div
-id="visualizing-potential-association-between-poverty-income-and-educational-level-with-crime-rate"
-class="section level3">
-<h3>Visualizing potential association between poverty, income, and
-educational level with crime rate:</h3>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
+<div id="visualization-of-potential-association" class="section level3">
+<h3>Visualization of potential association</h3>
+<p>We start by visualizing potential association between factors that we
+hypothesize to impact crime rate, these are poverty, unemployment,
+income, and education.</p>
 <pre class="r"><code>eda_plot1 = ses_df |&gt; ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;Population in Poverty vs. Crime Rate&quot;)
+  labs(title = &quot;% below poverty threshold vs. Crime Rate&quot;)
 
 eda_plot2 = ses_df |&gt; ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
   geom_point() + 
@@ -471,12 +468,12 @@ eda_plot2 = ses_df |&gt; ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
 eda_plot3 = ses_df |&gt; ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;Population Unemployment Percentage vs. Crime Rate&quot;)
+  labs(title = &quot;% umployed vs. Crime Rate&quot;)
 
 eda_plot4 = ses_df |&gt; ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;Population with No High School Education vs. Crime Rate&quot;)
+  labs(title = &quot;% without High School Education vs. Crime Rate&quot;)
 
 gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)</code></pre>
@@ -487,11 +484,8 @@ association between unemployment and lack of education with crime rate,
 and a negative association between median household income and crime
 rate.</p>
 </div>
-<div
-id="we-would-like-to-fit-a-linear-model-to-use-these-four-ses-indicators-as-predictors-for-crime-rate-outcome-in-a-specific-neighborhood."
-class="section level3">
-<h3>We would like to fit a linear model to use these four SES indicators
-as predictors for crime rate outcome in a specific neighborhood.</h3>
+<div id="data-transformation-for-mlr" class="section level3">
+<h3>Data transformation for MLR</h3>
 <p>Let’s first visualize the distribution of crime rate:</p>
 <pre class="r"><code>ses_df |&gt; ggplot(aes(x = crime_rate)) +
   geom_histogram(alpha = 0.8, color = &quot;white&quot;) + 
@@ -500,97 +494,158 @@ as predictors for crime rate outcome in a specific neighborhood.</h3>
     y = &quot;Count&quot;,
     title = &quot;Distribution of Crime Rate by Neighborhoods&quot;)</code></pre>
 <p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>We can use Box-Cox Transformation to transform the data for linear
-fit</p>
-<pre class="r"><code>initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+<p>Since the data is slightly right-skewed, we can use the Box-Cox
+Transformation to transform the data for linear fit</p>
+<pre class="r"><code>initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + pop_foreign_pct, data = ses_df)
 
 MASS::boxcox(initial_fit)</code></pre>
 <p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>From the Box-Cox Transformation, log-transformation seems to be the
 best option. We will perform a log transformation on crime rate and use
 this as the predictor.</p>
+</div>
+<div id="model-fitting" class="section level3">
+<h3>Model fitting</h3>
+<p>To achieve the best model, we will use a “manual” backward
+elimination approach: first by fitting a MLR with all possible factors,
+and gradually remove factors that are not significant.</p>
 <pre class="r"><code>ses_df = ses_df |&gt; mutate(
   log_crime_rate = log(crime_rate)
 )
 
-log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
+log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + pop_foreign_pct, data = ses_df)
 
-broom::tidy(log_fit)</code></pre>
-<pre><code>## # A tibble: 5 × 5
-##   term                estimate  std.error statistic  p.value
-##   &lt;chr&gt;                  &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 (Intercept)       0.421      0.203          2.07  3.94e- 2
-## 2 pop_pov_pct       4.64       0.483          9.61  2.27e-18
-## 3 hh_inc_med_adj    0.00000550 0.00000140     3.92  1.19e- 4
-## 4 pop16_unemp_pct   0.560      0.749          0.748 4.55e- 1
-## 5 pop_edu_nohs_pct -0.439      0.493         -0.890 3.74e- 1</code></pre>
-<p>From the result of the MLR, it is observed that all 4 predictors are
-significant in terms of association with the crime rate outcome. We can
-run a regression diagnostic by plotting residuals for each borough:</p>
+summary(log_fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + 
+##     pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + 
+##     pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + 
+##     pop_foreign_pct, data = ses_df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.73689 -0.19577 -0.00971  0.17691  1.09847 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)         5.922e-01  1.018e+00   0.582  0.56137    
+## pop_pov_pct         5.315e+00  5.653e-01   9.403  &lt; 2e-16 ***
+## hh_inc_med_adj      9.872e-06  1.457e-06   6.775 1.28e-10 ***
+## pop16_unemp_pct    -1.384e+00  7.481e-01  -1.851  0.06567 .  
+## pop_edu_nohs_pct   -1.716e+00  6.400e-01  -2.681  0.00793 ** 
+## pop_race_asian_pct -3.306e-01  1.041e+00  -0.318  0.75118    
+## pop_race_black_pct  1.300e-01  1.007e+00   0.129  0.89739    
+## pop_race_hisp_pct   2.961e-01  9.690e-01   0.306  0.76023    
+## pop_race_white_pct -1.050e+00  9.846e-01  -1.067  0.28741    
+## pop_foreign_pct     2.877e-02  2.901e-01   0.099  0.92108    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.2986 on 206 degrees of freedom
+## Multiple R-squared:  0.5819, Adjusted R-squared:  0.5636 
+## F-statistic: 31.86 on 9 and 206 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>According to the MLR fit result, three factors are significant:
+percentage of population below poverty line, median household income,
+and percentage of population above 25 years old without high school
+degree.</p>
+<p>We will fine tune our model based on this three factors.</p>
+<pre class="r"><code>log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop_edu_nohs_pct, data = ses_df)
+
+summary(log_fit_optimized)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + 
+##     pop_edu_nohs_pct, data = ses_df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.06232 -0.20232 -0.00345  0.23603  1.05242 
+## 
+## Coefficients:
+##                    Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       4.521e-01  1.982e-01   2.281 0.023556 *  
+## pop_pov_pct       4.761e+00  4.546e-01  10.473  &lt; 2e-16 ***
+## hh_inc_med_adj    5.377e-06  1.391e-06   3.866 0.000147 ***
+## pop_edu_nohs_pct -4.502e-01  4.927e-01  -0.914 0.361884    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3555 on 212 degrees of freedom
+## Multiple R-squared:  0.3901, Adjusted R-squared:  0.3814 
+## F-statistic: 45.19 on 3 and 212 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>As we removed many insignificant predictors, education factor lost
+its significance as well. Our final model will only include two
+predictors: percentage of population below poverty line and median
+household income.</p>
+<pre class="r"><code>log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj, data = ses_df)
+
+summary(log_fit_optimized)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj, data = ses_df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.05481 -0.20115 -0.01538  0.23201  1.07555 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    3.434e-01  1.585e-01   2.167   0.0314 *  
+## pop_pov_pct    4.644e+00  4.358e-01  10.654  &lt; 2e-16 ***
+## hh_inc_med_adj 6.049e-06  1.180e-06   5.127 6.59e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3554 on 213 degrees of freedom
+## Multiple R-squared:  0.3876, Adjusted R-squared:  0.3819 
+## F-statistic: 67.42 on 2 and 213 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Both of these 2 predictors are significant. We can also check for
+multicollinearity of our optimized model</p>
+<pre class="r"><code>performance::check_collinearity(log_fit_optimized)</code></pre>
+<pre><code>## # Check for Multicollinearity
+## 
+## Low Correlation
+## 
+##            Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+##     pop_pov_pct 2.38 [1.97, 2.97]         1.54      0.42     [0.34, 0.51]
+##  hh_inc_med_adj 2.38 [1.97, 2.97]         1.54      0.42     [0.34, 0.51]</code></pre>
+<p>Multicollinearity is low between our two predictors and is within the
+acceptable range.</p>
+</div>
+</div>
+<div id="mlr-model-diagnostics" class="section level2">
+<h2>MLR model diagnostics</h2>
+<p>We can run a regression diagnostic by plotting residuals for each
+borough:</p>
 <pre class="r"><code>ses_df |&gt; 
-  modelr::add_residuals(log_fit) |&gt; 
+  modelr::add_residuals(log_fit_optimized) |&gt; 
   ggplot(aes(x = borough, y = resid)) + geom_violin() + 
   labs(title = &quot;MLR residuals for each borough&quot;, 
        xlab = &quot;Borough&quot;, 
        ylab = &quot;Residuals&quot;)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>We can further inspect our model by plotting residuals against fitted
 values</p>
 <pre class="r"><code>ses_df |&gt; 
-  modelr::add_residuals(log_fit) |&gt; 
-  modelr::add_predictions(log_fit) |&gt; 
+  modelr::add_residuals(log_fit_optimized) |&gt; 
+  modelr::add_predictions(log_fit_optimized) |&gt; 
   ggplot(aes(x = pred, y = resid, color = borough)) + geom_point() +
   labs(title = &quot;MLR residuals against fitted value&quot;, 
        xlab = &quot;Residuals&quot;, 
        ylab = &quot;Fitted Values&quot;)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>From the two diagnostics plots above, we can see that the residuals
 are roughly centered around zero, and are relatively normal. This would
 indicate that our model is a relatively good fit.</p>
+<div id="discussion" class="section level3">
+<h3>Discussion</h3>
+<p>From this model, we conclude that the crime rate for a specific
+neighborhood is highly associated with the percentage of people below
+poverty line, and the median household income. From diagnostic analysis,
+the multicollinearity between the 2 factors are low, and our model is a
+relatively good fit by inspecting residuals and fitted values.</p>
 </div>
-<div
-id="apply-lasso-regression-to-fine-tune-the-prediction-model-and-remove-predictors-that-are-not-influential-enough."
-class="section level3">
-<h3>Apply Lasso Regression to fine tune the prediction model and remove
-predictors that are not influential enough.</h3>
-<pre class="r"><code># Finding the best lambda
-cv_model &lt;- cv.glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1)
-
-best_lambda &lt;- cv_model$lambda.min
-
-# Conducting the Lasso fit 
-lasso_fit = glmnet(data.matrix(ses_df[, c(&#39;pop_pov_pct&#39;, &#39;hh_inc_med_adj&#39;, &#39;pop16_unemp_pct&#39;, &#39;pop_edu_nohs_pct&#39;)]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
-
-coef(lasso_fit) </code></pre>
-<pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
-##                             s0
-## (Intercept)      -1.630759e+00
-## pop_pov_pct       2.770070e+01
-## hh_inc_med_adj    3.370468e-05
-## pop16_unemp_pct   2.940526e+00
-## pop_edu_nohs_pct -2.468178e+00</code></pre>
-<p>TO DO: add diagnostics and compare with MLR</p>
-<p>Visualizing trend: are crime rates associated with racial factors?
-(delete??)</p>
-<pre class="r"><code>eda_plot5 = ses_df |&gt; ggplot(aes(x = pop_race_asian_pct, y = crime_rate)) +
-  geom_point() +  labs(title = &quot;Asian% in Poverty vs. Crime Rate&quot;)
-
-eda_plot6 = ses_df |&gt; ggplot(aes(x = pop_race_black_pct, y = crime_rate)) +
-  geom_point() +  labs(title = &quot;Black% in Poverty vs. Crime Rate&quot;)
-
-eda_plot7 = ses_df |&gt; ggplot(aes(x = pop_race_hisp_pct, y = crime_rate)) +
-  geom_point() +  labs(title = &quot;Hispanic% in Poverty vs. Crime Rate&quot;)
-
-eda_plot8 = ses_df |&gt; ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
-  geom_point() +  labs(title = &quot;White% in Poverty vs. Crime Rate&quot;)
-
-gridExtra::grid.arrange(
-  eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)</code></pre>
-<p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-</div>
-</div>
-<div id="discussion" class="section level2">
-<h2>Discussion</h2>
 </div>
 
 
