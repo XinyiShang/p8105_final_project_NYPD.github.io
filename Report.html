@@ -13,7 +13,7 @@
 
 <title>Report</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -410,65 +410,116 @@ div.tocify {
 </div>
 <div id="data-source-scraping-method-cleaning" class="section level1">
 <h1>Data (Source scraping method cleaning)</h1>
-<div id="suspects-and-victims" class="section level2">
-<h2>Suspects and Victims</h2>
+<div id="primary-data-source" class="section level3">
+<h3>Primary Data Source</h3>
+<p>Our main data source is NYPD historic complaint data. The raw data
+includes all valid felony, misdemeanor, and violation crimes reported to
+NYPD from 2006 to 2022, and we filtered the data to only investigate
+crime data between 2017 and 2022 to limit data size.</p>
+</div>
+<div id="suspects-and-victims" class="section level3">
+<h3>Suspects and Victims</h3>
 <p>A subset of the master dataset was created specifically for
 demographic distribution analysis by selecting the relevant variables.
 Rows with missing values were dropped for data cleaning purpose. The
 demographic dataset is further divided into suspects and victims
 datasets to calculate the percentage of race, age and sex. Columns with
 incorrect data values are further cleaned up. The demographic dataset
-has following variables:</p>
-<ul>
-<li><code>boro_nm</code>: NYC borough name<br />
-</li>
-<li><code>susp_age_group</code>: Age group the suspect belongs to
-(&lt;18, 18-24, 25-44, 45-64, 65+)<br />
-</li>
-<li><code>susp_race</code>: Suspect race (AMERICAN INDIAN/ALASKAN
-NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE
-HISPANIC)<br />
-</li>
-<li><code>susp_sex</code>: Suspect sex (Female, Male)<br />
-</li>
-<li><code>vic_age_group</code>: Age group the victim belongs to (&lt;18,
+has following variables: * <code>boro_nm</code>: NYC borough name<br />
+* <code>susp_age_group</code>: Age group the suspect belongs to (&lt;18,
 18-24, 25-44, 45-64, 65+)<br />
-</li>
-<li><code>vic_race</code>: Victim race (AMERICAN INDIAN/ALASKAN NATIVE,
+* <code>susp_race</code>: Suspect race (AMERICAN INDIAN/ALASKAN NATIVE,
 ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE
 HISPANIC)<br />
-</li>
-<li><code>vic_sex</code>: Victim sex (Female, Male)</li>
-</ul>
+* <code>susp_sex</code>: Suspect sex (Female, Male)<br />
+* <code>vic_age_group</code>: Age group the victim belongs to (&lt;18,
+18-24, 25-44, 45-64, 65+)<br />
+* <code>vic_race</code>: Victim race (AMERICAN INDIAN/ALASKAN NATIVE,
+ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE
+HISPANIC)<br />
+* <code>vic_sex</code>: Victim sex (Female, Male)</p>
 </div>
+<div id="crime-rate-and-socioeconomics-analysis" class="section level3">
+<h3>Crime Rate and Socioeconomics analysis</h3>
+<p>To conduct neighborhood-level analysis, we matched the police
+precinct data from the NYPD complaint data to their specific
+neighborhood according to Golub et al. (2006). This allowed us to also
+match crime data and socioeconomics data with the respective
+neighborhood.</p>
+<p>For socioeconomic factor analysis, we utilized the New York City
+neighborhood indicator from the NYU Furman Center, and we only filtered
+for years between 2017 and 2022 as well as only kept the variables of
+interest, such as percentage under poverty threshold, median income,
+education, unemployment rate, race, and immigration factors. Using the
+total population data from this source, we were able to calculate the
+crime rate per neighborhood: Crime Rate = (Total number of complaints in
+a neighborhood in a given year / Total population in a neighborhood in a
+given year) * 100,000. We merged the socioeconomic data and crime rate
+by neighborhood to conduct regression analyses.</p>
 </div>
-<div id="regression-analysis" class="section level1">
-<h1>Regression Analysis</h1>
+<div id="data-quality-issues" class="section level3">
+<h3>Data quality issues</h3>
+<p>We noticed that there are missing SES data for the year 2020 and
+2022; therefore, our regression analyses are based on the data in 2017,
+2018, 2019, and 2021.</p>
+</div>
 </div>
 <div id="exploratory-analysis" class="section level1">
 <h1>Exploratory analysis</h1>
 <p>(Visualizations, summaries, and exploratory statistical analysies.
-Justify the steps you took, and show any major change to your ideas) ##
-Suspects and Victims Three barplots were created to visualize the
-distribution of race, age, and sex in suspects and victims. Number of
-suspects and number of victims are separately counted in each race, age,
-and sex groups. Initially, count of suspects and victims in each race,
-age, and sex groups were plotted. However, the different total
-population of each borough made it difficult to directly visualize the
-distributions. Thus, percentage of suspects and victims in each race,
-age, and sex groups were calculated by dividing the count by total
-number of suspects or victims in each borough. # Discussion ## Suspects
-and Victims It is interesting to see the distribution of race are quite
-similar between suspects and victims. This suggests that the racial
-composition of individuals involved as suspects or victims is consistent
-across the dataset. The distribution of race are also similar between
-boroughs. This suggests that there is no significant variation in the
-racial demographics of incidents across different boroughs. The
-distribution of age group are also similar between suspects and victims,
-as well as across boroughs. This implies consistency in age demographics
-across dataset and NYC boroughs. In combined, we observe consistency in
-the race and age group distribution in suspects and victims in NYC
-crimes. The distributions are uniform throughout the city, which was not
+Justify the steps you took, and show any major change to your ideas)</p>
+<div id="suspects-and-victims-1" class="section level3">
+<h3>Suspects and Victims</h3>
+<p>Three barplots were created to visualize the distribution of race,
+age, and sex in suspects and victims. Number of suspects and number of
+victims are separately counted in each race, age, and sex groups.
+Initially, count of suspects and victims in each race, age, and sex
+groups were plotted. However, the different total population of each
+borough made it difficult to directly visualize the distributions. Thus,
+percentage of suspects and victims in each race, age, and sex groups
+were calculated by dividing the count by total number of suspects or
+victims in each borough.</p>
+</div>
+<div id="crime-rate-by-neighborhood" class="section level3">
+<h3>Crime rate by neighborhood</h3>
+<p>Together with the SES indicator data, we calculated the average crime
+rate (2017 - 2022) for each neighborhood. We displayed tables showing
+the 5 neighborhoods with highest and lowest crime rate, along with the
+most common types of crimes in the 5 neighborhoods with highest crime
+rate. Since our CUMC campus is located in Washington Heights, we also
+showed the top 10 types of crime in our neighborhood.</p>
+</div>
+</div>
+<div id="regression-analysis" class="section level1">
+<h1>Regression Analysis</h1>
+<div id="socioeconomics-factors-and-crime-rate" class="section level3">
+<h3>Socioeconomics factors and crime rate</h3>
+<p>We applied a MLR model to investigate potential socioeconomics
+factors that are associated with crime rate, including percentage of
+population below poverty line, median household income, education,
+unemployment, race, and immigration status. Using a backward elimination
+approach, we shortlisted percentage of population below poverty line and
+median household income as the main predictors of crime rate. We also
+ran a diagnostics analysis of this model, confirming low
+multicollinearity between the two predictors, and confirmed that
+residuals are around 0.</p>
+</div>
+</div>
+<div id="discussion" class="section level1">
+<h1>Discussion</h1>
+<div id="suspects-and-victims-2" class="section level3">
+<h3>Suspects and Victims</h3>
+<p>It is interesting to see the distribution of race are quite similar
+between suspects and victims. This suggests that the racial composition
+of individuals involved as suspects or victims is consistent across the
+dataset. The distribution of race are also similar between boroughs.
+This suggests that there is no significant variation in the racial
+demographics of incidents across different boroughs. The distribution of
+age group are also similar between suspects and victims, as well as
+across boroughs. This implies consistency in age demographics across
+dataset and NYC boroughs. In combined, we observe consistency in the
+race and age group distribution in suspects and victims in NYC crimes.
+The distributions are uniform throughout the city, which was not
 expected. The uniformity in demographic patterns may indicate systemic
 factors influencing incidents rather than borough-specific or
 role-specific(suspect vs victim) factors.<br />
@@ -484,6 +535,22 @@ proportion of females being victims. The gender distribution is not
 surprising and confirms what we expected. The observed gender
 disparities may suggests potential sociological or systemic factors
 influencing crime reporting, law enforcement, or victimization.</p>
+</div>
+<div id="socioeconomics-factors-and-crime-rate-1"
+class="section level3">
+<h3>Socioeconomics factors and crime rate</h3>
+<p>It was to our surprise that the Chelsea/Clinton/Midtown neighborhood
+has the highest average crime rate, but this is subsequently explained
+by a great percentage of petite and grand larceny. In areas of highest
+crime rate, larceny, harassment, assault, and criminal mischief are the
+most common types of crime.</p>
+<p>For the regression analysis investigating crime rate as an outcome,
+it is aligned with our hypothesis that percentage of population below
+poverty line and median household income are the two main significant
+factors associated with crime rate. We originally expected high
+collinearity between these two factors, but the VIF analysis did not
+show such evidence.</p>
+</div>
 </div>
 
 
