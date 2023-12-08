@@ -615,20 +615,23 @@ source</a></li>
 dropbox</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>df_nypd <span class="ot">=</span> <span class="fu">read_csv</span>(<span class="st">&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;</span>, <span class="at">na =</span> <span class="st">&quot;(null)&quot;</span>) <span class="sc">|&gt;</span> <span class="co"># some values are coded as &quot;(null)&quot; in the df; rewrite them as NA</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() </span></code></pre></div>
-<pre><code>## Warning: One or more parsing issues, call `problems()`
-## on your data frame for details, e.g.:
+<pre><code>## Warning: One or more parsing issues, call
+## `problems()` on your data frame for
+## details, e.g.:
 ##   dat &lt;- vroom(...)
 ##   problems(dat)
 
-## Rows: 207 Columns: 1
-## ── Column specification ───────────────────────
+## Rows: 2772016 Columns: 40
+## ── Column specification ────────────────────
 ## Delimiter: &quot;,&quot;
-## chr (1): &lt;!DOCTYPE html&gt;
+## chr  (22): CMPLNT_FR_DT, CMPLNT_TO_DT, RPT_DT, OFNS_DESC, PD_DESC, CRM_ATPT_...
+## dbl  (16): CMPLNT_NUM, ADDR_PCT_CD, KY_CD, PD_CD, JURISDICTION_CODE, HOUSING...
+## time  (2): CMPLNT_FR_TM, CMPLNT_TO_TM
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<p>The file size is 0.97GB. The dataset should have 1 variables and 207
-rows.</p>
+<p>The file size is 0.97GB. The dataset should have 40 variables and
+2772016 rows.</p>
 <p>Column names are changed to lower cases using
 <code>janitor::clean_names()</code>. Please refer to this <a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i">link</a>
 for more details about columns.</p>

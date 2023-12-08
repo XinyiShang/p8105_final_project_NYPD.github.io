@@ -1,8 +1,7 @@
 ---
 title: "Exploratory Data Visualization"
 output: 
-  html_document:
-    keep_md: yes
+  html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +22,10 @@ Since the primary data used did not have neighborhood information, we used NYPD 
 ```{r}
 # Import and clead NYPD data
 
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+#  janitor::clean_names()
+
+df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")

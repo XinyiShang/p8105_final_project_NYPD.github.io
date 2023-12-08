@@ -13,7 +13,7 @@
 
 <title>Crime Rate Analysis</title>
 
-<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -364,10 +364,18 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="Crime_Rate_Analysis.html">SES Analysis</a>
+      <a href="eda_social.html">Exploratory Data Analysis</a>
     </li>
-    <li>
-      <a href="eda_social.html">Exploratory data analysis</a>
+    <li class="dropdown-submenu">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Socioeconomic Status Analysis</a>
+      <ul class="dropdown-menu" role="menu">
+        <li>
+          <a href="Crime_Rate_Analysis.html">Overall Crime Rate</a>
+        </li>
+        <li>
+          <a href="eda_linear.html">Serious Crimes</a>
+        </li>
+      </ul>
     </li>
   </ul>
 </li>
@@ -410,7 +418,7 @@ of complaints in a neighborhood in a given year / Total population in a
 neighborhood in a given year) * 100,000</p>
 <pre class="r"><code># df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
 #   janitor::clean_names() 
-df_nypd = read_csv(&quot;../NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
+df_nypd = read_csv(&quot;data/NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
   janitor::clean_names()
 
 #Reading in the dataset that map each precinct to a neighborhood, for further SES analysis

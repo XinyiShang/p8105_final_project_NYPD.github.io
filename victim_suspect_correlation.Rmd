@@ -1,7 +1,7 @@
 ---
 title: "suspect_victim_correlations"
 author: "Nihaal Rahman"
-output: github_document
+output: html_document
 ---
 
 ```{r, include=FALSE}
