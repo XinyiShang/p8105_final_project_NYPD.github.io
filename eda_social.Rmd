@@ -191,20 +191,26 @@ tm_shape(count_by_neighborhood) +
 
 ## Crime Rate & Crime Types
 
-### What are the top 5 neighborhoods with highest average crime rate?
+### Most dangerous neighborhoods
+
+What are the top 5 neighborhoods with highest average crime rate?
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
   arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
 ```
 
-### What are the top 5 neighborhoods with lowest average crime rate?
+### Safest neighborhoods
+
+What are the top 5 neighborhoods with lowest average crime rate?
 
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
   arrange(avg_crime_rate) |> head(5) |> knitr::kable()
 ```
+
+### Focusing on Manhattan
 
 Since CUMC is located in Manhattan, let's also visualize the crime rate in Manhattan:
 
@@ -225,12 +231,16 @@ nypd_ses_df_save = nypd_ses_df |>
 write.csv(nypd_ses_df_save, "Top5CrimeTypes/data/nypd_ses_df.csv")
 ```
 
-### What are the most common types of crime in these neighborhoods?
+### Most common types of crime
+
+What are the most common types of crime in these neighborhoods?
 
 <iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top5CrimeTypes/"> </iframe>
 
 
 The high crime rate in Chelsea/Clinton/Midtown can be explained by the significant contribution of petite and grand larceny, which is as expected. 
+
+### Focusing on Washignton Heights: 
 
 Since CUMC is located in Washington Heights, let's take a closer look at the top 10 crime types at Washington Heights: 
 
@@ -252,7 +262,7 @@ nypd_ses_df |>
 
 ## Rent & Crime Rate
 
-### Is there an association between rent and crime rate?
+Is there an association between rent and crime rate?
 
 ```{r}
 ses_df |> group_by(neighborhood) |> 
