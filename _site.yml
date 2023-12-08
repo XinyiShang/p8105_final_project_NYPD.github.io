@@ -30,7 +30,7 @@ navbar:
             - text: "Overall Crime Rate"
               href: Crime_Rate_Analysis.html
             - text: "Severe Crimes"
-              href: eda.linear.html
+              href: eda_linear.html
 
     - icon: "fa-github fa-lg"
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io
