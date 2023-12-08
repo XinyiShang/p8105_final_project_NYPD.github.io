@@ -1,9 +1,8 @@
 ---
-title: "Factors associated with severe crimes"
+title: "Factors associated with serious crimes"
 output: 
-  html_document:
+  html_document: 
     keep_md: yes
-  github_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -128,18 +127,6 @@ We built the following three models and compered their performance.
 - **Spatial lag model (SLM)**  
 - **Spatial error model (SEM)**   
 
-The independent variables included in the models are as follows:  
-- `pop`: the population in each precinct (we used `log(pop)` in the models)  
-- `hh_inc_med_adj`: the median household's total income of all members of the household aged 15 years or older    
-- `pop16_unemp_pct`: the number of people aged 16 years and older in the civilian labor force who are unemployed, divided by the total number of people aged 16 years and older in the civilian labor force  
-- `pop_edu_collp_pct`: the percentage of the population aged 25 and older who have attained a bachelor's degree or higher  
-- `pop_pov_pct`: the number of people below the poverty threshold divided by the number of people for whom poverty status was determined  
-- `pop_race_asian_pct`: the percentage of the total population that identifies as Asian (non-Hispanic)  
-- `pop_race_black_pct`: the percentage of the total population that identifies as black (non-Hispanic)  
-- `pop_race_white_pct`: the percentage of the total population that identifies as white (non-Hispanic)  
-- `pop_race_hisp_pct`: the percentage of the total population that identifies as Hispanic (of any race)  
-- `pop_foreign_pct`: the share of the population that is born outside the United States or Puerto Rico   
-
 ```{r}
 # simple linear regression
 fit.ols.simple = lm(fel_asslt_rate ~ hh_inc_med_adj, data = count_by_precinct)
@@ -238,7 +225,7 @@ labels = c("Standard Linear Regression", "Spatial Lag Model","Spatial Error Mode
 data.frame(Models = labels, AIC = round(AICs, 2)) |> 
   knitr::kable() 
 ```
-The Akaike Information Criterion (AIC) values across the three models suggest that the spatial error model (SEM) is the best fit of the three models. Despite the absence of global spatial autocorrelation in the linear regression residuals, the SEM model exhibited superior performance compared to the other two models. This may be attributed to potential local spatial patterns of heterogeneity that were captured by the spatial error model. 
+The Akaike Information Criterion (AIC) values across the three models suggest that the spatial error model (SEM) is the best fit of the three models. 
 
 The coefficients of `pop_pov_pct`, `pop_race_asian_pct`, `pop_race_white_pct` and `pop_foreign_pct` were statistically significant in the spatial error model.  
 
@@ -257,7 +244,7 @@ plot(resid(fit.ols.multiple))
 OLS residuals are normally distributed and Q-Q plot also indicates that the normality assumption is met in this model. There may be heteroskedasticity according to the third plot, where the points are narrowing as the index moves from left to right.
 
 # Conclusion
-The spatial error model demonstrated a superior fit, revealing that factors such as the poverty rate, the percentage of Asian and White populations, and the percentage of individuals born outside the US or Puerto Rico were significant predictors for severe crime rates.
+The spatial error model demonstrated a superior fit, revealing that factors such as the poverty rate, the percentage of Asian and White populations, and the percentage of individuals born outside the US or Puerto Rico were significant predictors for serious crime rates.
 
 # References 
 - NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)

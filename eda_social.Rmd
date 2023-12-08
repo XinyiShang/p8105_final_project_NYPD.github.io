@@ -3,7 +3,6 @@ title: "Exploratory Data Visualization"
 output: 
   html_document:
     keep_md: yes
-  github_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -26,9 +25,6 @@ Since the primary data used did not have neighborhood information, we used NYPD 
 
 df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
   janitor::clean_names()
-
-df_nypd = read_csv('../NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
-  janitor::clean_names() 
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
 
@@ -70,7 +66,7 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
 ### Data 
 In this section, we mapped the crime rate (with a specific focused on "felony assault") and the socioeconomic status in each police precinct. The data used for this analysis were 2021 NYPD crime complaint data and 2020 Census population data.  
 Crimes categorized under "felony assault" share common characteristics such as physical injury, intentional and reckless actions, the use of deadly weapons or dangerous instruments, and others as defined by New York Penal Law.  
-The crime rate was determined by dividing the total number of felony assault complaints in each precinct by the total population in that precinct. Note that due to lack of data, data on crime complaints and socioeconomic status are based on 2021 records, while data on total population are from 2020.     
+The serious crime rate was determined by dividing the total number of felony assault complaints in each precinct by the total population in that precinct. Note that due to lack of data, data on crime complaints and socioeconomic status are based on 2021 records, while data on total population are from 2020.     
 
 ```{r}
 # NYC neighborhoods borders
@@ -111,12 +107,12 @@ nypd_ses_heat = nypd_ses_df |>
   merge(df_pop, by = "precinct") |> 
   group_by(precinct) |> 
   mutate(
-    "crime_rate" = (sum(ofns_desc == "FELONY ASSAULT") / pop) * 100000, # calculate crime rate per 100,000 using 2020 population census data by precinct
+    "s_crime_rate" = (sum(ofns_desc == "FELONY ASSAULT") / pop) * 100000, # calculate crime rate per 100,000 using 2020 population census data by precinct
     "violation" = (sum(law_cat_cd == "VIOLATION") / n()) * 100, # the rate of violation among all complaints
     "misdemeanor" = (sum(law_cat_cd == "MISDEMEANOR") / n()) * 100, # the rate of misdemeanor among all complaints
     "felony" = (sum(law_cat_cd == "FELONY") / n()) * 100 # the rate of felony among all complaints
   ) |> 
-  select(precinct, neighborhood, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct, geometry, crime_rate, felony, misdemeanor, violation)
+  select(precinct, neighborhood, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct, geometry, s_crime_rate, felony, misdemeanor, violation)
 
 # spatial join
 df_spj = nypd_ses_heat |>
@@ -161,24 +157,24 @@ tm_shape(count_by_neighborhood) +
 The median household's total income of all members of the household aged 15 years or older.
 ```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median income (USD/yr)", palette = "Blues", popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Crime rate (per 100,000): " = "crime_rate")) +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Crime rate (per 100,000): " = "crime_rate"))
+  tm_polygons(col = "hh_inc_med_adj", id = "pre_nei", title = "Median income (USD/yr)", palette = "Blues", popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Serious crime rate (per 100,000): " = "s_crime_rate")) +
+  tm_bubbles("s_crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Median houshold's income: " = "hh_inc_med_adj", "Serious crime rate (per 100,000): " = "s_crime_rate"))
 ```
 
 ### Unemployment rate
 The number of people aged 16 years and older in the civilian labor force who are unemployed, divided by the total number of people aged 16 years and older in the civilian labor force.
 ```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop16_unemp_pct", id = "pre_nei", title = "Unemployment rate (%)", popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Crime rate (per 100,000): " = "crime_rate")) +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Crime rate (per 100,000): " = "crime_rate"))
+  tm_polygons(col = "pop16_unemp_pct", id = "pre_nei", title = "Unemployment rate (%)", popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Serious crime rate (per 100,000): " = "s_crime_rate")) +
+  tm_bubbles("s_crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Unemployment rate: " = "pop16_unemp_pct", "Serious crime rate (per 100,000): " = "s_crime_rate"))
 ```
 
 ### Education
 The percentage of the population aged 25 and older who have attained a bachelor's degree or higher.
 ```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop_edu_collp_pct", id = "pre_nei", title = "College graduates (%)", palette = "Blues", popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Crime rate (per 100,000): " = "crime_rate")) +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Crime rate (per 100,000): " = "crime_rate"))
+  tm_polygons(col = "pop_edu_collp_pct", id = "pre_nei", title = "College graduates (%)", palette = "Blues", popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Serious crime rate (per 100,000): " = "s_crime_rate")) +
+  tm_bubbles("s_crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("College graduates: " = "pop_edu_collp_pct", "Serious crime rate (per 100,000): " = "s_crime_rate"))
 ```
 
 ### Poverty
@@ -186,8 +182,8 @@ The number of people below the poverty threshold divided by the number of people
 The poverty threshold in 2021 was $27,479 for a family of four (two adults and two children under 18 years).
 ```{r}
 tm_shape(count_by_neighborhood) +
-  tm_polygons(col = "pop_pov_pct", id = "pre_nei", title = "Below poverty threshold (%)", popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "crime_rate")) +
-  tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "crime_rate"))
+  tm_polygons(col = "pop_pov_pct", id = "pre_nei", title = "Below poverty threshold (%)", popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "s_crime_rate")) +
+  tm_bubbles("s_crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Serious crime rate (per 100,000): " = "s_crime_rate"))
 ```
 
 ## Crime Rate & Crime Types

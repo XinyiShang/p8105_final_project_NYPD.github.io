@@ -46,11 +46,25 @@ output: html_document
 
   To conduct neighborhood-level analysis, we matched the police precinct data from the NYPD complaint data to their specific neighborhood according to Golub et al. (2006). This allowed us to also match crime data and socioeconomics data with the respective neighborhood.
   
-  For socioeconomic factor analysis, we utilized the New York City neighborhood indicator from the NYU Furman Center, and we only filtered for years between 2017 and 2022 as well as only kept the variables of interest, such as percentage under poverty threshold, median income, education, unemployment rate, race, and immigration factors. Using the total population data from this source, we were able to calculate the crime rate per neighborhood: Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000. We merged the socioeconomic data and crime rate by neighborhood to conduct regression analyses. 
+  For socioeconomic factor analysis, we utilized the New York City neighborhood indicator from the NYU Furman Center, and we only filtered for years between 2017 and 2022 as well as only kept the variables of interest, such as percentage under poverty threshold, median income, education, unemployment rate, race, and immigration factors.   
+    
+  Using the total population data from this source, we were able to calculate the crime rate per neighborhood: Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000. We also obtained precinct-level population data from the 2020 Census and calculated the incidence of serious crimes (felony assault) in each precinct using the formula: (Total number of complaints in a precinct in 2021) / (Total population in a precinct in 2020) * 100,000. Additionally, we derived the serious crime rate for each precinct (the number of felony assaults in each precinct divided by the total number of complaints in each precinct). We merged the socioeconomic data, spacial data by NYC Open Data, and crime rate by neighborhood/precinct to conduct regression analyses.   
+  
+  The independent variables included in our models are as follows:  
+   * `pop`: the population in each precinct (we used `log(pop)` in the models)  
+   * `hh_inc_med_adj`: the median household's total income of all members of the household aged 15 years or older    
+   * `pop16_unemp_pct`: the number of people aged 16 years and older in the civilian labor force who are unemployed, divided by the total number of people aged 16 years and older in the civilian labor force  
+   * `pop_edu_collp_pct`: the percentage of the population aged 25 and older who have attained a bachelor's degree or higher  
+   * `pop_pov_pct`: the number of people below the poverty threshold divided by the number of people for whom poverty status was determined  
+   * `pop_race_asian_pct`: the percentage of the total population that identifies as Asian (non-Hispanic)  
+   * `pop_race_black_pct`: the percentage of the total population that identifies as black (non-Hispanic)  
+   * `pop_race_white_pct`: the percentage of the total population that identifies as white (non-Hispanic)  
+   * `pop_race_hisp_pct`: the percentage of the total population that identifies as Hispanic (of any race)  
+   * `pop_foreign_pct`: the share of the population that is born outside the United States or Puerto Rico 
   
 ### Data quality issues
 
-  We noticed that there are missing SES data for the year 2020 and 2022; therefore, our regression analyses are based on the data in 2017, 2018, 2019, and 2021. 
+  We noticed that there are missing SES data for the year 2020 and 2022; therefore, our regression analyses are based on the data in 2017, 2018, 2019, and 2021. The only precinct-level population data available from the census was for the year 2020.
   
 
 
@@ -66,15 +80,21 @@ output: html_document
 
 Three barplots were created to visualize the distribution of race, age, and sex in suspects and victims. Number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough.
 
-### Crime rate by neighborhood 
+### Crime rate and socioeconomic status by neighborhood/NYPD precinct
 
-  Together with the SES indicator data, we calculated the average crime rate (2017 - 2022) for each neighborhood. We displayed tables showing the 5 neighborhoods with highest and lowest crime rate, along with the most common types of crimes in the 5 neighborhoods with highest crime rate. Since our CUMC campus is located in Washington Heights, we also showed the top 10 types of crime in our neighborhood. 
+  Together with the SES indicator data, we calculated the average crime rate (2017 - 2022) for each neighborhood. We displayed tables showing the 5 neighborhoods with highest and lowest crime rate, along with the most common types of crimes in the 5 neighborhoods with highest crime rate. Since our CUMC campus is located in Washington Heights, we also showed the top 10 types of crime in our neighborhood.   
+    
+  We also generated choropleth maps at the precinct level to depict crime characteristics alongside various socioeconomic indicators such as median household income, unemployment rate, education level, and poverty rate. 
 
 # Regression Analysis
 
 ### Socioeconomics factors and crime rate
 
-We applied a MLR model to investigate potential socioeconomics factors that are associated with crime rate, including percentage of population below poverty line, median household income, education, unemployment, race, and immigration status. Using a backward elimination approach, we shortlisted percentage of population below poverty line and median household income as the main predictors of crime rate. We also ran a diagnostics analysis of this model, confirming low multicollinearity between the two predictors, and confirmed that residuals are around 0. 
+  We applied a MLR model and spatial regression models to investigate potential socioeconomics factors that are associated with crime rate, including percentage of population below poverty line, median household income, education, unemployment, race, and immigration status. Our analysis consists of two parts, focusing on the overall crime rate and the serious crime rate.   
+    
+  For the overall crime rate, using a backward elimination approach, we shortlisted percentage of population below poverty line and median household income as the main predictors of crime rate. We also ran a diagnostics analysis of this model, confirming low multicollinearity between the two predictors, and confirmed that residuals are around 0.   
+    
+  We investigated the felony crime rate using three models (standard linear regression, spatial lag model, and spatial error model) and compared their performance. To detect spatial autocorrelation, we visualized the serious crime rate and their linear regression residuals at the precinct level. The Moran scatter plot and the Moran I test were employed for a more in-depth assessment of spatial autocorrelation. Diagnostic checks were conducted on the linear model to ensure that assumptions were met. Ultimately, we compared the three models by examining Akaike Information Criterion (AIC) values.
 
 # Discussion 
 
@@ -98,6 +118,24 @@ Neighborhood Variations: An interesting observation is that the Upper East Side 
   
 ### Socioeconomics factors and crime rate
 
-  It was to our surprise that the Chelsea/Clinton/Midtown neighborhood has the highest average crime rate, but this is subsequently explained by a great percentage of petite and grand larceny. In areas of highest crime rate, larceny, harassment, assault, and criminal mischief are the most common types of crime. 
+  It was to our surprise that the Chelsea/Clinton/Midtown neighborhood has the highest average crime rate/serious crime rate, but this is subsequently explained by a great percentage of petite and grand larceny. Additionally, this neighborhood has a much larger daytime fluid population than residents, so the low numerator population in contrast to the high absolute number of crimes may contribute to the extraordinarily high crime rate compared to the rest of the area. In areas of highest crime rate, larceny, harassment, assault, and criminal mischief are the most common types of crime.   
   
-  For the regression analysis investigating crime rate as an outcome, it is aligned with our hypothesis that percentage of population below poverty line and median household income are the two main significant factors associated with crime rate. We originally expected high collinearity between these two factors, but the VIF analysis did not show such evidence. 
+  For the regression analysis investigating crime rate as an outcome, it is aligned with our hypothesis that percentage of population below poverty line and median household income are the two main significant factors associated with crime rate. We originally expected high collinearity between these two factors, but the VIF analysis did not show such evidence.   
+  
+  This model has several limitations. First, neighborhood-level data assumes that all individuals within a neighborhood are similar regarding the predictors being averaged. The data we have fails to capture substantial within-neighborhood variability. Second, there may be a spatial autocorrelation issue. Crime levels in each neighborhood may be spatially correlated, violating the assumption of independence in standard logistic regression.   
+    
+  To address the spatial autocorrelation issue and to further investigate the serious crime rate in each precinct, we employed spatial regression models. Our analysis revealed that the spatial error model (SEM) had the best fit. Despite the absence of global spatial autocorrelation in the linear regression residuals (insignificant results from global Moran I for regression residuals), the SEM model exhibited superior performance compared to the other two models. This may be attributed to potential local spatial patterns of heterogeneity that were captured by the spatial error model. The coefficients of poverty rate was found to be significant in this model, as well as the percentage of Asian, White, and immigration population in each precinct. Surprisingly, no association were detected between the serious crime rate and the median household's income, higher education level, and unemployment rate.    
+  
+  Crime patterns in urban settings are complex and shaped by local dynamics. Factors such as population density, land use, and historical context can influence crime rates in some neighborhoods. The coexistence of both high-income and low-income households in a single precinct can also complicate an overall understanding of the dynamics between socioeconomic factors and crime rates. Therefore, further analysis is needed to delve deeper into these complexities and gain a more nuanced understanding of the factors that influence crime patterns in New York City.
+
+# References 
+- Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.
+- NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)
+- CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s CoreData.nyc. [Link](https://furmancenter.org/coredata/userguide/about)
+- Bureau, U. C. (2022, November 29). 2020 census. Census.gov. [Link](https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html)
+- Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz)
+
+
+
+  
+  

@@ -11,7 +11,7 @@
 
 
 
-<title>Factors associated with severe crimes</title>
+<title>Factors associated with serious crimes</title>
 
 <script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -373,7 +373,7 @@ div.tocify {
           <a href="Crime_Rate_Analysis.html">Overall Crime Rate</a>
         </li>
         <li>
-          <a href="eda.linear.html">Severe Crimes</a>
+          <a href="eda_linear.html">Serious Crimes</a>
         </li>
       </ul>
     </li>
@@ -402,7 +402,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Factors associated with severe crimes</h1>
+<h1 class="title toc-ignore">Factors associated with serious crimes</h1>
 
 </div>
 
@@ -512,31 +512,6 @@ performance.<br />
 - <strong>Standard linear regression</strong><br />
 - <strong>Spatial lag model (SLM)</strong><br />
 - <strong>Spatial error model (SEM)</strong></p>
-<p>The independent variables included in the models are as
-follows:<br />
-- <code>pop</code>: the population in each precinct (we used
-<code>log(pop)</code> in the models)<br />
-- <code>hh_inc_med_adj</code>: the median household’s total income of
-all members of the household aged 15 years or older<br />
-- <code>pop16_unemp_pct</code>: the number of people aged 16 years and
-older in the civilian labor force who are unemployed, divided by the
-total number of people aged 16 years and older in the civilian labor
-force<br />
-- <code>pop_edu_collp_pct</code>: the percentage of the population aged
-25 and older who have attained a bachelor’s degree or higher<br />
-- <code>pop_pov_pct</code>: the number of people below the poverty
-threshold divided by the number of people for whom poverty status was
-determined<br />
-- <code>pop_race_asian_pct</code>: the percentage of the total
-population that identifies as Asian (non-Hispanic)<br />
-- <code>pop_race_black_pct</code>: the percentage of the total
-population that identifies as black (non-Hispanic)<br />
-- <code>pop_race_white_pct</code>: the percentage of the total
-population that identifies as white (non-Hispanic)<br />
-- <code>pop_race_hisp_pct</code>: the percentage of the total population
-that identifies as Hispanic (of any race)<br />
-- <code>pop_foreign_pct</code>: the share of the population that is born
-outside the United States or Puerto Rico</p>
 <pre class="r"><code># simple linear regression
 fit.ols.simple = lm(fel_asslt_rate ~ hh_inc_med_adj, data = count_by_precinct)
 
@@ -1334,11 +1309,7 @@ data.frame(Models = labels, AIC = round(AICs, 2)) |&gt;
 </table>
 <p>The Akaike Information Criterion (AIC) values across the three models
 suggest that the spatial error model (SEM) is the best fit of the three
-models. Despite the absence of global spatial autocorrelation in the
-linear regression residuals, the SEM model exhibited superior
-performance compared to the other two models. This may be attributed to
-potential local spatial patterns of heterogeneity that were captured by
-the spatial error model.</p>
+models.</p>
 <p>The coefficients of <code>pop_pov_pct</code>,
 <code>pop_race_asian_pct</code>, <code>pop_race_white_pct</code> and
 <code>pop_foreign_pct</code> were statistically significant in the
@@ -1369,7 +1340,7 @@ narrowing as the index moves from left to right.</p>
 <p>The spatial error model demonstrated a superior fit, revealing that
 factors such as the poverty rate, the percentage of Asian and White
 populations, and the percentage of individuals born outside the US or
-Puerto Rico were significant predictors for severe crime rates.</p>
+Puerto Rico were significant predictors for serious crime rates.</p>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>

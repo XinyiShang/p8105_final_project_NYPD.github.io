@@ -29,7 +29,7 @@ navbar:
           menu:  
             - text: "Overall Crime Rate"
               href: Crime_Rate_Analysis.html
-            - text: "Severe Crimes"
+            - text: "Serious Crimes"
               href: eda_linear.html
 
     - icon: "fa-github fa-lg"
