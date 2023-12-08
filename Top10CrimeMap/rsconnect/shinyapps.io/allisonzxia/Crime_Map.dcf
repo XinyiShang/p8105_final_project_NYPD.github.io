@@ -5,7 +5,7 @@ account: allisonzxia
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10752288
-bundleId:
+bundleId: 8025328
 url: https://allisonzxia.shinyapps.io/Crime_Map/
 version: 1
 asMultiple: FALSE
