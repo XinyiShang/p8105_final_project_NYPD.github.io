@@ -22,7 +22,7 @@ library(glmnet)
 ```{r}
 # df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #   janitor::clean_names() 
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
   janitor::clean_names()
 
 #Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
@@ -62,14 +62,16 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
   left_join(neighbor_rent, by = "neighborhood")
 ```
 
-## Are crime rates associated with poverty, income, and educational level? 
+## Linear Regression
 
-### Visualizing potential association between poverty, income, and educational level with crime rate: 
+### Visualization of potential association
+
+Visualizing potential association between poverty, income, and educational level with crime rate: 
 ```{r}
 eda_plot1 = ses_df |> ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Population in Poverty vs. Crime Rate")
+  labs(title = "% below poverty threshold vs. Crime Rate")
 
 eda_plot2 = ses_df |> ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
   geom_point() + 
@@ -79,12 +81,12 @@ eda_plot2 = ses_df |> ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
 eda_plot3 = ses_df |> ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Population Unemployment Percentage vs. Crime Rate")
+  labs(title = "% umployed vs. Crime Rate")
 
 eda_plot4 = ses_df |> ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Population with No High School Education vs. Crime Rate")
+  labs(title = "% without High School Education vs. Crime Rate")
 
 gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)
@@ -92,7 +94,7 @@ gridExtra::grid.arrange(
 
 It is observed that there is a stronger positive association between percentage of poverty population with crime rate; a weaker positive association between unemployment and lack of education with crime rate, and a negative association between median household income and crime rate. 
 
-### We would like to fit a linear model to use these four SES indicators as predictors for crime rate outcome in a specific neighborhood.
+### MLR model 
 
 Let's first visualize the distribution of crime rate:
 ```{r}
@@ -104,7 +106,7 @@ ses_df |> ggplot(aes(x = crime_rate)) +
     title = "Distribution of Crime Rate by Neighborhoods")
 ```
 
-We can use Box-Cox Transformation to transform the data for linear fit
+Since the data is slightly right-skewed, we can use the Box-Cox Transformation to transform the data for linear fit
 ```{r}
 initial_fit = lm(crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct, data = ses_df)
 
@@ -121,6 +123,8 @@ log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + p
 
 broom::tidy(log_fit)
 ```
+
+### MLR model diagnostics
 
 From the result of the MLR, it is observed that all 4 predictors are significant in terms of association with the crime rate outcome. We can run a regression diagnostic by plotting residuals for each borough:
 ```{r}
@@ -145,40 +149,20 @@ ses_df |>
 
 From the two diagnostics plots above, we can see that the residuals are roughly centered around zero, and are relatively normal. This would indicate that our model is a relatively good fit. 
 
-### Apply Lasso Regression to fine tune the prediction model and remove predictors that are not influential enough. 
+## Lasso Regression
+
+For the above MLR, we've only inspected four potential indicators that can predict crime rate. There are other social and demographics indicator that we are interested in, such as race and immigration status. Since Lasso regression encourages simpler model by only keeping the most influential factors, we also applied Lasso Regression to fine tune the prediction model.
 
 ```{r}
 # Finding the best lambda
-cv_model <- cv.glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct')]), ses_df$crime_rate, alpha = 1)
+cv_model <- cv.glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct', 'pop_race_asian_pct', 'pop_race_black_pct', 'pop_race_hisp_pct', 'pop_race_white_pct', 'pop_foreign_pct')]), ses_df$crime_rate, alpha = 1)
 
 best_lambda <- cv_model$lambda.min
 
 # Conducting the Lasso fit 
-lasso_fit = glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct')]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
+lasso_fit = glmnet(data.matrix(ses_df[, c('pop_pov_pct', 'hh_inc_med_adj', 'pop16_unemp_pct', 'pop_edu_nohs_pct', 'pop_race_asian_pct', 'pop_race_black_pct', 'pop_race_hisp_pct', 'pop_race_white_pct', 'pop_foreign_pct')]), ses_df$crime_rate, alpha = 1, lambda = best_lambda)
 
 coef(lasso_fit) 
 ```
 
 TO DO: add diagnostics and compare with MLR 
-
-
-Visualizing trend: are crime rates associated with racial factors? (delete??)
-```{r}
-eda_plot5 = ses_df |> ggplot(aes(x = pop_race_asian_pct, y = crime_rate)) +
-  geom_point() +  labs(title = "Asian% in Poverty vs. Crime Rate")
-
-eda_plot6 = ses_df |> ggplot(aes(x = pop_race_black_pct, y = crime_rate)) +
-  geom_point() +  labs(title = "Black% in Poverty vs. Crime Rate")
-
-eda_plot7 = ses_df |> ggplot(aes(x = pop_race_hisp_pct, y = crime_rate)) +
-  geom_point() +  labs(title = "Hispanic% in Poverty vs. Crime Rate")
-
-eda_plot8 = ses_df |> ggplot(aes(x = pop_race_white_pct, y = crime_rate)) +
-  geom_point() +  labs(title = "White% in Poverty vs. Crime Rate")
-
-gridExtra::grid.arrange(
-  eda_plot5, eda_plot6, eda_plot7, eda_plot8, ncol = 2)
-```
-
-
-## Discussion
