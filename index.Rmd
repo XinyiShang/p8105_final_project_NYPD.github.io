@@ -21,7 +21,20 @@ knitr::opts_chunk$set(
 
 New York City, a city renowned for its diversity and dynamic energy, faces an ongoing challenge in ensuring the safety and security of its inhabitants. In this project, we conducted a comprehensive examination of safety in New York City through an in-depth analysis of NYPD complaint data spanning the years 2006 to 2019. The analysis will be intricately divided into three distinct layers, focusing on crime events, suspects/victims, and socioeconomic indicators. The primary objective is to discern patterns, trends, and correlations within these layers, with the ultimate goal of informing enhanced safety measures and refining law enforcement strategies.
 
-## Background
+## Website Contents
+
+1. [Report](Report.html)
+
+2. Crime Event Analysis
+   - Crime Count Visualization
+   - Offense Type Visualization
+
+3. Suspect and Victim Analysis
+   - Correlation Patterns
+
+4. Crime Rate and Socioeconomics
+   - Exploratory Data Analysis
+   - Socioeconomic Status Analysis
 
 ## Team
 
