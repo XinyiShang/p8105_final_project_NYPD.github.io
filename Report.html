@@ -465,11 +465,22 @@ crime data between 2017 and 2022 to limit data size.</p>
 </div>
 <div id="crime-event-analysis" class="section level3">
 <h3>Crime Event Analysis</h3>
-<div id="general-crime-data" class="section level4">
-<h4>General Crime Data</h4>
+<div id="crime-count" class="section level4">
+<h4>Crime Count</h4>
+<p>To perform a comprehensive crime analysis, our initial step involves
+examining the frequency of crime cases at the city, borough, and
+neighborhood levels. Subsequently, we create visualizations depicting
+the top 10 crime types in each borough over a span of 5 years to
+illustrate distinct crime patterns. The key variables utilized in this
+analysis include:<br />
+* <code>cmplnt_fr_dt</code>: Date of the Crime<br />
+* <code>boro_nm</code>: NYC borough name<br />
+* <code>ofns_desc</code>: Crime Type<br />
+* <code>neighborhood</code>: NYC neighborhood name<br />
+</p>
 </div>
-<div id="crime-patterns" class="section level4">
-<h4>Crime Patterns</h4>
+<div id="offense-type" class="section level4">
+<h4>Offense Type</h4>
 <p>Given the offense description (<code>ofns_desc</code>), our dataset
 comprises 69 distinct crime types. To ensure our visualizations remain
 accessible and easily interpretable, we have condensed the scope to
@@ -494,7 +505,8 @@ Rows with missing values were dropped for data cleaning purpose. The
 demographic dataset is further divided into suspects and victims
 datasets to calculate the percentage of race, age and sex. Columns with
 incorrect data values are further cleaned up. The demographic dataset
-has following variables: * <code>boro_nm</code>: NYC borough name<br />
+has following variables:<br />
+* <code>boro_nm</code>: NYC borough name<br />
 * <code>susp_age_group</code>: Age group the suspect belongs to (&lt;18,
 18-24, 25-44, 45-64, 65+)<br />
 * <code>susp_race</code>: Suspect race (AMERICAN INDIAN/ALASKAN NATIVE,
@@ -563,7 +575,9 @@ outside the United States or Puerto Rico</p>
 <p>We noticed that there are missing SES data for the year 2020 and
 2022; therefore, our regression analyses are based on the data in 2017,
 2018, 2019, and 2021. The only precinct-level population data available
-from the census was for the year 2020.</p>
+from the census was for the year 2020. Furthermore, the dataset contains
+missing values, indicated by “(null),” which were excluded from the
+analysis during the filtering process.</p>
 </div>
 </div>
 <div id="exploratory-analysis" class="section level1">
@@ -572,20 +586,30 @@ from the census was for the year 2020.</p>
 Justify the steps you took, and show any major change to your ideas)</p>
 <div id="crime-event-analysis-1" class="section level3">
 <h3>Crime Event Analysis</h3>
-<ul>
-<li>Temporal Trends: To illustrate the trends over time, a barplot was
-designed to showcase the frequency of various crime types across
-different years. To analyze daily temporal patterns, a line graph was
-created to delve into the patterns within different times of the day,
-with each line tracing the fluctuations in crime counts throughout the
-hours, thereby emphasizing the periods when crime peaks are most
-prevalent.</li>
-<li>Spatial Distribution: An interactive map was developed to illustrate
+<p>*Temporal Trends: To depict the trends in the number of cases over
+each year, three visual representations were generated: a line plot for
+New York City at the aggregate level, another line plot for individual
+boroughs, and a bar plot for neighborhood-level analysis. In the New
+York City level, there is a subtle decreasing trend observed from 2017
+to 2019, followed by a significant drop in the number of cases in
+2020.Post-2020, a noteworthy and rapid increase in the number of cases
+is evident, surpassing the figures recorded in any previous years.<br />
+To highlight the variations in law categories across each year and
+borough, a line graph was produced.   For showcasing the top 10 types of
+crime annually within each borough, an interactive Shiny app was
+developed. This app facilitates the display of bar plots illustrating
+the top 10 crime types in each borough for every year.   To illustrate
+the trends over time, a barplot was designed to showcase the frequency
+of various crime types across different years. To analyze daily temporal
+patterns, a line graph was created to delve into the patterns within
+different times of the day, with each line tracing the fluctuations in
+crime counts throughout the hours, thereby emphasizing the periods when
+crime peaks are most prevalent.</p>
+<p>*Spatial Distribution: An interactive map was developed to illustrate
 the spread and density of different crime types throughout the boroughs
 of New York City. This map allows users to interactively explore crime
 data across regions by selecting year and crime type, offering insights
-into the geographical crime landscape</li>
-</ul>
+into the geographical crime landscape</p>
 </div>
 <div id="suspects-and-victims-1" class="section level3">
 <h3>Suspects and Victims</h3>
@@ -647,6 +671,41 @@ examining Akaike Information Criterion (AIC) values.</p>
 <h1>Discussion</h1>
 <div id="crime-event" class="section level3">
 <h3>Crime event</h3>
+<div id="crime-count-1" class="section level4">
+<h4>Crime Count</h4>
+<p>From 2017 to 2019, a subtle decrease in reported cases occurred,
+followed by a significant drop in 2020, possibly due to the COVID-19
+pandemic and related factors. Post-2020 saw a rapid increase in cases,
+surpassing previous years.</p>
+<p>Brooklyn consistently led in reported crimes from 2017 to 2022,
+followed by Manhattan; Staten Island consistently reported the lowest
+cases. Notably, Queens overtook the Bronx in reported cases in 2021.</p>
+<p>North Crown Heights/Prospect Heights consistently reported the fewest
+cases, while Morningside Heights/Hamilton Heights consistently had the
+highest, except in 2020 when East Harlem topped. The top three
+neighborhoods overall are Morningside Heights/Hamilton Heights, East
+Harlem, and Chelsea/Clinton/Midtown.</p>
+<p>In Bronx, Brooklyn, Manhattan, and Queens, misdemeanors were most
+common, followed by felonies, with violations least common, except for
+Staten Island, where felony and violation cases are more balanced.</p>
+<p>Staten Island’s lower case count is likely due to its smaller
+population. Cases in Bronx, Brooklyn, Manhattan, and Queens show
+consistency, with felonies increasing each year (except 2020),
+misdemeanors declining from 2017 to 2020 and then rising, while
+violation cases remain relatively constant.</p>
+<p>PETIT LARCENY tops the list of reported crimes in New York City,
+followed closely by HARASSMENT 2 and ASSAULT 3 &amp; related offenses.
+These patterns persist across boroughs, with Manhattan showing a
+distinctive focus on GRAND LARCENY, and STATEN ISLAND exhibiting a shift
+to CRIMINAL MISCHIEF &amp; RELATED OFFENSES as the third most reported
+crime. In the BRONX, HARRASSMENT 2 surpasses PETIT LARCENY in reported
+cases. Recognizing these trends can inform targeted crime prevention
+strategies tailored to each borough’s specific needs, emphasizing the
+prevalence of theft in Manhattan and consistent concerns about
+harassment and assault citywide.</p>
+</div>
+<div id="offense-type-1" class="section level4">
+<h4>Offense Type</h4>
 <p>The top 10 most frequent crime types constitute a substantial 80.5%
 of all crime cases reported to the NYPD from 2017 through 2022,
 revealing a concentrated pattern of offenses. Within this dataset,
@@ -682,6 +741,7 @@ the Upper East Side in Manhattan has significantly lower crime rates
 compared to its neighboring areas. This could be attributed to factors
 like higher income levels, better security measures, or lower population
 density.</p>
+</div>
 </div>
 <div id="suspects-and-victims-2" class="section level3">
 <h3>Suspects and Victims</h3>
