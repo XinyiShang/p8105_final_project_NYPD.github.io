@@ -1,0 +1,12 @@
+name: Top5CrimeTypes
+title: Top5CrimeTypes
+username: xinyi-anna-shang
+account: xinyi-anna-shang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10748944
+bundleId: 8023120
+url: https://xinyi-anna-shang.shinyapps.io/Top5CrimeTypes/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
