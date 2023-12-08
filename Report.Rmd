@@ -4,10 +4,14 @@ output: html_document
 ---
 
 # Motivation
+  As students living in NYC, we wanted to create a comprehensive analysis of crime and safety in NYC. The goals of this project were to use a NYPD data from 2006-2019 to provide a multi-dimensional view of crime incidents in NYC. Particularly, we analyzed patterns of crime events, characteristics of suspects & victims, and socioeconomic indicators. By doing so, we hoped to identify trends that may inform better safety measures and law enforcement strategies.  
 
 # Related Work
+  A few things inspired this project. Firstly, we think our lived experiences in NYC and wanting to engage with the city while still remaining safe was a leading factor. From the increased prevalence of cops on subways to news surrounding the spike in crimes in NYC post-COVID-19, we thought that it was important to understand more concretely what key factors contributed to crime and safety. Moreover, I think another inspiration for this were the methods we learned in class to visualize data in a variety of ways, including maps and geospatial figures. We were eager to understand the differences by borough and neighborhood, and tease apart nuances that may be lost when reading headlines from the news. 
 
 # Initial Questions 
+  Our intial plan for the data was to divide the large dataset into 3 key parts: general crime data, suspect and victim analysis, and socioecnomic indicators. For the first section, we wanted to answer questions like: "What are the total number of crimes by borough?" or "In which borough are the most severe crimes occuring?" This was meant to be a large overview of crime occuring in the city, particularly in its prevalence and location. The second section sought to answer questions such as "Do the types of suspects or perpetrators differ by borough?" or "What group of people makes up the highest proportion of victims in severe crime?" This gave us insight as to who is at risk, and where are they at the highest risk. Finally, the last section was meant to answer questions such as "Is income associated with crime rate?" In this section we wanted to understand what were the contributing factors to crime in NYC, and together with the previous sections, thought that this multi-dimensional analysis could inform city safety improvements and law enforcement policies. 
+  While we were able to answer many of these questions and more, we think it is important to note the source of our data. Coming from the NYPD directly means that the data may be biased, and that individuals' lived experiences with law enforcement and crime vary drastically from demographic to demographic. 
 
 # Data (Source scraping method cleaning)
 
