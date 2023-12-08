@@ -441,6 +441,11 @@ HISPANIC)<br />
 </div>
 <div id="crime-rate-and-socioeconomics-analysis" class="section level3">
 <h3>Crime Rate and Socioeconomics analysis</h3>
+<p>To conduct neighborhood-level analysis, we matched the police
+precinct data from the NYPD complaint data to their specific
+neighborhood according to Golub et al. (2006). This allowed us to also
+match crime data and socioeconomics data with the respective
+neighborhood.</p>
 <p>For socioeconomic factor analysis, we utilized the New York City
 neighborhood indicator from the NYU Furman Center, and we only filtered
 for years between 2017 and 2022 as well as only kept the variables of
@@ -451,6 +456,12 @@ crime rate per neighborhood: Crime Rate = (Total number of complaints in
 a neighborhood in a given year / Total population in a neighborhood in a
 given year) * 100,000. We merged the socioeconomic data and crime rate
 by neighborhood to conduct regression analyses.</p>
+</div>
+<div id="data-quality-issues" class="section level3">
+<h3>Data quality issues</h3>
+<p>We noticed that there are missing SES data for the year 2020 and
+2022; therefore, our regression analyses are based on the data in 2017,
+2018, 2019, and 2021.</p>
 </div>
 </div>
 <div id="exploratory-analysis" class="section level1">
@@ -471,14 +482,27 @@ victims in each borough.</p>
 </div>
 <div id="crime-rate-by-neighborhood" class="section level3">
 <h3>Crime rate by neighborhood</h3>
-<p>TO DO: Siqing needs to complete this</p>
+<p>Together with the SES indicator data, we calculated the average crime
+rate (2017 - 2022) for each neighborhood. We displayed tables showing
+the 5 neighborhoods with highest and lowest crime rate, along with the
+most common types of crimes in the 5 neighborhoods with highest crime
+rate. Since our CUMC campus is located in Washington Heights, we also
+showed the top 10 types of crime in our neighborhood.</p>
 </div>
 </div>
 <div id="regression-analysis" class="section level1">
 <h1>Regression Analysis</h1>
 <div id="socioeconomics-factors-and-crime-rate" class="section level3">
 <h3>Socioeconomics factors and crime rate</h3>
-<p>TO DO: Siqing needs to complete this</p>
+<p>We applied a MLR model to investigate potential socioeconomics
+factors that are associated with crime rate, including percentage of
+population below poverty line, median household income, education,
+unemployment, race, and immigration status. Using a backward elimination
+approach, we shortlisted percentage of population below poverty line and
+median household income as the main predictors of crime rate. We also
+ran a diagnostics analysis of this model, confirming low
+multicollinearity between the two predictors, and confirmed that
+residuals are around 0.</p>
 </div>
 </div>
 <div id="discussion" class="section level1">
@@ -515,7 +539,17 @@ influencing crime reporting, law enforcement, or victimization.</p>
 <div id="socioeconomics-factors-and-crime-rate-1"
 class="section level3">
 <h3>Socioeconomics factors and crime rate</h3>
-<p>TO DO: Siqing needs to complete this</p>
+<p>It was to our surprise that the Chelsea/Clinton/Midtown neighborhood
+has the highest average crime rate, but this is subsequently explained
+by a great percentage of petite and grand larceny. In areas of highest
+crime rate, larceny, harassment, assault, and criminal mischief are the
+most common types of crime.</p>
+<p>For the regression analysis investigating crime rate as an outcome,
+it is aligned with our hypothesis that percentage of population below
+poverty line and median household income are the two main significant
+factors associated with crime rate. We originally expected high
+collinearity between these two factors, but the VIF analysis did not
+show such evidence.</p>
 </div>
 </div>
 
