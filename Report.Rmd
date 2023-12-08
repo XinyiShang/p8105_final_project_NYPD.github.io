@@ -4,12 +4,19 @@ output: html_document
 ---
 
 # Motivation
+
 # Related Work
+
 # Initial Questions 
+
 # Data (Source scraping method cleaning)
+
+## Primary Data Source
+  Our main data source is NYPD historic complaint data. The raw data includes all valid felony, misdemeanor, and violation crimes reported to NYPD from 2006 to 2022, and we filtered the data to only investigate crime data between 2017 and 2022 to limit data size. 
+  
 ## Suspects and Victims
+
   A subset of the master dataset was created specifically for demographic distribution analysis by selecting the relevant variables. Rows with missing values were dropped for data cleaning purpose. The demographic dataset is further divided into suspects and victims datasets to calculate the percentage of race, age and sex. Columns with incorrect data values are further cleaned up. The demographic dataset has following variables:
-   
    * `boro_nm`: NYC borough name\
    * `susp_age_group`: Age group the suspect belongs to (<18, 18-24, 25-44, 45-64, 65+)\
    * `susp_race`: Suspect race (AMERICAN INDIAN/ALASKAN NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE HISPANIC)\
@@ -17,12 +24,28 @@ output: html_document
    * `vic_age_group`: Age group the victim belongs to (<18, 18-24, 25-44, 45-64, 65+)\
    * `vic_race`: Victim race (AMERICAN INDIAN/ALASKAN NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE HISPANIC)\
    * `vic_sex`: Victim sex (Female, Male)
+   
+## Crime Rate and Socioeconomics analysis
 
-# Regression Analysis
+  For socioeconomic factor analysis, we utilized the New York City neighborhood indicator from the NYU Furman Center, and we only filtered for years between 2017 and 2022 as well as only kept the variables of interest, such as percentage under poverty threshold, median income, education, unemployment rate, race, and immigration factors. Using the total population data from this source, we were able to calculate the crime rate per neighborhood: Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000. We merged the socioeconomic data and crime rate by neighborhood to conduct regression analyses. 
+
 # Exploratory analysis
 (Visualizations, summaries, and exploratory statistical analysies. Justify the steps you took, and show any major change to your ideas)
+
 ## Suspects and Victims
-Three barplots were created to visualize the distribution of race, age, and sex in suspects and victims. Number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough. 
+
+Three barplots were created to visualize the distribution of race, age, and sex in suspects and victims. Number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough.
+
+## Crime rate by neighborhood 
+
+TO DO: Siqing needs to complete this 
+
+# Regression Analysis
+
+## Socioeconomics factors and crime rate
+
+TO DO: Siqing needs to complete this 
+
 # Discussion 
 ## Suspects and Victims 
  It is interesting to see the distribution of race are quite similar between suspects and victims. This suggests that the racial composition of individuals involved as suspects or victims is consistent across the dataset. The distribution of race are also similar between boroughs. This suggests that there is no significant variation in the racial demographics of incidents across different boroughs. The distribution of age group are also similar between suspects and victims, as well as across boroughs. This implies consistency in age demographics across dataset and NYC boroughs. In combined, we observe consistency in the race and age group distribution in suspects and victims in NYC crimes. The distributions are uniform throughout the city, which was not expected. The uniformity in demographic patterns may indicate systemic factors influencing incidents rather than borough-specific or role-specific(suspect vs victim) factors. \
