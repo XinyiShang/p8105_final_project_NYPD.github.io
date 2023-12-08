@@ -17,6 +17,7 @@ library(shinydashboard)
 library(leaflet)
 library(ggmap)
 library(leaflet.extras)
+library(knitr)
 # set knitr defaults
 knitr::opts_chunk$set(
     echo      = TRUE
@@ -46,9 +47,9 @@ scale_fill_discrete   = scale_fill_viridis_d
 ```
 
 ```{r load data}
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
-# df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
-#  janitor::clean_names() 
+# df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)")
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
+ janitor::clean_names()
 ```
 
 ```{r data wrangling}
@@ -57,7 +58,24 @@ df_nypd = df_nypd |>
   mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt)) |> 
   mutate(year = lubridate::year(cmplnt_fr_dt))
 ```
+## Top 10 Crime Types
 
+### All Crime Types
+
+Since the dataset encompasses a total of 69 crime types, displaying them all in data visualization may not be visually efficient. To enhance clarity and focus, we will limit our visualization to the top 10 most frequent crime types, as these represent the most significant portion of our dataset. 
+
+```{r}
+df_nypd |> 
+  group_by(ofns_desc) |> 
+  summarize(count = n()) |> 
+  arrange(desc(count)) |> 
+  mutate(Rank = row_number()) |> 
+  rename(`Crime Type` = ofns_desc,
+         `Number of Cases` = count) |> 
+  kable()
+```
+
+### Top 10 Crime Types
 ```{r Choose most frequent crime types}
 # Step 1: Group, count, and sort
 df_summary <- df_nypd %>%
@@ -104,6 +122,16 @@ df_summary =
 ```
 
 ```{r}
+df_summary |> 
+  rename(`Crime Code` = ky_cd,
+         `Crime Type` = ofns_desc,
+         `Number of Cases` = count,
+         `Cumulative Percentage (%)` = cumulative_percentage) |>
+  kable()
+```
+The table above illustrates that the top 10 most frequent crime categories account for at least 80% of all crimes in NYC. Our concentration of incidents within these categories provides a focused overview of the primary crime types in the city.
+
+```{r}
 # crime_counts = df_crime_patterns |>
 #     group_by(year,ofns_desc) |>
 #     summarize(count = n())
@@ -122,7 +150,6 @@ df_summary =
 #   write.csv("Top10CrimeMap/data/df_crime_patterns_sample.csv", col.names = TRUE)
 ```
 
-The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
 
 ## Number of Cases across Most Frequent 10 Offense Types in Each Year
 
@@ -141,8 +168,13 @@ p_1 <- df_crime_patterns |>
 
 ggplotly(p_1)
 ```
+This data visualization presents a stacked bar chart showing the number of cases for different offense types in New York City over 6 years: 2017-2022. Each color in the bars corresponds to a specific type of offense, as indicated in the legend on the right. 
 
-## Number of Cases across Most Frequent 10 Offense Types by Hour in Eash Year
+The total number of offenses has fluctuated over the years, with a clear upward trend in the number of offenses from 2017 to 2019, followed by a noticeable decline in offenses reported in 2020. This dip could be attributed to the lockdowns, restrictions, and changes in social behavior during the pandemic. Then from 2020 to 2022, there is an apparent increase in offenses again, which could indicate a return to pre-pandemic patterns or a response to evolving social and economic conditions.an increase again to 2022. To learn more about general crime's temporal change, composition, and their correlations with Borough and Law Category: [click here](https://xinyishang.github.io/p8105_final_project_NYPD.github.io/General_Crime_Data.html)
+
+(Data Completeness: The visualization does not include all offense types, focusing instead on the top 10, which allows for a clearer analysis of the most significant crime trends)
+
+## Number of Cases across Most Frequent 10 Offense Types by Hour in Each Year
 ```{r}
 p_2 = df_crime_patterns %>%
   group_by(year, ofns_desc, hour) %>%
@@ -158,84 +190,21 @@ p_2 = df_crime_patterns %>%
 ggplotly(p_2)
 ```
 
-## Crime Type Map
+The visualization is a plot that shows the number of cases across the most frequent 10 offense types by hour for each year, with separate panels for each year from 2017 to 2022.
 
-```{r create_plotly_function crime type}
-# Function to create a plot
-create_plot <- function(ofnsDesc) {
-  # Generate the plot title
-  plot_title <- paste("Number of", ofnsDesc, "in Each Year")
+* Daily Patterns: For offenses such as petit larceny, harassment 2, and grand larceny, there is a noticeable increase in cases during the hours of 11 AM to 6 PM. These peaks suggest that these types of offenses occur more frequently during the daytime, potentially aligning with higher population activity and opportunities for these crimes. Across all examined offenses, there is a marked decrease in frequency around the hours of 5 AM and 6 AM, indicating these early morning hours are when offenses are least common. This pattern could be related to lower pedestrian and vehicle traffic, reduced social interaction, and the fact that many potential victims and perpetrators are likely to be at home during these hours.
 
-  # Create the plot
-  df_crime_patterns |>
-    filter(ofns_desc == ofnsDesc) |>
-    group_by(year) |>
-    summarize(count = n()) |>
-    plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', 
-            marker = list(color = viridis(6))) |>
-    layout(
-      title = plot_title,
-      xaxis = list(title = "Year"),
-      yaxis = list(title = "Number of Cases"),
-      showlegend = FALSE
-    )
-}
-```
+* Yearly Differences: By comparing across panels, we can see the patterns hold steady over 2017-2022. This consistency suggests that the hourly trends in criminal activity for these offense types have not undergone significant changes over the years. Such stability in crime patterns might imply that underlying factors influencing crime rates—such as social behavior, economic conditions, and law enforcement practices—have remained relatively constant during this period.
 
-```{r}
-crime_heatmap <- function(ofnsDesc, Year) {
-  # Filter the data based on the given ky_cd and year
-  filtered_data <- df_crime_patterns |> 
-    filter(ofns_desc == ofnsDesc & year == Year)
+From this visualization, stakeholders such as law enforcement or community leaders could draw insights into when to allocate resources more effectively to prevent or respond to these offenses. Additionally, it could prompt further investigation into why certain offenses peak at specific hours and how this information could inform prevention strategies.
 
-  # Create the leaflet map
-  leaflet_map <- leaflet(filtered_data) %>%
-    addProviderTiles(providers$CartoDB.Positron) %>%
-    addCircleMarkers(~longitude,
-                     ~latitude,
-                     stroke = FALSE, fillOpacity = 0.8,
-                     clusterOptions = markerClusterOptions(), # adds summary circles
-                     popup = ~as.character(ofns_desc)
-    ) %>% 
-    addHeatmap(lng=~longitude,
-               lat=~latitude,
-               radius = 8)
-  
-  return(leaflet_map)
-}
-```
+## Crime Map
 
-```{r}
-ui <- fluidPage(
-    titlePanel("Crime Data Visualization"),
-    
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("yr", "Year", 
-                        min = min(df_crime_patterns$year), 
-                        max = max(df_crime_patterns$year), 
-                        value = min(df_crime_patterns$year),
-                        step = 1),
-            selectInput("ofnsDesc", "Crime Tyoe",
-                        choices = unique(df_summary$ofns_desc))
-        ),
-        mainPanel(
-            leafletOutput("crimeMap"),
-            plotlyOutput("plotlyPlot")
-        )
-    )
-)
+* Due to limitations in server memory, we are not able to display all offense reports on the heat map. As a result, we've randomly selected 30% of all NYPD crime complaints to be visualized on the heat map, ensuring that the performance remains efficient. 
+* To offer a thorough analysis of crime trends, we have included all cases in the line graph that accompanies the heat map below. 
+* Consequently, the discrepancy in the number of total crime cases each year between the two visual representations is deliberate. This method allows us to balance interactive map responsiveness with a full depiction of crime trends over the years.
 
-server <- function(input, output) {
-  output$crimeMap <- renderLeaflet(
-    crime_heatmap(input$ofnsDesc, input$yr)
-  )
-  output$plotlyPlot = renderPlotly({
-    create_plot(
-      input$ofnsDesc)
-  })
-}
 
-```
+<iframe height="1000" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map/"> </iframe>
 
-<iframe height="600" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map/"> </iframe>
+

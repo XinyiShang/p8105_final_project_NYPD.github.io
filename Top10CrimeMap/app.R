@@ -16,9 +16,9 @@ df_crime_patterns = read_csv("https://www.dropbox.com/scl/fi/9ecsdf8ps1gpx4hn3ox
 crime_counts = read_csv("https://www.dropbox.com/scl/fi/uc7loy417kmshq5gulxme/crime_counts.csv?rlkey=okb1xv5qgt0lgxzioq5ha6kfz&dl=1")
 
 # Function to create linegraph
-create_plot <- function(ofnsDesc) {
+create_plot <- function(ofnsDesc, Year) {
   # Generate the plot title
-  plot_title <- paste("Number of", ofnsDesc, "in Each Year")
+  plot_title <- paste("Number of", ofnsDesc, "in", Year)
   
   # Create the plot
   crime_counts |>
@@ -80,7 +80,7 @@ server <- function(input, output) {
   )
   output$plotlyPlot = renderPlotly({
     create_plot(
-      input$ofnsDesc)
+      input$ofnsDesc, input$yr)
   })
 }
 
