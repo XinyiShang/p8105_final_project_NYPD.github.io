@@ -40,7 +40,7 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
     <p><strong>Yuki Joyama</strong><br>yj2803</p>
     <p>
         <button style="border: none; background: none; padding: 0; margin: 0;">
-            <a href="Your GitHub Link" style="text-decoration: none;">
+            <a href="https://github.com/yjoyama" style="text-decoration: none;">
                 <img src="image/github_icon.png" alt="github_icon" style="width: 30px; height: 30px; object-fit: cover; object-position: center center;">
             </a>
         </button>

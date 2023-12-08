@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Factors associated with severe crimes</title>
+
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Report.html">Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Crime Event
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="General_Crime_Data.html">Crime Count Visualization</a>
+    </li>
+    <li>
+      <a href="crime_patterns.html">Offense Type Visualization</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Suspect and Victim Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="demographic.html">Correlation Patterns</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Crime Rate and Socioeconomics
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="eda_social.html">Exploratory Data Analysis</a>
+    </li>
+    <li class="dropdown-submenu">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Socioeconomic Status Analysis</a>
+      <ul class="dropdown-menu" role="menu">
+        <li>
+          <a href="Crime_Rate_Analysis.html">Overall Crime Rate</a>
+        </li>
+        <li>
+          <a href="eda.linear.html">Severe Crimes</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="https://github.com/XinyiShang/p8105_final_project_NYPD.github.io">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Factors associated with severe crimes</h1>
+
+</div>
+
+
+<p>This analysis focuses on the proportion of serious crimes (“felony
+assault”) and aims to investigate the socioeconomic factors associated
+with the higher rate of serious crimes. Again, we used 2021 NYPD crime
+complaint data and 2020 Census population data.<br />
+The primary outcome (dependent variable: <code>fel_asslt_rate</code>) is
+the number of felony assault cases in each precinct divided by the total
+number of complaints in each precinct.<br />
+NYC Open Data (2013) was used as spatial data to determine the borders
+of each precinct.</p>
+<pre class="r"><code># import and clean NYPD data
+df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
+  janitor::clean_names()
+
+# precinct neighbor association
+prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)
+
+
+# merging neighborhood information with NYPD data, keep only relevant variables
+nypd_ses_df = df_nypd |&gt; 
+  rename(precinct = addr_pct_cd) |&gt; 
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt, format = &quot;%m/%d/%Y&quot;),
+         year = format(cmplnt_fr_dt, &quot;%Y&quot;)) |&gt; 
+  left_join(prec_neighbor, by = &quot;precinct&quot;) |&gt; 
+  filter(year == 2021) |&gt; 
+  select(precinct, ofns_desc, neighborhood, borough, longitude, latitude) |&gt; 
+  drop_na()
+
+#Import and clean socio-economic data. neighbor_SES has SES indicators (except rent) for each neighborhood 
+neighbor_ses = readxl::read_excel(&quot;data/neighorhood_indicators.xlsx&quot;, sheet = &quot;Data&quot;) |&gt; 
+  janitor::clean_names() |&gt; 
+  filter(region_type == &quot;Sub-Borough Area&quot;) |&gt; 
+  rename(neighborhood = region_name) |&gt; 
+  select(neighborhood, year, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct, pop_race_asian_pct, pop_race_black_pct, pop_race_hisp_pct, pop_race_white_pct, pop_foreign_pct) |&gt; 
+  filter(year == 2021) |&gt; 
+  mutate(
+    pop16_unemp_pct = pop16_unemp_pct * 100, 
+    pop_edu_collp_pct = pop_edu_collp_pct * 100, 
+    pop_pov_pct = pop_pov_pct * 100,
+    pop_race_asian_pct = pop_race_asian_pct * 100, 
+    pop_race_black_pct = pop_race_black_pct * 100, 
+    pop_race_white_pct = pop_race_white_pct * 100, 
+    pop_race_hisp_pct = pop_race_hisp_pct * 100, 
+    pop_foreign_pct = pop_foreign_pct * 100
+  ) 
+
+# NYC neighborhoods borders
+nyc = read_sf(here::here(&quot;data&quot;, &quot;Police_Precincts.geojson&quot;)) |&gt; 
+  select(-shape_area, -shape_leng) |&gt; 
+  mutate(
+    precinct = as.double(precinct)
+  )
+
+# population data by precinct (2020 census, P1_001N: total population)
+df_pop = read_csv(here::here(&quot;data&quot;, &quot;nyc_precinct_2020pop.csv&quot;)) |&gt; 
+  rename(pop = P1_001N) |&gt; 
+  select(precinct, pop)
+
+# merge with nypd dataset and calculate relevant indicators
+nypd_ses_sda = nypd_ses_df |&gt;  
+  left_join(neighbor_ses, by = &quot;neighborhood&quot;) |&gt; # combine with ses data
+  st_as_sf(
+    # which columns to use as coordinates
+    coords = c(&quot;longitude&quot;, &quot;latitude&quot;), 
+    # keep the coordinate columns
+    remove = FALSE,
+    # projection system
+    crs = 4326
+  ) |&gt; 
+  merge(df_pop, by = &quot;precinct&quot;) |&gt; 
+  group_by(precinct) |&gt; 
+  mutate(
+    &quot;fel_asslt_rate&quot; = (sum(ofns_desc == &quot;FELONY ASSAULT&quot;) / n()) * 100 # calculate &quot;FELONY ASSAULT&quot; rate among all crimes 
+  ) |&gt; 
+  select(precinct, neighborhood, borough, pop, hh_inc_med_adj, pop16_unemp_pct, pop_edu_collp_pct, pop_pov_pct, geometry, fel_asslt_rate, pop_race_asian_pct, pop_race_black_pct, pop_race_white_pct, pop_race_hisp_pct, pop_foreign_pct) |&gt; 
+  ungroup()
+
+# spatial join
+df_spj = nypd_ses_sda |&gt;
+  # spatial join
+  st_join(
+    # only need these columns from nyc tibble
+    nyc |&gt; select(precinct, geometry),
+    # join rows where there is some overlap between a dock and a precinct
+    join = st_intersects,
+    left = FALSE
+  ) |&gt; 
+  select(-precinct.y) |&gt; 
+  rename(precinct = precinct.x)
+
+count_by_precinct = df_spj |&gt; 
+  # remove geometry for fast counting
+  st_drop_geometry() |&gt; 
+  distinct() |&gt; 
+  # join the counts into the nyc neighborhood object
+  right_join(nyc, by=c(&quot;precinct&quot; = &quot;precinct&quot;)) |&gt; 
+  mutate(
+    &quot;pre_nei&quot; = paste(precinct, &quot;-&quot;, neighborhood, sep = &quot; &quot;) 
+  ) |&gt; 
+  st_as_sf() |&gt; 
+  filter(precinct != 22) # remove central park data</code></pre>
+<p>We built the following three models and compered their
+performance.<br />
+- <strong>Standard linear regression</strong><br />
+- <strong>Spatial lag model (SLM)</strong><br />
+- <strong>Spatial error model (SEM)</strong></p>
+<p>The independent variables included in the models are as
+follows:<br />
+- <code>pop</code>: the population in each precinct (we used
+<code>log(pop)</code> in the models)<br />
+- <code>hh_inc_med_adj</code>: the median household’s total income of
+all members of the household aged 15 years or older<br />
+- <code>pop16_unemp_pct</code>: the number of people aged 16 years and
+older in the civilian labor force who are unemployed, divided by the
+total number of people aged 16 years and older in the civilian labor
+force<br />
+- <code>pop_edu_collp_pct</code>: the percentage of the population aged
+25 and older who have attained a bachelor’s degree or higher<br />
+- <code>pop_pov_pct</code>: the number of people below the poverty
+threshold divided by the number of people for whom poverty status was
+determined<br />
+- <code>pop_race_asian_pct</code>: the percentage of the total
+population that identifies as Asian (non-Hispanic)<br />
+- <code>pop_race_black_pct</code>: the percentage of the total
+population that identifies as black (non-Hispanic)<br />
+- <code>pop_race_white_pct</code>: the percentage of the total
+population that identifies as white (non-Hispanic)<br />
+- <code>pop_race_hisp_pct</code>: the percentage of the total population
+that identifies as Hispanic (of any race)<br />
+- <code>pop_foreign_pct</code>: the share of the population that is born
+outside the United States or Puerto Rico</p>
+<pre class="r"><code># simple linear regression
+fit.ols.simple = lm(fel_asslt_rate ~ hh_inc_med_adj, data = count_by_precinct)
+
+# multiple linear regression
+fit.ols.multiple = lm(fel_asslt_rate ~ log(pop) + hh_inc_med_adj + pop16_unemp_pct + pop_edu_collp_pct + pop_pov_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_white_pct + pop_race_hisp_pct + pop_foreign_pct, data = count_by_precinct)
+
+# the neighbor nb object using poly2nb()
+seab = poly2nb(count_by_precinct, queen = T)
+
+# the listw weights object using nb2listw()
+seaw = nb2listw(seab, style = &quot;W&quot;, zero.policy = TRUE)
+
+# Spatial lag model (SLM)
+fit.lag = lagsarlm(fel_asslt_rate ~ log(pop) + hh_inc_med_adj + pop16_unemp_pct + pop_edu_collp_pct + pop_pov_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_white_pct + pop_race_hisp_pct + pop_foreign_pct, data = count_by_precinct, listw = seaw) 
+
+# get estimates of the direct, indirect and total effect of each variable
+fit.lag.effects = impacts(fit.lag, listw = seaw, R = 999)
+
+# Spatial error model (SEM)
+fit.err = errorsarlm(fel_asslt_rate ~ log(pop) + hh_inc_med_adj + pop16_unemp_pct + pop_edu_collp_pct + pop_pov_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_white_pct + pop_race_hisp_pct + pop_foreign_pct, data = count_by_precinct, listw = seaw) </code></pre>
+<p>First, let’s look at the histogram of the dependent variable. The
+distribution is unimodal and slightly right-skewed, but overall it is
+approximately normally distributed.</p>
+<pre class="r"><code># histogram
+count_by_precinct |&gt; 
+  ggplot() +
+    geom_histogram(aes(x = fel_asslt_rate)) +
+    xlab(&quot;Felony assault rate&quot;)</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-3-1.png" /><!-- --></p>
+<div id="explaratory-spatial-data-analysis" class="section level1">
+<h1>Explaratory spatial data analysis</h1>
+<pre class="r"><code># ESDA
+tmap_mode(&quot;plot&quot;)
+
+tm_shape(count_by_precinct, unit = &quot;mi&quot;) +
+  tm_polygons(col = &quot;fel_asslt_rate&quot;, style = &quot;quantile&quot;, palette = &quot;Reds&quot;, title = &quot;&quot;) +
+  tm_scale_bar(breaks = c(0, 2, 4), text.size = 1, position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+  tm_layout(main.title = &quot;Felony assault rate, 2021&quot;,  main.title.size = 0.95, frame = FALSE, legend.outside = TRUE, 
+            attr.outside = TRUE)</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-4-1.png" /><!-- --></p>
+<pre class="r"><code># plot residuals
+count_by_precinct = count_by_precinct |&gt; 
+  mutate(olsresid = resid(fit.ols.multiple))
+
+tm_shape(count_by_precinct, unit = &quot;mi&quot;) +
+  tm_polygons(col = &quot;olsresid&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;, title = &quot;&quot;) +
+  tm_scale_bar(breaks = c(0, 2, 4), text.size = 1, position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+  tm_layout(main.title = &quot;Residuals from linear regression&quot;,  main.title.size = 0.95, frame = FALSE, legend.outside = TRUE,
+            attr.outside = TRUE)</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-5-1.png" /><!-- --></p>
+<p>The spatial distribution of precincts with high felony crime rates
+and the residuals of the linear regression model are visualized. Spatial
+autocorrelation of errors is indicated as both maps appear to
+cluster.</p>
+<pre class="r"><code># examine the Moran scatterplot
+moran.plot(as.numeric(scale(count_by_precinct$fel_asslt_rate)), listw = seaw, 
+           xlab = &quot;Standardized Felony Assault Rate&quot;, 
+           ylab = &quot;Precincts Standardized Felony Assault Rate&quot;,
+           main = c(&quot;Moran Scatterplot for Felony assault rate in NYC&quot;))</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-6-1.png" /><!-- --></p>
+<p>The Moran scatter plot displays the positive relationship between the
+standardized felony assault rate and precincts standardized felony
+assault rate.</p>
+<pre class="r"><code># the Global Moran’s I
+# use Monte Carlo simulation to get the p-value
+moran.mc(count_by_precinct$fel_asslt_rate, seaw, nsim=999) |&gt; 
+  broom::tidy() |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="10%" />
+<col width="13%" />
+<col width="45%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">parameter</th>
+<th align="left">method</th>
+<th align="left">alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.5097451</td>
+<td align="right">0.001</td>
+<td align="right">1000</td>
+<td align="left">Monte-Carlo simulation of Moran I</td>
+<td align="left">greater</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># repeat for the OLS residuals using the lm.morantest() function
+lm.morantest(fit.ols.multiple, seaw) |&gt; 
+  broom::tidy() |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="10%" />
+<col width="9%" />
+<col width="38%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">estimate1</th>
+<th align="right">estimate2</th>
+<th align="right">estimate3</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="left">method</th>
+<th align="left">alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">-0.115526</td>
+<td align="right">-0.082871</td>
+<td align="right">0.0056489</td>
+<td align="right">-0.4344796</td>
+<td align="right">0.6680299</td>
+<td align="left">Global Moran I for regression residuals</td>
+<td align="left">greater</td>
+</tr>
+</tbody>
+</table>
+<p>The Moran I test indicates that there is a positive spatial
+autocorrelation for the felony assault rate, but no spatial
+autocorrelation for the linear regression residuals.</p>
+</div>
+<div id="compare-three-models" class="section level1">
+<h1>Compare three models</h1>
+<pre class="r"><code># present results for more than one model
+stargazer(fit.ols.multiple, fit.lag, fit.err, type = &quot;html&quot;, digits = 3, title = &quot;Regression Results&quot;)</code></pre>
+<table style="text-align:center">
+<caption>
+<strong>Regression Results</strong>
+</caption>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+fel_asslt_rate
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>OLS</em>
+</td>
+<td>
+<em>spatial</em>
+</td>
+<td>
+<em>spatial</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em></em>
+</td>
+<td>
+<em>autoregressive</em>
+</td>
+<td>
+<em>error</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+log(pop)
+</td>
+<td>
+-0.150
+</td>
+<td>
+-0.150
+</td>
+<td>
+-0.192
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.336)
+</td>
+<td>
+(0.310)
+</td>
+<td>
+(0.283)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+hh_inc_med_adj
+</td>
+<td>
+0.00001
+</td>
+<td>
+0.00001
+</td>
+<td>
+0.00001
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.00001)
+</td>
+<td>
+(0.00001)
+</td>
+<td>
+(0.00001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop16_unemp_pct
+</td>
+<td>
+-0.007
+</td>
+<td>
+-0.002
+</td>
+<td>
+-0.006
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.059)
+</td>
+<td>
+(0.055)
+</td>
+<td>
+(0.049)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_edu_collp_pct
+</td>
+<td>
+0.0005
+</td>
+<td>
+0.001
+</td>
+<td>
+0.002
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.015)
+</td>
+<td>
+(0.013)
+</td>
+<td>
+(0.011)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_pov_pct
+</td>
+<td>
+0.089<sup>**</sup>
+</td>
+<td>
+0.090<sup>***</sup>
+</td>
+<td>
+0.099<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.036)
+</td>
+<td>
+(0.033)
+</td>
+<td>
+(0.028)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_race_asian_pct
+</td>
+<td>
+-0.102<sup>*</sup>
+</td>
+<td>
+-0.107<sup>**</sup>
+</td>
+<td>
+-0.108<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.055)
+</td>
+<td>
+(0.052)
+</td>
+<td>
+(0.044)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_race_black_pct
+</td>
+<td>
+-0.033
+</td>
+<td>
+-0.036
+</td>
+<td>
+-0.044
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.056)
+</td>
+<td>
+(0.052)
+</td>
+<td>
+(0.045)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_race_white_pct
+</td>
+<td>
+-0.078
+</td>
+<td>
+-0.082<sup>*</sup>
+</td>
+<td>
+-0.091<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.052)
+</td>
+<td>
+(0.048)
+</td>
+<td>
+(0.042)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_race_hisp_pct
+</td>
+<td>
+-0.053
+</td>
+<td>
+-0.056
+</td>
+<td>
+-0.063
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.050)
+</td>
+<td>
+(0.046)
+</td>
+<td>
+(0.040)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pop_foreign_pct
+</td>
+<td>
+0.031<sup>*</sup>
+</td>
+<td>
+0.031<sup>*</sup>
+</td>
+<td>
+0.033<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.017)
+</td>
+<td>
+(0.016)
+</td>
+<td>
+(0.014)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+9.499
+</td>
+<td>
+10.060<sup>*</sup>
+</td>
+<td>
+10.531<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(6.510)
+</td>
+<td>
+(6.077)
+</td>
+<td>
+(5.414)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+76
+</td>
+<td>
+76
+</td>
+<td>
+76
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.761
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.724
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Log Likelihood
+</td>
+<td>
+</td>
+<td>
+-95.441
+</td>
+<td>
+-93.988
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+sigma<sup>2</sup>
+</td>
+<td>
+</td>
+<td>
+0.721
+</td>
+<td>
+0.674
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+</td>
+<td>
+216.882
+</td>
+<td>
+213.976
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+0.920 (df = 65)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+20.697<sup>***</sup> (df = 10; 65)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Wald Test (df = 1)
+</td>
+<td>
+</td>
+<td>
+0.287
+</td>
+<td>
+4.691<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+LR Test (df = 1)
+</td>
+<td>
+</td>
+<td>
+0.250
+</td>
+<td>
+3.156<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05;
+<sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<pre class="r"><code># save AIC values
+AICs = c(AIC(fit.ols.multiple),AIC(fit.lag), AIC(fit.err))
+labels = c(&quot;Standard Linear Regression&quot;, &quot;Spatial Lag Model&quot;,&quot;Spatial Error Model&quot; )
+
+data.frame(Models = labels, AIC = round(AICs, 2)) |&gt; 
+  knitr::kable() </code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Models</th>
+<th align="right">AIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Standard Linear Regression</td>
+<td align="right">215.13</td>
+</tr>
+<tr class="even">
+<td align="left">Spatial Lag Model</td>
+<td align="right">216.88</td>
+</tr>
+<tr class="odd">
+<td align="left">Spatial Error Model</td>
+<td align="right">213.98</td>
+</tr>
+</tbody>
+</table>
+<p>The Akaike Information Criterion (AIC) values across the three models
+suggest that the spatial error model (SEM) is the best fit of the three
+models. Despite the absence of global spatial autocorrelation in the
+linear regression residuals, the SEM model exhibited superior
+performance compared to the other two models. This may be attributed to
+potential local spatial patterns of heterogeneity that were captured by
+the spatial error model.</p>
+<p>The coefficients of <code>pop_pov_pct</code>,
+<code>pop_race_asian_pct</code>, <code>pop_race_white_pct</code> and
+<code>pop_foreign_pct</code> were statistically significant in the
+spatial error model.</p>
+<div id="linear-regression-diagnostics" class="section level2">
+<h2>Linear regression diagnostics</h2>
+<pre class="r"><code># diagnostics
+ggplot() + 
+  geom_histogram(mapping = aes(x=resid(fit.ols.multiple))) +
+  xlab(&quot;OLS residuals&quot;)</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-10-1.png" /><!-- --></p>
+<pre class="r"><code>qqPlot(fit.ols.multiple)</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-10-2.png" /><!-- --></p>
+<pre><code>## [1] 19 37</code></pre>
+<pre class="r"><code>plot(resid(fit.ols.multiple))</code></pre>
+<p><img
+src="eda_linear_files/figure-html/unnamed-chunk-10-3.png" /><!-- --></p>
+<p>OLS residuals are normally distributed and Q-Q plot also indicates
+that the normality assumption is met in this model. There may be
+heteroskedasticity according to the third plot, where the points are
+narrowing as the index moves from left to right.</p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The spatial error model demonstrated a superior fit, revealing that
+factors such as the poverty rate, the percentage of Asian and White
+populations, and the percentage of individuals born outside the US or
+Puerto Rico were significant predictors for severe crime rates.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li>NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data.
+<a
+href="https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i">Link</a></li>
+<li>CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s
+CoreData.nyc. <a
+href="https://furmancenter.org/coredata/userguide/about">Link</a></li>
+<li>Bureau, U. C. (2022, November 29). 2020 census. Census.gov. <a
+href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html">Link</a></li>
+<li>Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. <a
+href="https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz">Link</a></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

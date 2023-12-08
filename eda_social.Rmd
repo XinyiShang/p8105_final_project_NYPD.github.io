@@ -23,7 +23,7 @@ Since the primary data used did not have neighborhood information, we used NYPD 
 
 ```{r}
 # Import and clead NYPD data
-df_nypd = read_csv("https://www.dropbox.com/scl/fi/1j6emjrdo3zbjrt5ehgq0/NYPD_Complaint_Data_Historic.csv?rlkey=co02d6vsgxr0aj44r7uhnbz64&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
   janitor::clean_names()
 
 # df_nypd = read_csv("../NYPD_Complaint_Data_Historic.csv") |> 
@@ -325,8 +325,6 @@ ses_df |> group_by(neighborhood) |>
 ```
 
 There appears to be no obvious association between rent and crime rate.  
-
-## Discussion
 
 ## References 
 - Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.

@@ -23,10 +23,15 @@ navbar:
 
     - text: "Crime Rate and Socioeconomics"
       menu:
-        - text: "SES Analysis"
-          href: Crime_Rate_Analysis.html
-        - text: "Exploratory data analysis"
+        - text: "Exploratory Data Analysis"
           href: eda_social.html
+        - text: "Socioeconomic Status Analysis"
+          menu:  
+            - text: "Overall Crime Rate"
+              href: Crime_Rate_Analysis.html
+            - text: "Severe Crimes"
+              href: eda.linear.html
+
     - icon: "fa-github fa-lg"
       href: https://github.com/XinyiShang/p8105_final_project_NYPD.github.io
 
