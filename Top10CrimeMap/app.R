@@ -1,0 +1,73 @@
+
+
+
+# Function to create a plot
+create_plot <- function(ofnsDesc) {
+  # Generate the plot title
+  plot_title <- paste("Number of", ofnsDesc, "in Each Year")
+  
+  # Create the plot
+  df_crime_patterns |>
+    filter(ofns_desc == ofnsDesc) |>
+    group_by(year) |>
+    summarize(count = n()) |>
+    plot_ly(x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', 
+            marker = list(color = viridis(6))) |>
+    layout(
+      title = plot_title,
+      xaxis = list(title = "Year"),
+      yaxis = list(title = "Number of Cases"),
+      showlegend = FALSE
+    )
+}
+
+crime_heatmap <- function(ofnsDesc, Year) {
+  # Filter the data based on the given ky_cd and year
+  filtered_data <- df_crime_patterns |> 
+    filter(ofns_desc == ofnsDesc & year == Year)
+  
+  # Create the leaflet map
+  leaflet_map <- leaflet(filtered_data) %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addCircleMarkers(~longitude,
+                     ~latitude,
+                     stroke = FALSE, fillOpacity = 0.8,
+                     clusterOptions = markerClusterOptions(), # adds summary circles
+                     popup = ~as.character(ofns_desc)
+    ) %>% 
+    addHeatmap(lng=~longitude,
+               lat=~latitude,
+               radius = 8)
+  
+  return(leaflet_map)
+}
+
+ui <- fluidPage(
+  titlePanel("Crime Data Visualization"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("yr", "Year", 
+                  min = min(df_crime_patterns$year), 
+                  max = max(df_crime_patterns$year), 
+                  value = min(df_crime_patterns$year),
+                  step = 1),
+      selectInput("ofnsDesc", "Crime Tyoe",
+                  choices = unique(df_summary$ofns_desc))
+    ),
+    mainPanel(
+      leafletOutput("crimeMap"),
+      plotlyOutput("plotlyPlot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$crimeMap <- renderLeaflet(
+    crime_heatmap(input$ofnsDesc, input$yr)
+  )
+  output$plotlyPlot = renderPlotly({
+    create_plot(
+      input$ofnsDesc)
+  })
+}
