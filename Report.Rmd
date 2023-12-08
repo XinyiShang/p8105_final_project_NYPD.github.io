@@ -145,7 +145,7 @@ Neighborhood Variations: An interesting observation is that the Upper East Side 
   
   For the regression analysis investigating crime rate as an outcome, it is aligned with our hypothesis that percentage of population below poverty line and median household income are the two main significant factors associated with crime rate. We originally expected high collinearity between these two factors, but the VIF analysis did not show such evidence.   
   
-  This model has several limitations. First, neighborhood-level data assumes that all individuals within a neighborhood are similar regarding the predictors being averaged. The data we have fails to capture substantial within-neighborhood variability. Second, there may be a spatial autocorrelation issue. Crime levels in each neighborhood may be spatially correlated, violating the assumption of independence in standard logistic regression.   
+  This model is subject to several limitations. Firstly, the use of neighborhood-level data assumes homogeneity among all individuals within a neighborhood regarding the averaged predictors. However, the data at hand lacks the capacity to account for significant variability within neighborhoods. Secondly, a potential spatial autocorrelation issue arises. Crime levels in each neighborhood may exhibit spatial correlation, challenging the assumption of independence in standard logistic regression.    
     
   To address the spatial autocorrelation issue and to further investigate the serious crime rate in each precinct, we employed spatial regression models. Our analysis revealed that the spatial error model (SEM) had the best fit. Despite the absence of global spatial autocorrelation in the linear regression residuals (insignificant results from global Moran I for regression residuals), the SEM model exhibited superior performance compared to the other two models. This may be attributed to potential local spatial patterns of heterogeneity that were captured by the spatial error model. The coefficients of poverty rate was found to be significant in this model, as well as the percentage of Asian, White, and immigration population in each precinct. Surprisingly, no association were detected between the serious crime rate and the median household's income, higher education level, and unemployment rate.    
   
@@ -157,7 +157,6 @@ Neighborhood Variations: An interesting observation is that the Upper East Side 
 - CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s CoreData.nyc. [Link](https://furmancenter.org/coredata/userguide/about)
 - Bureau, U. C. (2022, November 29). 2020 census. Census.gov. [Link](https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html)
 - Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz)
-
 
 
   

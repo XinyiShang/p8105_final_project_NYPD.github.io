@@ -790,13 +790,14 @@ poverty line and median household income are the two main significant
 factors associated with crime rate. We originally expected high
 collinearity between these two factors, but the VIF analysis did not
 show such evidence.</p>
-<p>This model has several limitations. First, neighborhood-level data
-assumes that all individuals within a neighborhood are similar regarding
-the predictors being averaged. The data we have fails to capture
-substantial within-neighborhood variability. Second, there may be a
-spatial autocorrelation issue. Crime levels in each neighborhood may be
-spatially correlated, violating the assumption of independence in
-standard logistic regression.</p>
+<p>This model is subject to several limitations. Firstly, the use of
+neighborhood-level data assumes homogeneity among all individuals within
+a neighborhood regarding the averaged predictors. However, the data at
+hand lacks the capacity to account for significant variability within
+neighborhoods. Secondly, a potential spatial autocorrelation issue
+arises. Crime levels in each neighborhood may exhibit spatial
+correlation, challenging the assumption of independence in standard
+logistic regression.</p>
 <p>To address the spatial autocorrelation issue and to further
 investigate the serious crime rate in each precinct, we employed spatial
 regression models. Our analysis revealed that the spatial error model
