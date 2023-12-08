@@ -18,6 +18,19 @@ output: html_document
 ### Primary Data Source
   Our main data source is NYPD historic complaint data. The raw data includes all valid felony, misdemeanor, and violation crimes reported to NYPD from 2006 to 2022, and we filtered the data to only investigate crime data between 2017 and 2022 to limit data size. 
   
+### Crime Event Analysis
+
+#### General Crime Data
+
+
+#### Crime Patterns
+  Given the offense description (`ofns_desc`), our dataset comprises 69 distinct crime types. To ensure our visualizations remain accessible and easily interpretable, we have condensed the scope to encompass only the top 10 most prevalent crime types. Consequently, we have curated a subset of the data, organized by the frequency of cases, which consists of four key variables:
+  * `ky_code`: A numerical code representing the specific crime.
+  * `count`: The aggregate count of reported incidents for each crime.
+  * `ofns_desc`: The description of the crime type in textual form.
+  * `cumulative_percentage`: This denotes the running total percentage of cases accounted for up to and including the current row.
+  This streamlined dataset allows for a focused analysis of the crimes that constitute the majority of cases, thereby rendering our visual representations more concise and informative.
+  
 ### Suspects and Victims
 
   A subset of the master dataset was created specifically for demographic distribution analysis by selecting the relevant variables. Rows with missing values were dropped for data cleaning purpose. The demographic dataset is further divided into suspects and victims datasets to calculate the percentage of race, age and sex. Columns with incorrect data values are further cleaned up. The demographic dataset has following variables:
@@ -44,6 +57,11 @@ output: html_document
 # Exploratory analysis
 (Visualizations, summaries, and exploratory statistical analysies. Justify the steps you took, and show any major change to your ideas)
 
+### Crime Event Analysis
+
+* Temporal Trends: To illustrate the trends over time, a barplot was designed to showcase the frequency of various crime types across different years. To analyze daily temporal patterns, a line graph was created to delve into the patterns within different times of the day, with each line tracing the fluctuations in crime counts throughout the hours, thereby emphasizing the periods when crime peaks are most prevalent.
+* Spatial Distribution: An interactive map was developed to illustrate the spread and density of different crime types throughout the boroughs of New York City. This map allows users to interactively explore crime data across regions by selecting year and crime type, offering insights into the geographical crime landscape
+
 ### Suspects and Victims
 
 Three barplots were created to visualize the distribution of race, age, and sex in suspects and victims. Number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough.
@@ -59,6 +77,20 @@ Three barplots were created to visualize the distribution of race, age, and sex 
 We applied a MLR model to investigate potential socioeconomics factors that are associated with crime rate, including percentage of population below poverty line, median household income, education, unemployment, race, and immigration status. Using a backward elimination approach, we shortlisted percentage of population below poverty line and median household income as the main predictors of crime rate. We also ran a diagnostics analysis of this model, confirming low multicollinearity between the two predictors, and confirmed that residuals are around 0. 
 
 # Discussion 
+
+### Crime event
+
+The top 10 most frequent crime types constitute a substantial 80.5% of all crime cases reported to the NYPD from 2017 through 2022, revealing a concentrated pattern of offenses. Within this dataset, 'Petit Larceny' stands out for its relative stability year over year, consistently forming a significant segment of the reported offenses.
+
+Examining the daily temporal pattern, we observe pronounced peaks for offenses such as petit larceny, harassment 2, and grand larceny during the hours from 11 AM to 6 PM. This trend likely correlates with increased daytime activity when the streets are bustling, and the opportunity for these crimes escalates. The timing of these peaks coincides with the busiest periods in public spaces, suggesting a potential link between crime frequency and population density.
+
+Conversely, all offenses demonstrate a substantial decrease in frequency around the early hours of 5 AM and 6 AM. This trough in criminal activity can be attributed to the minimal pedestrian and vehicle traffic at these times, along with a general reduction in social interactions as most individuals are home, thus lowering the risk and opportunity for offenses.
+
+These temporal insights are invaluable for stakeholders such as law enforcement agencies and community leaders, who could leverage this data to optimize resource allocation, aiming for effective crime prevention and timely response. Furthermore, this analysis can trigger deeper inquiries into the causal factors behind the peak times for specific offenses, guiding the development of targeted crime prevention strategies and interventions. Understanding the rhythm of criminal activity empowers decision-makers to adopt a more strategic approach in combating crime and enhancing community safety.
+
+Our interactive map highlights that Manhattan, Queens, and the Bronx are areas with higher crime rates. This could be due to various factors like population density, socio-economic conditions, or policing strategies.
+Neighborhood Variations: An interesting observation is that the Upper East Side in Manhattan has significantly lower crime rates compared to its neighboring areas. This could be attributed to factors like higher income levels, better security measures, or lower population density.
+
 ### Suspects and Victims 
  It is interesting to see the distribution of race are quite similar between suspects and victims. This suggests that the racial composition of individuals involved as suspects or victims is consistent across the dataset. The distribution of race are also similar between boroughs. This suggests that there is no significant variation in the racial demographics of incidents across different boroughs. The distribution of age group are also similar between suspects and victims, as well as across boroughs. This implies consistency in age demographics across dataset and NYC boroughs. In combined, we observe consistency in the race and age group distribution in suspects and victims in NYC crimes. The distributions are uniform throughout the city, which was not expected. The uniformity in demographic patterns may indicate systemic factors influencing incidents rather than borough-specific or role-specific(suspect vs victim) factors. \
   

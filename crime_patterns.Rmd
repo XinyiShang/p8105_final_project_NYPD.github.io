@@ -170,7 +170,13 @@ ggplotly(p_1)
 ```
 This data visualization presents a stacked bar chart showing the number of cases for different offense types in New York City over 6 years: 2017-2022. Each color in the bars corresponds to a specific type of offense, as indicated in the legend on the right. 
 
-The total number of offenses has fluctuated over the years, with a clear upward trend in the number of offenses from 2017 to 2019, followed by a noticeable decline in offenses reported in 2020. This dip could be attributed to the lockdowns, restrictions, and changes in social behavior during the pandemic. Then from 2020 to 2022, there is an apparent increase in offenses again, which could indicate a return to pre-pandemic patterns or a response to evolving social and economic conditions.an increase again to 2022. To learn more about general crime's temporal change, composition, and their correlations with Borough and Law Category: [click here](https://xinyishang.github.io/p8105_final_project_NYPD.github.io/General_Crime_Data.html)
+The total number of offenses has  a clear upward trend in the number of offenses from 2017 to 2019, followed by a noticeable decline in offenses reported in 2020. This dip could be attributed to the lockdowns, restrictions, and changes in social behavior during the pandemic. Then from 2020 to 2022, there is an apparent increase in offenses again, which could indicate a return to pre-pandemic patterns or a response to evolving social and economic conditions.an increase again to 2022. To learn more about general crime's temporal change, composition, and their correlations with Borough and Law Category: [click here](https://xinyishang.github.io/p8105_final_project_NYPD.github.io/General_Crime_Data.html)
+
+* 'Petit Larceny' (represented in yellow) remains relatively stable as a significant portion of the offenses.
+* 'Harassment 2' (in cyan) seems to have increased slightly in 2020 compared to 2018 and 2022.
+* 'Assault 3 & Related Offenses' (in purple) shows an increase in 2020 before dropping in 2022.
+* 'Grand Larceny' (in green) also shows some fluctuations, with an increase in 2020 and a decrease in 2022.
+
 
 (Data Completeness: The visualization does not include all offense types, focusing instead on the top 10, which allows for a clearer analysis of the most significant crime trends)
 
@@ -207,4 +213,4 @@ From this visualization, stakeholders such as law enforcement or community leade
 
 <iframe height="1000" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map/"> </iframe>
 
-
+This map highlights that Manhattan, Queens, and the Bronx are areas with more crime activities. This could be due to various factors like population density, [socio-economic conditions](https://xinyishang.github.io/p8105_final_project_NYPD.github.io/demographic.html), or policing strategies. An interesting observation is that the Upper East Side in Manhattan has significantly lower crime rates compared to its neighboring areas. This could be attributed to factors like higher income levels, better security measures, or lower population density.

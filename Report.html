@@ -364,10 +364,18 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="Crime_Rate_Analysis.html">SES Analysis</a>
+      <a href="eda_social.html">Exploratory Data Analysis</a>
     </li>
-    <li>
-      <a href="eda_social.html">Exploratory data analysis</a>
+    <li class="dropdown-submenu">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Socioeconomic Status Analysis</a>
+      <ul class="dropdown-menu" role="menu">
+        <li>
+          <a href="Crime_Rate_Analysis.html">Overall Crime Rate</a>
+        </li>
+        <li>
+          <a href="eda.linear.html">Severe Crimes</a>
+        </li>
+      </ul>
     </li>
   </ul>
 </li>
@@ -401,12 +409,50 @@ div.tocify {
 
 <div id="motivation" class="section level1">
 <h1>Motivation</h1>
+<p>As students living in NYC, we wanted to create a comprehensive
+analysis of crime and safety in NYC. The goals of this project were to
+use a NYPD data from 2006-2019 to provide a multi-dimensional view of
+crime incidents in NYC. Particularly, we analyzed patterns of crime
+events, characteristics of suspects &amp; victims, and socioeconomic
+indicators. By doing so, we hoped to identify trends that may inform
+better safety measures and law enforcement strategies.</p>
 </div>
 <div id="related-work" class="section level1">
 <h1>Related Work</h1>
+<p>A few things inspired this project. Firstly, we think our lived
+experiences in NYC and wanting to engage with the city while still
+remaining safe was a leading factor. From the increased prevalence of
+cops on subways to news surrounding the spike in crimes in NYC
+post-COVID-19, we thought that it was important to understand more
+concretely what key factors contributed to crime and safety. Moreover, I
+think another inspiration for this were the methods we learned in class
+to visualize data in a variety of ways, including maps and geospatial
+figures. We were eager to understand the differences by borough and
+neighborhood, and tease apart nuances that may be lost when reading
+headlines from the news.</p>
 </div>
 <div id="initial-questions" class="section level1">
 <h1>Initial Questions</h1>
+<p>Our intial plan for the data was to divide the large dataset into 3
+key parts: general crime data, suspect and victim analysis, and
+socioecnomic indicators. For the first section, we wanted to answer
+questions like: “What are the total number of crimes by borough?” or “In
+which borough are the most severe crimes occuring?” This was meant to be
+a large overview of crime occuring in the city, particularly in its
+prevalence and location. The second section sought to answer questions
+such as “Do the types of suspects or perpetrators differ by borough?” or
+“What group of people makes up the highest proportion of victims in
+severe crime?” This gave us insight as to who is at risk, and where are
+they at the highest risk. Finally, the last section was meant to answer
+questions such as “Is income associated with crime rate?” In this
+section we wanted to understand what were the contributing factors to
+crime in NYC, and together with the previous sections, thought that this
+multi-dimensional analysis could inform city safety improvements and law
+enforcement policies. While we were able to answer many of these
+questions and more, we think it is important to note the source of our
+data. Coming from the NYPD directly means that the data may be biased,
+and that individuals’ lived experiences with law enforcement and crime
+vary drastically from demographic to demographic.</p>
 </div>
 <div id="data-source-scraping-method-cleaning" class="section level1">
 <h1>Data (Source scraping method cleaning)</h1>
@@ -416,6 +462,29 @@ div.tocify {
 includes all valid felony, misdemeanor, and violation crimes reported to
 NYPD from 2006 to 2022, and we filtered the data to only investigate
 crime data between 2017 and 2022 to limit data size.</p>
+</div>
+<div id="crime-event-analysis" class="section level3">
+<h3>Crime Event Analysis</h3>
+<div id="general-crime-data" class="section level4">
+<h4>General Crime Data</h4>
+</div>
+<div id="crime-patterns" class="section level4">
+<h4>Crime Patterns</h4>
+<p>Given the offense description (<code>ofns_desc</code>), our dataset
+comprises 69 distinct crime types. To ensure our visualizations remain
+accessible and easily interpretable, we have condensed the scope to
+encompass only the top 10 most prevalent crime types. Consequently, we
+have curated a subset of the data, organized by the frequency of cases,
+which consists of four key variables: * <code>ky_code</code>: A
+numerical code representing the specific crime. * <code>count</code>:
+The aggregate count of reported incidents for each crime. *
+<code>ofns_desc</code>: The description of the crime type in textual
+form. * <code>cumulative_percentage</code>: This denotes the running
+total percentage of cases accounted for up to and including the current
+row. This streamlined dataset allows for a focused analysis of the
+crimes that constitute the majority of cases, thereby rendering our
+visual representations more concise and informative.</p>
+</div>
 </div>
 <div id="suspects-and-victims" class="section level3">
 <h3>Suspects and Victims</h3>
@@ -468,6 +537,23 @@ by neighborhood to conduct regression analyses.</p>
 <h1>Exploratory analysis</h1>
 <p>(Visualizations, summaries, and exploratory statistical analysies.
 Justify the steps you took, and show any major change to your ideas)</p>
+<div id="crime-event-analysis-1" class="section level3">
+<h3>Crime Event Analysis</h3>
+<ul>
+<li>Temporal Trends: To illustrate the trends over time, a barplot was
+designed to showcase the frequency of various crime types across
+different years. To analyze daily temporal patterns, a line graph was
+created to delve into the patterns within different times of the day,
+with each line tracing the fluctuations in crime counts throughout the
+hours, thereby emphasizing the periods when crime peaks are most
+prevalent.</li>
+<li>Spatial Distribution: An interactive map was developed to illustrate
+the spread and density of different crime types throughout the boroughs
+of New York City. This map allows users to interactively explore crime
+data across regions by selecting year and crime type, offering insights
+into the geographical crime landscape</li>
+</ul>
+</div>
 <div id="suspects-and-victims-1" class="section level3">
 <h3>Suspects and Victims</h3>
 <p>Three barplots were created to visualize the distribution of race,
@@ -507,6 +593,44 @@ residuals are around 0.</p>
 </div>
 <div id="discussion" class="section level1">
 <h1>Discussion</h1>
+<div id="crime-event" class="section level3">
+<h3>Crime event</h3>
+<p>The top 10 most frequent crime types constitute a substantial 80.5%
+of all crime cases reported to the NYPD from 2017 through 2022,
+revealing a concentrated pattern of offenses. Within this dataset,
+‘Petit Larceny’ stands out for its relative stability year over year,
+consistently forming a significant segment of the reported offenses.</p>
+<p>Examining the daily temporal pattern, we observe pronounced peaks for
+offenses such as petit larceny, harassment 2, and grand larceny during
+the hours from 11 AM to 6 PM. This trend likely correlates with
+increased daytime activity when the streets are bustling, and the
+opportunity for these crimes escalates. The timing of these peaks
+coincides with the busiest periods in public spaces, suggesting a
+potential link between crime frequency and population density.</p>
+<p>Conversely, all offenses demonstrate a substantial decrease in
+frequency around the early hours of 5 AM and 6 AM. This trough in
+criminal activity can be attributed to the minimal pedestrian and
+vehicle traffic at these times, along with a general reduction in social
+interactions as most individuals are home, thus lowering the risk and
+opportunity for offenses.</p>
+<p>These temporal insights are invaluable for stakeholders such as law
+enforcement agencies and community leaders, who could leverage this data
+to optimize resource allocation, aiming for effective crime prevention
+and timely response. Furthermore, this analysis can trigger deeper
+inquiries into the causal factors behind the peak times for specific
+offenses, guiding the development of targeted crime prevention
+strategies and interventions. Understanding the rhythm of criminal
+activity empowers decision-makers to adopt a more strategic approach in
+combating crime and enhancing community safety.</p>
+<p>Our interactive map highlights that Manhattan, Queens, and the Bronx
+are areas with higher crime rates. This could be due to various factors
+like population density, socio-economic conditions, or policing
+strategies. Neighborhood Variations: An interesting observation is that
+the Upper East Side in Manhattan has significantly lower crime rates
+compared to its neighboring areas. This could be attributed to factors
+like higher income levels, better security measures, or lower population
+density.</p>
+</div>
 <div id="suspects-and-victims-2" class="section level3">
 <h3>Suspects and Victims</h3>
 <p>It is interesting to see the distribution of race are quite similar
