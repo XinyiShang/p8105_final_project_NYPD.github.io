@@ -144,17 +144,17 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
 
 
   <div style="flex: 0 0 auto; margin-right: 20px; text-align: center;">
-    <img src="image/new_york.jpg" alt="haha" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
+    <img src="image/allison.jpeg" alt="allison_xia" style="width: 200px; height: 200px; object-fit: cover; object-position: center center; border-radius: 50%;">
     <p><strong>Allison Xia</strong><br>zx2482</p>
     <p>
         <button style="border: none; background: none; padding: 0; margin: 0;">
-            <a href="Github Link" style="text-decoration: none;">
+            <a href="https://github.com/allisonzxia" style="text-decoration: none;">
                 <img src="image/github_icon.png" alt="github_icon" style="width: 30px; height: 30px; object-fit: cover; object-position: center center;">
             </a>
         </button>
         &nbsp;
         <button style="border: none; background: none; padding: 0; margin: 0;">
-            <a href="Linkedin Link" style="text-decoration: none;">
+            <a href="https://www.linkedin.com/in/allison-xia/" style="text-decoration: none;">
                 <img src="image/linkedin_icon.png" alt="linkedin_icon" style="width: 30px; height: 30px; object-fit: cover; object-position: center center">
             </a>
         </button>
