@@ -26,7 +26,7 @@ Since the primary data used did not have neighborhood information, we used NYPD 
 #df_nypd = read_csv("https://www.dropbox.com/scl/fi/1j6emjrdo3zbjrt5ehgq0/NYPD_Complaint_Data_Historic.csv?rlkey=co02d6vsgxr0aj44r7uhnbz64&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
 #  janitor::clean_names()
 
-df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
+df_nypd = read_csv('../NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
   janitor::clean_names() 
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
@@ -189,7 +189,7 @@ tm_shape(count_by_neighborhood) +
   tm_bubbles("crime_rate", id = "pre_nei", col = "azure", alpha = .5, popup.vars = c("Below poverty threshold: " = "pop_pov_pct", "Crime rate (per 100,000): " = "crime_rate"))
 ```
 
-## Crime type
+## Crime Rate & Crime Types
 
 ### What are the top 5 neighborhoods with highest average crime rate?
 ```{r}
@@ -198,12 +198,12 @@ ses_df |> group_by(borough, neighborhood) |>
   arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
 ```
 
-### What are the top 5 neighborhoods with highest average crime rate?
+### What are the top 5 neighborhoods with lowest average crime rate?
 
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
-  arrange(desc(avg_crime_rate)) |> tail(5) |> knitr::kable()
+  arrange(avg_crime_rate) |> head(5) |> knitr::kable()
 ```
 
 Since CUMC is located in Manhattan, let's also visualize the crime rate in Manhattan:
@@ -229,70 +229,6 @@ write.csv(nypd_ses_df_save, "Top5CrimeTypes/data/nypd_ses_df.csv")
 
 <iframe height="600" width="100%" frameborder="no" src=" https://xinyi-anna-shang.shinyapps.io/Top5CrimeTypes/"> </iframe>
 
-Chelsea/Clinton/Midtown:
-```{r}
-nypd_ses_df |> 
-  filter(neighborhood =="Chelsea/Clinton/Midtown") |> 
-  count(ofns_desc) |> 
-  arrange(desc(n)) |> 
-  head(5) |> 
-  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |> 
-  rename(crime_type = ofns_desc) |> 
-  knitr::kable()
-```
-
-University Heights/Fordham: 
-```{r}
-nypd_ses_df |> 
-  filter(neighborhood == "University Heights/Fordham") |> 
-  count(ofns_desc) |> 
-  arrange(desc(n)) |> 
-  head(5) |> 
-  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |> 
-  rename(crime_type = ofns_desc) |>
-  knitr::kable() 
-```
-
-Mott Haven/Hunts Point: 
-```{r}
-nypd_ses_df |> 
-  filter(neighborhood == "Mott Haven/Hunts Point") |> 
-  count(ofns_desc) |> 
-  arrange(desc(n)) |> 
-  head(5) |> 
-  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |> 
-  rename(crime_type = ofns_desc) |>
-  knitr::kable() 
-```
-
-East Harlem:
-```{r}
-nypd_ses_df |> 
-  filter(neighborhood == "East Harlem") |> 
-  count(ofns_desc) |> 
-  arrange(desc(n)) |> 
-  head(5) |> 
-  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |> 
-  rename(crime_type = ofns_desc) |>
-  knitr::kable() 
-```
-
-Lower East Side/Chinatown: 
-```{r}
-nypd_ses_df |> 
-  filter(neighborhood == "Lower East Side/Chinatown") |> 
-  count(ofns_desc) |> 
-  arrange(desc(n)) |> 
-  head(5) |> 
-  mutate(percentage = scales::percent(n / sum(n), scale = 100)) |> 
-  select(ofns_desc, percentage) |>
-  rename(crime_type = ofns_desc) |>
-  knitr::kable() 
-```
 
 The high crime rate in Chelsea/Clinton/Midtown can be explained by the significant contribution of petite and grand larceny, which is as expected. 
 
@@ -314,7 +250,7 @@ nypd_ses_df |>
 ```
 
 
-## Line plot
+## Rent & Crime Rate
 
 ### Is there an association between rent and crime rate?
 
@@ -335,8 +271,6 @@ ses_df |> group_by(neighborhood) |>
 ```
 
 There appears to be no obvious association between rent and crime rate.  
-
-## Discussion
 
 ## References 
 - Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.
