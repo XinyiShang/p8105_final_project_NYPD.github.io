@@ -103,6 +103,25 @@ df_summary =
               distinct(), by = "ky_cd") 
 ```
 
+```{r}
+# crime_counts = df_crime_patterns |>
+#     group_by(year,ofns_desc) |>
+#     summarize(count = n())
+# 
+# crime_counts |> 
+#   write.csv("Top10CrimeMap/data/crime_counts.csv")
+```
+
+```{r}
+# df_summary |>
+#   write.csv("Top10CrimeMap/data/df_summary.csv", col.names = TRUE)
+# 
+# set.seed(123)
+# df_crime_patterns|>
+#   sample_frac(0.30) |>
+#   write.csv("Top10CrimeMap/data/df_crime_patterns_sample.csv", col.names = TRUE)
+```
+
 The most frequent 10 crime categories constitute at least 80% of all the crimes in NYC.
 
 ## Number of Cases across Most Frequent 10 Offense Types in Each Year
@@ -219,4 +238,4 @@ server <- function(input, output) {
 
 ```
 
-<iframe height="600" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map_Shiny/"> </iframe>
+<iframe height="600" width="100%" frameborder="no" src="https://allisonzxia.shinyapps.io/Crime_Map/"> </iframe>

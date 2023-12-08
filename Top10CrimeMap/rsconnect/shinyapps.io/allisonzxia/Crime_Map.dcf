@@ -1,0 +1,12 @@
+name: Crime_Map
+title: Crime_Map
+username: allisonzxia
+account: allisonzxia
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10752288
+bundleId: 8025044
+url: https://allisonzxia.shinyapps.io/Crime_Map/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
