@@ -310,9 +310,9 @@ After creating these tables, we are able to see that black women between the age
 
 ```{r,include=FALSE}
 final=grid.arrange(
-  sex_borough_plot + theme(legend.position = "bottom",legend.key.size = unit(1, "lines"),legend.text = element_text(size = 6))+ggtitle(NULL),
-  race_borough_plot+ theme(legend.position = "bottom",legend.key.size = unit(0.3, "lines"),legend.text = element_text(size = 4))+ggtitle(NULL),
-  age_borough_plot + theme(legend.position = "none")+ggtitle(NULL),
+  sex_borough_plot + theme(legend.position = "bottom",legend.key.size = unit(1, "lines"),legend.text = element_text(size = 6),legend.title=element_text(size=5))+ggtitle(NULL),
+  race_borough_plot+ theme(legend.position = "bottom",legend.key.size = unit(0.3, "lines"),legend.text = element_text(size = 4),legend.title=element_text(size=5))+ggtitle(NULL),
+  age_borough_plot + theme(legend.position = "bottom",legend.key.size = unit(0.3, "lines"),legend.text = element_text(size = 4),legend.title=element_text(size=5))+ggtitle(NULL),
   age_plot + theme(legend.position = "none")+ggtitle(NULL),
   sex_plot + theme(legend.position = "none")+ggtitle(NULL),
   race_plot+ theme(legend.position = "none")+ggtitle(NULL),

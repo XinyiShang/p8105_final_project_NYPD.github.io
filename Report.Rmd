@@ -80,7 +80,6 @@ output: html_document
   We noticed that there are missing SES data for the year 2020 and 2022; therefore, our regression analyses are based on the data in 2017, 2018, 2019, and 2021. The only precinct-level population data available from the census was for the year 2020. Furthermore, the dataset contains missing values, indicated by "(null)," which were excluded from the analysis during the filtering process.
   
 # Exploratory analysis
-(Visualizations, summaries, and exploratory statistical analysies. Justify the steps you took, and show any major change to your ideas)
 
 ### Crime Event Analysis
 
@@ -95,12 +94,12 @@ An interactive map was developed to illustrate the spread and density of differe
 
 ### Suspects and Victims
 
+Six barplots were created to visualize the distribution of race, age, and sex in suspects and victims against boroughs and levels of crime. The legends are labeled in the first three plots and are consistent throughout the rest.\
 
 ![ ](demographic_analysis.png)
 
-Six barplots were created to visualize the distribution of race, age, and sex in suspects and victims against boroughs and levels of crime. The legends are labeled in the first two plots and are consistent throughout the rest.\
-F
-or analysis across boroughs, number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough. For analysis across levels of crime, the data is divided into victims and suspects. Variables describing race, age, and sex were selected. The absolute counts are plotted out against each levels of crime. 
+
+For analysis across boroughs, number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough. For analysis across levels of crime, the data is divided into victims and suspects. Variables describing race, age, and sex were selected. The absolute counts are plotted out against each levels of crime. 
 
 
 ### Crime rate and socioeconomic status by neighborhood/NYPD precinct
