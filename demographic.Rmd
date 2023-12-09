@@ -211,9 +211,10 @@ plot(sex_borough_plot)
 
 This figure shows the percentage of sex in suspects and victims for all NYC boroughs. Around 75% of suspects are male and around 25% are female for all boroughs. Around 70% of victims are female and around 30% are male for all boroughs. 
 
-The following queries are exploring the demographic information breakdown in suspects and victims by the severity of the crime reported. Using the crime levels of violation, misdemeanor, and felony, these charts visualize the counts of suspects/victims by race, age, and sex, respectively. 
 
 ## Correlation Patterns vs. Level of Offense
+
+The following queries are exploring the demographic information breakdown in suspects and victims by the severity of the crime reported. Using the crime levels of violation, misdemeanor, and felony, these charts visualize the counts of suspects/victims by race, age, and sex, respectively. 
 
 ### Suspect/Victim Race by Level of Offense
 ```{r}

@@ -587,16 +587,16 @@ plot(sex_borough_plot)</code></pre>
 all NYC boroughs. Around 75% of suspects are male and around 25% are
 female for all boroughs. Around 70% of victims are female and around 30%
 are male for all boroughs.</p>
-<p>The following queries are exploring the demographic information
-breakdown in suspects and victims by the severity of the crime reported.
-Using the crime levels of violation, misdemeanor, and felony, these
-charts visualize the counts of suspects/victims by race, age, and sex,
-respectively.</p>
 </div>
 </div>
 <div id="correlation-patterns-vs.-level-of-offense"
 class="section level2">
 <h2>Correlation Patterns vs. Level of Offense</h2>
+<p>The following queries are exploring the demographic information
+breakdown in suspects and victims by the severity of the crime reported.
+Using the crime levels of violation, misdemeanor, and felony, these
+charts visualize the counts of suspects/victims by race, age, and sex,
+respectively.</p>
 <div id="suspectvictim-race-by-level-of-offense" class="section level3">
 <h3>Suspect/Victim Race by Level of Offense</h3>
 <pre class="r"><code>race_combined &lt;- gather(data, key = &quot;variable&quot;, value = &quot;race&quot;, susp_race, vic_race)
