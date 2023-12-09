@@ -640,10 +640,17 @@ class="section level3">
 precinct</h3>
 <p>Together with the SES indicator data, we calculated the average crime
 rate (2017 - 2022) for each neighborhood. We displayed tables showing
-the 5 neighborhoods with highest and lowest crime rate, along with the
-most common types of crimes in the 5 neighborhoods with highest crime
-rate. Since our CUMC campus is located in Washington Heights, we also
-showed the top 10 types of crime in our neighborhood.</p>
+the 5 neighborhoods with highest and lowest crime rate.</p>
+<p>Top 5 neighborhoods with highest crime rate:</p>
+<p><img src="eda_social_files/highest_crime_rate.png" /></p>
+<p>Top 5 neighborhoods with lowest crime rate:</p>
+<p><img src="eda_social_files/lowest_crime_rate.png" /></p>
+<p>In addition, we showed the most common types of crimes in the 5
+neighborhoods with highest crime rate. Since our CUMC campus is located
+in Washington Heights, we also showed the top 10 types of crime in our
+neighborhood. More details can be found in our <a
+href="eda_social.html">Crime Rate and Socioeconomics: Exploratory Data
+Analysis page</a>.</p>
 <p>We also generated choropleth maps at the precinct level to depict
 crime characteristics alongside various socioeconomic indicators such as
 median household income, unemployment rate, education level, and poverty
@@ -661,11 +668,15 @@ income, education, unemployment, race, and immigration status. Our
 analysis consists of two parts, focusing on the overall crime rate and
 the serious crime rate.</p>
 <p>For the overall crime rate, using a backward elimination approach, we
-shortlisted percentage of population below poverty line and median
-household income as the main predictors of crime rate. We also ran a
-diagnostics analysis of this model, confirming low multicollinearity
-between the two predictors, and confirmed that residuals are around
-0.</p>
+first visualized the association between crime rate and 4 important
+factors that we hypothesized may be relevant:</p>
+<p><img src="Crime_Rate_Analysis_files/combined_eda_plot.png" /></p>
+<p>Then, we shortlisted percentage of population below poverty line and
+median household income as the main predictors of crime rate. We also
+ran a diagnostics analysis of this model, confirming low
+multicollinearity between the two predictors, and confirmed that
+residuals are around 0. Our final model is as follow:</p>
+<p><img src="Crime_Rate_Analysis_files/final_MLR.png" /></p>
 <p>We investigated the felony crime rate using three models (standard
 linear regression, spatial lag model, and spatial error model) and
 compared their performance. To detect spatial autocorrelation, we
@@ -877,6 +888,17 @@ href="https://furmancenter.org/coredata/userguide/about">Link</a></li>
 href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html">Link</a></li>
 <li>Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. <a
 href="https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz">Link</a></li>
+</ul>
+</div>
+<div id="group-members" class="section level1">
+<h1>Group Members</h1>
+<ul>
+<li>Yuki Joyama (yj2803)</li>
+<li>Nihaal Rahman (nkr2121)</li>
+<li>Siqing Wang (sw3879)</li>
+<li>Miao Fu (mf3593)</li>
+<li>Xinyi Shang (xs2529)</li>
+<li>Allison Xia (zx2482)</li>
 </ul>
 </div>
 

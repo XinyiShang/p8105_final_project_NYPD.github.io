@@ -22,10 +22,7 @@ Since the primary data used did not have neighborhood information, we used NYPD 
 ```{r}
 # Import and clead NYPD data
 
-#df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
-#  janitor::clean_names()
-
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
+df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
   janitor::clean_names()
 
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
@@ -196,7 +193,7 @@ What are the top 5 neighborhoods with highest average crime rate?
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
-  arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable()
+  arrange(desc(avg_crime_rate)) |> head(5) |> knitr::kable(digits = 3)
 ```
 
 ### Safest neighborhoods
@@ -206,7 +203,7 @@ What are the top 5 neighborhoods with lowest average crime rate?
 ```{r}
 ses_df |> group_by(borough, neighborhood) |>
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
-  arrange(avg_crime_rate) |> head(5) |> knitr::kable()
+  arrange(avg_crime_rate) |> head(5) |> knitr::kable(digits = 3)
 ```
 
 ### Focusing on Manhattan
@@ -217,7 +214,7 @@ Since CUMC is located in Manhattan, let's also visualize the crime rate in Manha
 ses_df |> group_by(borough, neighborhood) |>
   filter(borough == "Manhattan") |> 
   summarise(avg_crime_rate = mean(crime_rate, na.rm = TRUE)) |> 
-  arrange(desc(avg_crime_rate)) |> knitr::kable()
+  arrange(desc(avg_crime_rate)) |> knitr::kable(digits = 3)
 ```
 
 The top 5 neighborhoods of highest average crime rate are to our surprise, so we further looked into the common types of crimes in these neighorhoods. 

@@ -13,7 +13,7 @@
 
 <title>Crime Rate Analysis</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -410,16 +410,14 @@ div.tocify {
 <p>We are interested in exploring whether socioeconomic factors are
 associated or can be used as predictors to assess crime rate. Since our
 NYPD complaint dataset only contains individual complaints, we utilized
-a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to
-gather population data for each borough and neighborhood.</p>
+a socioeconomic indicator dataset from NYU Furman Center to gather
+population data for each borough and neighborhood.</p>
 <p>To better conduct regression analysis, we have calculated the crime
-rate for each neighborhood as the following: Crime Rate = (Total number
-of complaints in a neighborhood in a given year / Total population in a
-neighborhood in a given year) * 100,000</p>
-<pre class="r"><code># df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
-#   janitor::clean_names() 
-df_nypd = read_csv(&quot;data/NYPD_Complaint_Data_Historic.csv&quot;) |&gt; 
-  janitor::clean_names()
+rate for each neighborhood as the following:</p>
+<p>Crime Rate = (Total number of complaints in a neighborhood in a given
+year / Total population in a neighborhood in a given year) * 100,000</p>
+<pre class="r"><code> df_nypd = read_csv(&quot;https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1&quot;, na = &quot;(null)&quot;) |&gt; # some values are coded as &quot;(null)&quot; in the df; rewrite them as NA
+   janitor::clean_names() 
 
 #Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
 prec_neighbor = read_csv(&quot;data/nyc_prec_neighborhood.csv&quot;)
@@ -466,26 +464,31 @@ income, and education.</p>
 <pre class="r"><code>eda_plot1 = ses_df |&gt; ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;% below poverty threshold vs. Crime Rate&quot;)
+  labs(title = &quot;% Below poverty threshold vs. Crime Rate&quot;) +
+  theme(text = element_text(size = 9))
 
 eda_plot2 = ses_df |&gt; ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;Median Household Income vs. Crime Rate&quot;)
+  labs(title = &quot;Median Household Income vs. Crime Rate&quot;) +
+  theme(text = element_text(size = 9))
 
 eda_plot3 = ses_df |&gt; ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;% umployed vs. Crime Rate&quot;)
+  labs(title = &quot;% Umployed vs. Crime Rate&quot;) +
+  theme(text = element_text(size = 9))
 
 eda_plot4 = ses_df |&gt; ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = &quot;lm&quot;, se = FALSE, color = &quot;blue&quot;) +
-  labs(title = &quot;% without High School Education vs. Crime Rate&quot;)
+  labs(title = &quot;% No High School Education vs. Crime Rate&quot;) +
+  theme(text = element_text(size = 9))
 
-gridExtra::grid.arrange(
+combined_eda_plot = gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)</code></pre>
 <p><img src="Crime_Rate_Analysis_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>ggsave(file.path(&quot;Crime_Rate_Analysis_files&quot;, &quot;combined_eda_plot.png&quot;), combined_eda_plot, width = 12, height = 8, units = &quot;in&quot;)</code></pre>
 <p>It is observed that there is a stronger positive association between
 percentage of poverty population with crime rate; a weaker positive
 association between unemployment and lack of education with crime rate,
@@ -523,36 +526,90 @@ and gradually remove factors that are not significant.</p>
 
 log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + pop_foreign_pct, data = ses_df)
 
-summary(log_fit)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + 
-##     pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + 
-##     pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + 
-##     pop_foreign_pct, data = ses_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.73689 -0.19577 -0.00971  0.17691  1.09847 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         5.922e-01  1.018e+00   0.582  0.56137    
-## pop_pov_pct         5.315e+00  5.653e-01   9.403  &lt; 2e-16 ***
-## hh_inc_med_adj      9.872e-06  1.457e-06   6.775 1.28e-10 ***
-## pop16_unemp_pct    -1.384e+00  7.481e-01  -1.851  0.06567 .  
-## pop_edu_nohs_pct   -1.716e+00  6.400e-01  -2.681  0.00793 ** 
-## pop_race_asian_pct -3.306e-01  1.041e+00  -0.318  0.75118    
-## pop_race_black_pct  1.300e-01  1.007e+00   0.129  0.89739    
-## pop_race_hisp_pct   2.961e-01  9.690e-01   0.306  0.76023    
-## pop_race_white_pct -1.050e+00  9.846e-01  -1.067  0.28741    
-## pop_foreign_pct     2.877e-02  2.901e-01   0.099  0.92108    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.2986 on 206 degrees of freedom
-## Multiple R-squared:  0.5819, Adjusted R-squared:  0.5636 
-## F-statistic: 31.86 on 9 and 206 DF,  p-value: &lt; 2.2e-16</code></pre>
+broom::tidy(log_fit) |&gt; knitr::kable(digits=3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.592</td>
+<td align="right">1.018</td>
+<td align="right">0.582</td>
+<td align="right">0.561</td>
+</tr>
+<tr class="even">
+<td align="left">pop_pov_pct</td>
+<td align="right">5.315</td>
+<td align="right">0.565</td>
+<td align="right">9.403</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="odd">
+<td align="left">hh_inc_med_adj</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">6.775</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="even">
+<td align="left">pop16_unemp_pct</td>
+<td align="right">-1.384</td>
+<td align="right">0.748</td>
+<td align="right">-1.851</td>
+<td align="right">0.066</td>
+</tr>
+<tr class="odd">
+<td align="left">pop_edu_nohs_pct</td>
+<td align="right">-1.716</td>
+<td align="right">0.640</td>
+<td align="right">-2.681</td>
+<td align="right">0.008</td>
+</tr>
+<tr class="even">
+<td align="left">pop_race_asian_pct</td>
+<td align="right">-0.331</td>
+<td align="right">1.041</td>
+<td align="right">-0.318</td>
+<td align="right">0.751</td>
+</tr>
+<tr class="odd">
+<td align="left">pop_race_black_pct</td>
+<td align="right">0.130</td>
+<td align="right">1.007</td>
+<td align="right">0.129</td>
+<td align="right">0.897</td>
+</tr>
+<tr class="even">
+<td align="left">pop_race_hisp_pct</td>
+<td align="right">0.296</td>
+<td align="right">0.969</td>
+<td align="right">0.306</td>
+<td align="right">0.760</td>
+</tr>
+<tr class="odd">
+<td align="left">pop_race_white_pct</td>
+<td align="right">-1.050</td>
+<td align="right">0.985</td>
+<td align="right">-1.067</td>
+<td align="right">0.287</td>
+</tr>
+<tr class="even">
+<td align="left">pop_foreign_pct</td>
+<td align="right">0.029</td>
+<td align="right">0.290</td>
+<td align="right">0.099</td>
+<td align="right">0.921</td>
+</tr>
+</tbody>
+</table>
 <p>According to the MLR fit result, three factors are significant:
 percentage of population below poverty line, median household income,
 and percentage of population above 25 years old without high school
@@ -560,72 +617,150 @@ degree.</p>
 <p>We will fine tune our model based on this three factors.</p>
 <pre class="r"><code>log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop_edu_nohs_pct, data = ses_df)
 
-summary(log_fit_optimized)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + 
-##     pop_edu_nohs_pct, data = ses_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.06232 -0.20232 -0.00345  0.23603  1.05242 
-## 
-## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)       4.521e-01  1.982e-01   2.281 0.023556 *  
-## pop_pov_pct       4.761e+00  4.546e-01  10.473  &lt; 2e-16 ***
-## hh_inc_med_adj    5.377e-06  1.391e-06   3.866 0.000147 ***
-## pop_edu_nohs_pct -4.502e-01  4.927e-01  -0.914 0.361884    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3555 on 212 degrees of freedom
-## Multiple R-squared:  0.3901, Adjusted R-squared:  0.3814 
-## F-statistic: 45.19 on 3 and 212 DF,  p-value: &lt; 2.2e-16</code></pre>
+broom::tidy(log_fit_optimized) |&gt; knitr::kable(digits=3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.452</td>
+<td align="right">0.198</td>
+<td align="right">2.281</td>
+<td align="right">0.024</td>
+</tr>
+<tr class="even">
+<td align="left">pop_pov_pct</td>
+<td align="right">4.761</td>
+<td align="right">0.455</td>
+<td align="right">10.473</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="odd">
+<td align="left">hh_inc_med_adj</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">3.866</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="even">
+<td align="left">pop_edu_nohs_pct</td>
+<td align="right">-0.450</td>
+<td align="right">0.493</td>
+<td align="right">-0.914</td>
+<td align="right">0.362</td>
+</tr>
+</tbody>
+</table>
 <p>As we removed many insignificant predictors, education factor lost
 its significance as well. Our final model will only include two
 predictors: percentage of population below poverty line and median
-household income.</p>
+household income. The below is our final model for prediction of crime
+rate of a neighborhood in NYC:</p>
 <pre class="r"><code>log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj, data = ses_df)
 
-summary(log_fit_optimized)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log_crime_rate ~ pop_pov_pct + hh_inc_med_adj, data = ses_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.05481 -0.20115 -0.01538  0.23201  1.07555 
-## 
-## Coefficients:
-##                 Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)    3.434e-01  1.585e-01   2.167   0.0314 *  
-## pop_pov_pct    4.644e+00  4.358e-01  10.654  &lt; 2e-16 ***
-## hh_inc_med_adj 6.049e-06  1.180e-06   5.127 6.59e-07 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3554 on 213 degrees of freedom
-## Multiple R-squared:  0.3876, Adjusted R-squared:  0.3819 
-## F-statistic: 67.42 on 2 and 213 DF,  p-value: &lt; 2.2e-16</code></pre>
+final_MLR = broom::tidy(log_fit_optimized) |&gt; knitr::kable(digits=3)
+
+final_MLR</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.343</td>
+<td align="right">0.159</td>
+<td align="right">2.167</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="even">
+<td align="left">pop_pov_pct</td>
+<td align="right">4.644</td>
+<td align="right">0.436</td>
+<td align="right">10.654</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="odd">
+<td align="left">hh_inc_med_adj</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">5.127</td>
+<td align="right">0.000</td>
+</tr>
+</tbody>
+</table>
 <p>Both of these 2 predictors are significant. We can also check for
-multicollinearity of our optimized model</p>
-<pre class="r"><code>performance::check_collinearity(log_fit_optimized)</code></pre>
-<pre><code>## # Check for Multicollinearity
-## 
-## Low Correlation
-## 
-##            Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
-##     pop_pov_pct 2.38 [1.97, 2.97]         1.54      0.42     [0.34, 0.51]
-##  hh_inc_med_adj 2.38 [1.97, 2.97]         1.54      0.42     [0.34, 0.51]</code></pre>
-<p>Multicollinearity is low between our two predictors and is within the
-acceptable range.</p>
+multicollinearity of our optimized model. From the test below, we can
+see that multicollinearity is low between our two predictors and is
+within the acceptable range.</p>
+<pre class="r"><code>performance::check_collinearity(log_fit_optimized) |&gt; 
+  knitr::kable(digits=3)</code></pre>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="6%" />
+<col width="11%" />
+<col width="12%" />
+<col width="10%" />
+<col width="10%" />
+<col width="17%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Term</th>
+<th align="right">VIF</th>
+<th align="right">VIF_CI_low</th>
+<th align="right">VIF_CI_high</th>
+<th align="right">SE_factor</th>
+<th align="right">Tolerance</th>
+<th align="right">Tolerance_CI_low</th>
+<th align="right">Tolerance_CI_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">pop_pov_pct</td>
+<td align="right">2.384</td>
+<td align="right">1.972</td>
+<td align="right">2.972</td>
+<td align="right">1.544</td>
+<td align="right">0.419</td>
+<td align="right">0.337</td>
+<td align="right">0.507</td>
+</tr>
+<tr class="even">
+<td align="left">hh_inc_med_adj</td>
+<td align="right">2.384</td>
+<td align="right">1.972</td>
+<td align="right">2.972</td>
+<td align="right">1.544</td>
+<td align="right">0.419</td>
+<td align="right">0.337</td>
+<td align="right">0.507</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="mlr-model-diagnostics" class="section level2">
 <h2>MLR model diagnostics</h2>
-<p>We can run a regression diagnostic by plotting residuals for each
-borough:</p>
+<p>To assess how well our model can explain crime rate, we can run a
+regression diagnostic by plotting residuals for each borough:</p>
 <pre class="r"><code>ses_df |&gt; 
   modelr::add_residuals(log_fit_optimized) |&gt; 
   ggplot(aes(x = borough, y = resid)) + geom_violin() + 

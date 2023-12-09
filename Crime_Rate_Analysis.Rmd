@@ -3,10 +3,12 @@ title: "Crime Rate Analysis"
 output: html_document
 ---
 
-We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset (INSERT LINK: NYU Furman Center) to gather population data for each borough and neighborhood. 
+We are interested in exploring whether socioeconomic factors are associated or can be used as predictors to assess crime rate. Since our NYPD complaint dataset only contains individual complaints, we utilized a socioeconomic indicator dataset from NYU Furman Center to gather population data for each borough and neighborhood. 
 
 To better conduct regression analysis, we have calculated the crime rate for each neighborhood as the following:
+
 Crime Rate = (Total number of complaints in a neighborhood in a given year / Total population in a neighborhood in a given year) * 100,000
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -20,10 +22,8 @@ library(glmnet)
 ```
 
 ```{r}
-# df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
-#   janitor::clean_names() 
-df_nypd = read_csv("data/NYPD_Complaint_Data_Historic.csv") |> 
-  janitor::clean_names()
+ df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |> # some values are coded as "(null)" in the df; rewrite them as NA
+   janitor::clean_names() 
 
 #Reading in the dataset that map each precinct to a neighborhood, for further SES analysis
 prec_neighbor = read_csv("data/nyc_prec_neighborhood.csv")
@@ -68,29 +68,36 @@ ses_df = ses_df |> merge(neighbor_ses, by = c("year", "neighborhood")) |>
 
 We start by visualizing potential association between factors that we hypothesize to impact crime rate, these are poverty, unemployment, income, and education. 
 
-```{r}
+```{r, message=FALSE}
 eda_plot1 = ses_df |> ggplot(aes(x = pop_pov_pct, y = crime_rate)) +
   geom_point() +  
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "% below poverty threshold vs. Crime Rate")
+  labs(title = "% Below poverty threshold vs. Crime Rate") +
+  theme(text = element_text(size = 9))
 
 eda_plot2 = ses_df |> ggplot(aes(x = hh_inc_med_adj, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Median Household Income vs. Crime Rate")
+  labs(title = "Median Household Income vs. Crime Rate") +
+  theme(text = element_text(size = 9))
 
 eda_plot3 = ses_df |> ggplot(aes(x = pop16_unemp_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "% umployed vs. Crime Rate")
+  labs(title = "% Umployed vs. Crime Rate") +
+  theme(text = element_text(size = 9))
 
 eda_plot4 = ses_df |> ggplot(aes(x = pop_edu_nohs_pct, y = crime_rate)) +
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "% without High School Education vs. Crime Rate")
+  labs(title = "% No High School Education vs. Crime Rate") +
+  theme(text = element_text(size = 9))
 
-gridExtra::grid.arrange(
+combined_eda_plot = gridExtra::grid.arrange(
   eda_plot1, eda_plot2, eda_plot3, eda_plot4, ncol = 2)
+
+
+ggsave(file.path("Crime_Rate_Analysis_files", "combined_eda_plot.png"), combined_eda_plot, width = 12, height = 8, units = "in")
 ```
 
 It is observed that there is a stronger positive association between percentage of poverty population with crime rate; a weaker positive association between unemployment and lack of education with crime rate, and a negative association between median household income and crime rate. 
@@ -126,7 +133,7 @@ ses_df = ses_df |> mutate(
 
 log_fit = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop16_unemp_pct + pop_edu_nohs_pct + pop_race_asian_pct + pop_race_black_pct + pop_race_hisp_pct + pop_race_white_pct + pop_foreign_pct, data = ses_df)
 
-summary(log_fit)
+broom::tidy(log_fit) |> knitr::kable(digits=3)
 ```
 
 According to the MLR fit result, three factors are significant: percentage of population below poverty line, median household income, and percentage of population above 25 years old without high school degree.
@@ -136,28 +143,30 @@ We will fine tune our model based on this three factors.
 ```{r}
 log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj + pop_edu_nohs_pct, data = ses_df)
 
-summary(log_fit_optimized)
+broom::tidy(log_fit_optimized) |> knitr::kable(digits=3)
 ```
 
-As we removed many insignificant predictors, education factor lost its significance as well. Our final model will only include two predictors: percentage of population below poverty line and median household income. 
+As we removed many insignificant predictors, education factor lost its significance as well. Our final model will only include two predictors: percentage of population below poverty line and median household income. The below is our final model for prediction of crime rate of a neighborhood in NYC: 
 
 ```{r}
 log_fit_optimized = lm(log_crime_rate ~ pop_pov_pct + hh_inc_med_adj, data = ses_df)
 
-summary(log_fit_optimized)
+final_MLR = broom::tidy(log_fit_optimized) |> knitr::kable(digits=3)
+
+final_MLR
 ```
 
-Both of these 2 predictors are significant. We can also check for multicollinearity of our optimized model
+Both of these 2 predictors are significant. We can also check for multicollinearity of our optimized model. From the test below, we can see that multicollinearity is low between our two predictors and is within the acceptable range. 
 
 ```{r}
-performance::check_collinearity(log_fit_optimized)
+performance::check_collinearity(log_fit_optimized) |> 
+  knitr::kable(digits=3)
 ```
 
-Multicollinearity is low between our two predictors and is within the acceptable range. 
 
 ## MLR model diagnostics
 
-We can run a regression diagnostic by plotting residuals for each borough:
+To assess how well our model can explain crime rate, we can run a regression diagnostic by plotting residuals for each borough:
 ```{r}
 ses_df |> 
   modelr::add_residuals(log_fit_optimized) |> 
