@@ -410,8 +410,10 @@ div.tocify {
 <p>We are interested in exploring whether socioeconomic factors are
 associated or can be used as predictors to assess crime rate. Since our
 NYPD complaint dataset only contains individual complaints, we utilized
-a socioeconomic indicator dataset from NYU Furman Center to gather
-population data for each borough and neighborhood.</p>
+a <a
+href="https://furmancenter.org/coredata/userguide/data-downloads">socioeconomic
+indicator dataset from NYU Furman Center</a> to gather population data
+for each borough and neighborhood.</p>
 <p>To better conduct regression analysis, we have calculated the crime
 rate for each neighborhood as the following:</p>
 <p>Crime Rate = (Total number of complaints in a neighborhood in a given
@@ -788,6 +790,20 @@ neighborhood is highly associated with the percentage of people below
 poverty line, and the median household income. From diagnostic analysis,
 the multicollinearity between the 2 factors are low, and our model is a
 relatively good fit by inspecting residuals and fitted values.</p>
+<p>There are limitations regarding this MLR model. Due to missing data
+and data processing complexities for huge dataset, the MLR model is
+based on the crime rate per neighborhood for 2017, 2018, 2019, and 2021
+only. While we are able to gather more observations by combining the
+crime rate data from multiple years, this model does not consider
+changes from year to year - that is, the degree of association between
+certain socioeconomics factors and crime rate may differ from year to
+year. In addition, we recognize a better approach was to split the data
+into training and testing sets, so that we can test our fitted MLR model
+on data that has not been used to fit the data. Since we only have
+neighborhood-level crime rate data for 4 years, we don’t have a large
+enough dataset to split into training and testing, and we acknowledge
+this would be a better approach if we have more years of data
+available.</p>
 </div>
 </div>
 
