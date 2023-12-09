@@ -27,4 +27,9 @@ Additionally, our processed and filtered dataset is accessible through [Dropbox]
 **zx2482 Allison Xia** 
 
 
-
+## References 
+- Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.
+- NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)
+- CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s CoreData.nyc. [Link](https://furmancenter.org/coredata/userguide/about)
+- Bureau, U. C. (2022, November 29). 2020 census. Census.gov. [Link](https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html)
+- Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz)

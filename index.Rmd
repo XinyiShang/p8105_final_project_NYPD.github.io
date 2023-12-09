@@ -24,6 +24,12 @@ Image by wiggijo, via <a href="https://pixabay.com/photos/usa-manhattan-contrast
 
 New York City, a city renowned for its diversity and dynamic energy, faces an ongoing challenge in ensuring the safety and security of its inhabitants. In this project, we conducted a comprehensive examination of safety in New York City through an in-depth analysis of NYPD complaint data spanning the years 2006 to 2019. The analysis will be intricately divided into three distinct layers, focusing on crime events, suspects/victims, and socioeconomic indicators. The primary objective is to discern patterns, trends, and correlations within these layers, with the ultimate goal of informing enhanced safety measures and refining law enforcement strategies.
 
+## Data Set
+
+The original dataset is available at [NYPD Complaint Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i).
+  
+Additionally, our filtered dataset is accessible through [Dropbox](https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1).
+
 ## Website Contents
 
 1. [Report](Report.html)
@@ -165,3 +171,11 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
   </div>
   
 </pre>
+
+
+## References 
+- Golub, Andrew, Bruce D. Johnson, and Eloise Dunlap. 2006. “Smoking Marijuana in Public: The Spatial and Policy Shift in New York City Arrests, 1992-2003.” Harm Reduction Journal 3 (August): 22.
+- NYPD (2023, June 16). NYPD Complaint Data Historic: NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)
+- CoreData.nyc. Subsidized Housing Database. NYU Furman Center’s CoreData.nyc. [Link](https://furmancenter.org/coredata/userguide/about)
+- Bureau, U. C. (2022, November 29). 2020 census. Census.gov. [Link](https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html)
+- Department of City Planning (DCP) (2013, Jan 29). NYC Open Data. [Link](https://data.cityofnewyork.us/Public-Safety/Police-Precincts/78dh-3ptz)

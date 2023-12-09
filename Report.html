@@ -463,6 +463,11 @@ demographic to demographic.</p>
 includes all valid felony, misdemeanor, and violation crimes reported to
 NYPD from 2006 to 2022, and we filtered the data to only investigate
 crime data between 2017 and 2022 to limit data size.</p>
+<p>The original dataset is available at <a
+href="https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i">NYPD
+Complaint Data Historic</a>.</p>
+<p>Additionally, our filtered dataset is accessible through <a
+href="https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&amp;dl=1">Dropbox</a>.</p>
 </div>
 <div id="crime-event-analysis" class="section level3">
 <h3>Crime Event Analysis</h3>
@@ -527,26 +532,31 @@ HISPANIC)<br />
 <h3>Crime Rate and Socioeconomics analysis</h3>
 <p>To conduct neighborhood-level analysis, we matched the police
 precinct data from the NYPD complaint data to their specific
-neighborhood according to Golub et al. (2006). This allowed us to also
-match crime data and socioeconomics data with the respective
-neighborhood.</p>
-<p>For socioeconomic factor analysis, we utilized the New York City
-neighborhood indicator from the NYU Furman Center, and we only filtered
-for years between 2017 and 2022 as well as only kept the variables of
-interest, such as percentage under poverty threshold, median income,
-education, unemployment rate, race, and immigration factors.</p>
+neighborhood according to <a
+href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1584220/">Golub et
+al. (2006)</a>. This allowed us to also match crime data and
+socioeconomics data with the respective neighborhood.</p>
+<p>For socioeconomic factor analysis, we utilized the <a
+href="https://furmancenter.org/coredata/userguide/about">New York City
+neighborhood indicator from the NYU Furman Center</a>, and we only
+filtered for years between 2017 and 2022 as well as only kept the
+variables of interest, such as percentage under poverty threshold,
+median income, education, unemployment rate, race, and immigration
+factors.</p>
 <p>Using the total population data from this source, we were able to
 calculate the crime rate per neighborhood: Crime Rate = (Total number of
 complaints in a neighborhood in a given year / Total population in a
 neighborhood in a given year) * 100,000. We also obtained precinct-level
-population data from the 2020 Census and calculated the incidence of
-serious crimes (felony assault) in each precinct using the formula:
-(Total number of complaints in a precinct in 2021) / (Total population
-in a precinct in 2020) * 100,000. Additionally, we derived the serious
-crime rate for each precinct (the number of felony assaults in each
-precinct divided by the total number of complaints in each precinct). We
-merged the socioeconomic data, spacial data by NYC Open Data, and crime
-rate by neighborhood/precinct to conduct regression analyses.</p>
+<a
+href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/2020-census-main.html">population
+data from the 2020 Census</a> and calculated the incidence of serious
+crimes (felony assault) in each precinct using the formula: (Total
+number of complaints in a precinct in 2021) / (Total population in a
+precinct in 2020) * 100,000. Additionally, we derived the serious crime
+rate for each precinct (the number of felony assaults in each precinct
+divided by the total number of complaints in each precinct). We merged
+the socioeconomic data, spacial data by NYC Open Data, and crime rate by
+neighborhood/precinct to conduct regression analyses.</p>
 <p>The independent variables included in our models are as
 follows:<br />
 * <code>pop</code>: the population in each precinct (we used
