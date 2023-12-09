@@ -48,6 +48,11 @@ Additionally, our processed and filtered dataset is accessible through [Dropbox]
 4. Crime Rate and Socioeconomics
    - Exploratory Data Analysis
    - Socioeconomic Status Analysis
+   
+## Screencast Recording
+
+[![](https://markdown-videos-api.jorgenkh.no/youtube/Eph-OcMPOB8)](https://youtu.be/Eph-OcMPOB8)
+
 
 ## Team
 
