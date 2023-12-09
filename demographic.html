@@ -13,7 +13,7 @@
 
 <title>Suspect and Victim Analysis</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -448,7 +448,7 @@ combined_race=vic_race|&gt;
     category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
   )
 
-combined_race|&gt;
+race_borough_plot=combined_race|&gt;
   ggplot(aes(x=boro_nm,y=percent,fill=race))+
   geom_bar(stat=&quot;identity&quot;)+
   facet_grid(~category)+
@@ -460,7 +460,9 @@ combined_race|&gt;
   theme_minimal()+
   scale_fill_viridis_d()+
   #scale_fill_brewer(palette = &quot;Spectral&quot;)+
-  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+plot(race_borough_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>This figure shows the percentage of different race for all NYC
 boroughs. Black, white, and white hispanic are the top three percent in
@@ -504,7 +506,7 @@ combined_age=vic_age|&gt;
     category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
   )
 
-combined_age|&gt;
+age_borough_plot=combined_age|&gt;
   ggplot(aes(x=boro_nm,y=percent,fill=age))+
   geom_bar(stat=&quot;identity&quot;)+
   facet_grid(~category)+
@@ -516,7 +518,8 @@ combined_age|&gt;
   theme_minimal()+
   scale_fill_viridis_d()+
   #scale_fill_brewer(palette = &quot;Dark2&quot;)+
-  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+plot(age_borough_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>This figure shows the percentage of age group for suspect and victim
 in all NYC boroughs. Majority of suspects and victims come from the age
@@ -564,7 +567,7 @@ combined_sex=vic_sex|&gt;
     category=ifelse(category==&quot;percent_susp&quot;,&quot;SUSPECT&quot;,&quot;VICTIM&quot;)
   )
 
-combined_sex|&gt;
+sex_borough_plot=combined_sex|&gt;
   ggplot(aes(x=boro_nm,y=percent,fill=sex))+
   geom_bar(stat=&quot;identity&quot;)+
   facet_grid(~category)+
@@ -576,7 +579,9 @@ combined_sex|&gt;
   theme_minimal()+
   scale_fill_viridis_d()+
   #scale_fill_brewer(palette = &quot;Dark2&quot;)+
-  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)</code></pre>
+  theme(axis.text.x=element_text(angle=45,hjust=1),legend.position=&quot;bottom&quot;)
+
+plot(sex_borough_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>This figure shows the percentage of sex in suspects and victims for
 all NYC boroughs. Around 75% of suspects are male and around 25% are
@@ -608,12 +613,10 @@ race_plot &lt;- ggplot(race_combined, aes(x = law_cat_cd, fill = race)) +
 
 print(race_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<p>Looking at this chart, we can see that black individuals have the
-highest counts across all crimes for both suspects and victims. In both
-charts, white Hispanic individuals make up the 2nd highest count, and
-then white individuals make up the 3rd. For suspects, black Hispanic
-individuals make up the 4th highest count, but Asian/Pacific Islander
-make up the 4th highest count of victims.</p>
+<p>This chart describes the counts of race distribution over different
+levels of crime in both suspects and victims. We can see that black
+individuals have the highest counts across all crimes for both suspects
+and victims.</p>
 </div>
 <div id="suspectvictim-age-by-level-of-offense" class="section level3">
 <h3>Suspect/Victim Age by Level of Offense</h3>
@@ -634,12 +637,10 @@ age_plot &lt;- data |&gt;
 
 print(age_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>In this chart we see that the 25-44 age group is the most populous
-for both suspects and victims across all levels of crime. Interestingly,
-the 18-24 group is the 2nd greatest for felony suspects, the 45-64 group
-is the 2nd highest for violation suspects, and both are relatively equal
-for misdemeanor suspects. Among the victims, 45-64 are consistently the
-2nd highest, with 18-24 following them.</p>
+<p>This chart describes counts of individuals in each age group across
+different levels of offense in both suspects and victims. We see that
+the 25-44 age group is the most populous for both suspects and victims
+across all levels of crime.</p>
 </div>
 <div id="suspectvictim-sex-by-level-of-offense" class="section level3">
 <h3>Suspect/Victim Sex by Level of Offense</h3>
@@ -660,10 +661,10 @@ sex_plot &lt;- data |&gt;
 
 print(sex_plot)</code></pre>
 <p><img src="demographic_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p>In this chart we see that women make up a greater number of victims,
-while men make up a greater number of suspects. However, the disparity
-between sexes is smaller among the victims than it is among the
-suspects.</p>
+<p>This chart describes counts of individuals in each sex across levels
+of defense in both suspects and victims. In this chart we see that women
+make up a greater number of victims, while men make up a greater number
+of suspects.</p>
 <p>Throughout our public health education, we have learned about the
 importance of intersectionality. While these snapshots give us
 information about key demographic identities, we may be missing some

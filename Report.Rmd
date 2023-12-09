@@ -11,9 +11,10 @@ output: html_document
 
 # Initial Questions 
   Our intial plan for the data was to divide the large dataset into 3 key parts: general crime data, suspect and victim analysis, and socioecnomic indicators. For the first section, we wanted to answer questions like: "What are the total number of crimes by borough?" or "In which borough are the most severe crimes occuring?" This was meant to be a large overview of crime occuring in the city, particularly in its prevalence and location. The second section sought to answer questions such as "Do the types of suspects or perpetrators differ by borough?" or "What group of people makes up the highest proportion of victims in severe crime?" This gave us insight as to who is at risk, and where are they at the highest risk. Finally, the last section was meant to answer questions such as "Is income associated with crime rate?" In this section we wanted to understand what were the contributing factors to crime in NYC, and together with the previous sections, thought that this multi-dimensional analysis could inform city safety improvements and law enforcement policies. 
+  
   While we were able to answer many of these questions and more, we think it is important to note the source of our data. Coming from the NYPD directly means that the data may be biased, and that individuals' lived experiences with law enforcement and crime vary drastically from demographic to demographic. 
 
-# Data (Source scraping method cleaning)
+# Data
 
 ### Primary Data Source
   Our main data source is NYPD historic complaint data. The raw data includes all valid felony, misdemeanor, and violation crimes reported to NYPD from 2006 to 2022, and we filtered the data to only investigate crime data between 2017 and 2022 to limit data size. 
@@ -33,11 +34,13 @@ output: html_document
   * `count`: The aggregate count of reported incidents for each crime.
   * `ofns_desc`: The description of the crime type in textual form.
   * `cumulative_percentage`: This denotes the running total percentage of cases accounted for up to and including the current row.
+  
   This streamlined dataset allows for a focused analysis of the crimes that constitute the majority of cases, thereby rendering our visual representations more concise and informative.
   
 ### Suspects and Victims
 
-  A subset of the master dataset was created specifically for demographic distribution analysis by selecting the relevant variables. Rows with missing values were dropped for data cleaning purpose. The demographic dataset is further divided into suspects and victims datasets to calculate the percentage of race, age and sex. Columns with incorrect data values are further cleaned up. The demographic dataset has following variables:\
+  A subset of the master dataset was created specifically for demographic distribution analysis by selecting the relevant variables. Rows with missing values were dropped for data cleaning purposes. Using the cleaned subdatasets, we made barplots to visualize age, sex, race distribution across boroughs and levels of offense.  Columns with incorrect data values are further cleaned up. The demographic dataset has following variables:\
+   * `law_cat_cd`: level of crime\
    * `boro_nm`: NYC borough name\
    * `susp_age_group`: Age group the suspect belongs to (<18, 18-24, 25-44, 45-64, 65+)\
    * `susp_race`: Suspect race (AMERICAN INDIAN/ALASKAN NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE HISPANIC)\
@@ -86,7 +89,13 @@ An interactive map was developed to illustrate the spread and density of differe
 
 ### Suspects and Victims
 
-Three barplots were created to visualize the distribution of race, age, and sex in suspects and victims. Number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough.
+
+![ ](demographic_analysis.png)
+
+Six barplots were created to visualize the distribution of race, age, and sex in suspects and victims against boroughs and levels of crime. The legends are labeled in the first two plots and are consistent throughout the rest.\
+F
+or analysis across boroughs, number of suspects and number of victims are separately counted in each race, age, and sex groups. Initially, count of suspects and victims in each race, age, and sex groups were plotted. However, the different total population of each borough made it difficult to directly visualize the distributions. Thus, percentage of suspects and victims in each race, age, and sex groups were calculated by dividing the count by total number of suspects or victims in each borough. For analysis across levels of crime, the data is divided into victims and suspects. Variables describing race, age, and sex were selected. The absolute counts are plotted out against each levels of crime. 
+
 
 ### Crime rate and socioeconomic status by neighborhood/NYPD precinct
 
@@ -137,7 +146,17 @@ Neighborhood Variations: An interesting observation is that the Upper East Side 
 ### Suspects and Victims 
  It is interesting to see the distribution of race are quite similar between suspects and victims. This suggests that the racial composition of individuals involved as suspects or victims is consistent across the dataset. The distribution of race are also similar between boroughs. This suggests that there is no significant variation in the racial demographics of incidents across different boroughs. The distribution of age group are also similar between suspects and victims, as well as across boroughs. This implies consistency in age demographics across dataset and NYC boroughs. In combined, we observe consistency in the race and age group distribution in suspects and victims in NYC crimes. The distributions are uniform throughout the city, which was not expected. The uniformity in demographic patterns may indicate systemic factors influencing incidents rather than borough-specific or role-specific(suspect vs victim) factors. \
   
-  On the other hand, the distribution of sex in suspects and victims show significantly more male suspects than female suspects across all 7 NYC boroughs. This suggests a consistent gender disparity among individuals identified as suspects. Additionally, there are significantly more female victims than male victims across all 7 NYC boroughs. In combined, the data highlights a gender imbalance with a higher proportion of males being identified as suspects and a higher proportion of females being victims. The gender distribution is not surprising and confirms what we expected. The observed gender disparities may suggests potential sociological or systemic factors influencing crime reporting, law enforcement, or victimization. 
+  On the other hand, the distribution of sex in suspects and victims show significantly more male suspects than female suspects across all 7 NYC boroughs. This suggests a consistent gender disparity among individuals identified as suspects. Additionally, there are significantly more female victims than male victims across all 7 NYC boroughs. In combined, the data highlights a gender imbalance with a higher proportion of males being identified as suspects and a higher proportion of females being victims. The gender distribution is not surprising and confirms what we expected. The observed gender disparities may suggests potential sociological or systemic factors influencing crime reporting, law enforcement, or victimization. \
+  
+  In the barplot of race distribution across different levels of offense, we can see that black individuals have the highest counts across all crimes for both suspects and victims. In both charts, white Hispanic individuals make up the 2nd highest count, and then white individuals make up the 3rd. For suspects, black Hispanic individuals make up the 4th highest count, but Asian/Pacific Islander make up the 4th highest count of victims.\
+  
+  In the chart of age distribution across different levels of offense, we see that the 25-44 age group is the most populous for both suspects and victims across all levels of crime. Interestingly, the 18-24 group is the 2nd greatest for felony suspects, the 45-64 group is the 2nd highest for violation suspects, and both are relatively equal for misdemeanor suspects. Among the victims, 45-64 are consistently the 2nd highest, with 18-24 following them.\
+  
+  In the chart of sex distribution across different levels of offense, we see that women make up a greater number of victims, while men make up a greater number of suspects. However, the disparity between sexes is smaller among the victims than it is among the suspects.\
+  
+  Throughout our public health education, we have learned about the importance of intersectionality. While these snapshots give us information about key demographic identities, we may be missing some kind of bigger picture. So, now we will investigate which combinations of identities are the most prevalent among the suspects and victims.
+
+
   
 ### Socioeconomics factors and crime rate
 
