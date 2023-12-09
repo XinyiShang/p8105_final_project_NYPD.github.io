@@ -57,18 +57,18 @@ df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
 ### New York City
 
 ```{r}
-df_nypd_test <- df_nypd  %>%
-  janitor::clean_names() %>%
+df_nypd_test <- df_nypd  |>
+  janitor::clean_names() |>
   mutate(cmplnt_fr_dt = lubridate::mdy(cmplnt_fr_dt))
 
-df_nypd_test <- df_nypd_test %>%
+df_nypd_test <- df_nypd_test |>
   mutate(year = lubridate::year(cmplnt_fr_dt))
 
-year_counts <- df_nypd_test %>%
-  group_by(year) %>%
+year_counts <- df_nypd_test |>
+  group_by(year) |>
   summarise(count = n())
 
-plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) %>%
+plot_ly(data = year_counts, x = ~year, y = ~count, type = 'scatter', mode = 'markers+lines', marker = list(color = viridis(6))) |>
       layout(
         title = "Number of Cases in Each Year",
         xaxis = list(title = "Year"),
@@ -85,8 +85,8 @@ Post-2020, a noteworthy and rapid increase in the number of cases is evident, su
 
 ### Boroughs
 ```{r}
-boro_counts <- df_nypd_test %>%
-  group_by(year, boro_nm) %>%
+boro_counts <- df_nypd_test |>
+  group_by(year, boro_nm) |>
   summarise(count = n()) |>
   filter(boro_nm != "(null)")
 
@@ -115,13 +115,13 @@ neighborhood_data <- read.csv("data/nyc_prec_neighborhood.csv") |>
 df_nypd_neighborhood <- df_nypd_test |>
   left_join(neighborhood_data, by = "police_precincts")
 
-neighborhood_counts <- df_nypd_neighborhood%>%
-  group_by(year, neighborhood) %>%
+neighborhood_counts <- df_nypd_neighborhood |>
+  group_by(year, neighborhood) |>
   summarise(count = n()) |>
   drop_na() |>
   arrange(year, desc(count))
 
-neighborhood_counts <- neighborhood_counts %>%
+neighborhood_counts <- neighborhood_counts |>
   arrange(neighborhood, desc(count))
 
 neighborhood_counts$neighborhood <- factor(neighborhood_counts$neighborhood, 
@@ -152,8 +152,8 @@ On the other hand, Morningside Heights/Hamilton Heights consistently had the hig
 ## Number of Cases by Year, Borough, and Law Category
 
 ```{r }
-count_data <- df_nypd_test %>%
-  group_by(boro_nm, year, law_cat_cd) %>%
+count_data <- df_nypd_test |>
+  group_by(boro_nm, year, law_cat_cd) |>
   summarise(count = n()) |>
   filter(boro_nm != "(null)")
 

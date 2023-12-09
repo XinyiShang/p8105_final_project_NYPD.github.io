@@ -38,13 +38,13 @@ server <- function(input, output) {
                             "2021" = crime_counts %>% filter(year == 2021),
                             "2022" = crime_counts %>% filter(year == 2022))
     
-    data_filtered <- data_filtered %>%
+    data_filtered <- data_filtered |>
       filter(boro_nm == input$boro)
     
     data_filtered
   })
   
-  output$plot <- renderPlotly({  # Updated the ID to match the UI output
+  output$plot <- renderPlotly({ 
     crime_counts <- selected_data()
     
     plot_ly(
@@ -54,7 +54,7 @@ server <- function(input, output) {
       type = "bar",
       marker = list(color = ~viridis::viridis(10)),
       showlegend = FALSE
-    ) %>%
+    ) |>
       layout(
         title = paste("Top 10 Crime Types: Identification and Count -", input$year),
         xaxis = list(title = "Crime Type", tickangle = 45, tickmode = "array"),
