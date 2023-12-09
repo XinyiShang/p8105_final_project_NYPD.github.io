@@ -80,8 +80,8 @@ output: html_document
 
 *Temporal Trends: 
 To depict the trends in the number of cases over each year, three visual representations were generated: a line plot for New York City at the aggregate level, another line plot for individual boroughs, and a bar plot for neighborhood-level analysis. In the New York City level, there is a subtle decreasing trend observed from 2017 to 2019, followed by a significant drop in the number of cases in 2020.Post-2020, a noteworthy and rapid increase in the number of cases is evident, surpassing the figures recorded in any previous years.\
-To highlight the variations in law categories across each year and borough, a line graph was produced. \ 
-For showcasing the top 10 types of crime annually within each borough, an interactive Shiny app was developed. This app facilitates the display of bar plots illustrating the top 10 crime types in each borough for every year. \ 
+To highlight the variations in law categories across each year and borough, a line graph was produced.\
+For showcasing the top 10 types of crime annually within each borough, an interactive Shiny app was developed. This app facilitates the display of bar plots illustrating the top 10 crime types in each borough for every year.\
 To illustrate the trends over time, a barplot was designed to showcase the frequency of various crime types across different years. To analyze daily temporal patterns, a line graph was created to delve into the patterns within different times of the day, with each line tracing the fluctuations in crime counts throughout the hours, thereby emphasizing the periods when crime peaks are most prevalent.
 
 *Spatial Distribution: 
@@ -139,6 +139,8 @@ From 2017 to 2019, a subtle decrease in reported cases occurred, followed by a s
 Brooklyn consistently led in reported crimes from 2017 to 2022, followed by Manhattan; Staten Island consistently reported the lowest cases. Notably, Queens overtook the Bronx in reported cases in 2021.
 
 North Crown Heights/Prospect Heights consistently reported the fewest cases, while Morningside Heights/Hamilton Heights consistently had the highest, except in 2020 when East Harlem topped. The top three neighborhoods overall are Morningside Heights/Hamilton Heights, East Harlem, and Chelsea/Clinton/Midtown.
+
+![](CrimeCount_Figure.jpg)
 
 In Bronx, Brooklyn, Manhattan, and Queens, misdemeanors were most common, followed by felonies, with violations least common, except for Staten Island, where felony and violation cases are more balanced.
 

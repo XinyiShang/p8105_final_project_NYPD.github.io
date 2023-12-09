@@ -45,7 +45,7 @@ scale_fill_discrete   = scale_fill_viridis_d
 #df_nypd = read_csv("https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1", na = "(null)") |>
 #  janitor::clean_names()
 
-df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv') |>
+df_nypd = read_csv('data/NYPD_Complaint_Data_Historic.csv', na = "(null)") |>
   janitor::clean_names()
 
 ```
@@ -176,6 +176,7 @@ figure = ggplot(count_data, aes(x = year, y = count, color = law_cat_cd)) +
 
 ggplotly(figure)
 
+ggsave(figure, filename = "CrimeCount_Figure.jpg", device = "jpeg")
 ```
 
 In Bronx, Brooklyn, Manhattan, and Queens, misdemeanor cases are the most frequently observed, followed by felony cases as the middle category, and violations as the least common among the four boroughs, except for Staten Island. Staten Island exhibits a moderate similarity in the number of cases between felony and violation categories.
