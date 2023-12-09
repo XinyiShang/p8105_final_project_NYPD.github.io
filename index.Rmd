@@ -26,9 +26,11 @@ New York City, a city renowned for its diversity and dynamic energy, faces an on
 
 ## Data Set
 
-The original dataset is available at [NYPD Complaint Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i).
-  
-Additionally, our filtered dataset is accessible through [Dropbox](https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1).
+Our primary data source is the NYPD Historic Complaint Data. 
+
+The original dataset is available at [NYPD Complaint Data Historic](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i). 
+
+Additionally, our processed and filtered dataset is accessible through [Dropbox](https://www.dropbox.com/scl/fi/kf2zk4t1onxzm2vo3lpkq/NYPD_Complaint_Data_Historic.csv?rlkey=ly36vi9v66sno80eir6rohlwn&dl=1).
 
 ## Website Contents
 
